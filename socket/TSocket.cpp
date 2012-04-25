@@ -104,3 +104,11 @@ std::string TSocket::Read() {
     return std::string(buf);
 }
 
+std::string TSocket::getIp() {
+    char ipAddr[CBUF_SIZE];
+    memset(ipAddr, 0, CBUF_SIZE * sizeof(char));
+    
+    inet_ntop(AF_INET, (in_addr *) &(addr.sin_addr), ipAddr, CBUF_SIZE);
+    
+    return std::string(ipAddr);
+}

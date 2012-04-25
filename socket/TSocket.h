@@ -33,6 +33,8 @@ public:
     void Write(std::string msg);
     std::string Read();
 
+    std::string getIp();
+
     //exceptions
     class ESocket {};
     class EBind    : public ESocket {};
