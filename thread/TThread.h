@@ -1,5 +1,5 @@
 /*
- *      POSIX thread (pthread) wrapper.
+ *      TThread class.
  *
  *      by AOrazaev
  *
@@ -8,24 +8,31 @@
 #ifndef TTHREAD_H
 #define TTHREAD_H
 
-#include <pthread>
+#include <pthread.h>
+#include "../util/patterns/TSingleton.h"
+#include "TMutex.h"
 
 class TThread {
     pthread_t thread;
+    TSingleton<TMutex> SMutex;
 
     TThread(const TThread& copy);
-    static void *thread_func(void *d) { ((TThread *) d)->run(); }
-public:
-    TThread() {}
-    virtual ~TThread() {}
+    static void *thread_func(void *d) {  ((TThread *) d)->run(); }
 
-    virtual run() = 0;
+public:
+    TThread();
+    virtual ~TThread();
+
+    virtual void run() = 0;
     
     void Create();
     void Join();
 
+    void mutexLock();
+    void mutexUnlock();
+
     //exceptions
-    class EThread {};
+    class EThread : public TError {};
     class ECreate : public EThread {};
     class EJoin   : public EThread {};
 };
