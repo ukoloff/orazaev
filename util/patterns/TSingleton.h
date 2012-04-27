@@ -18,10 +18,9 @@ public:
     T* operator->() { return instance; }
     operator T() { return *instance; }
 
-
     TSingleton& operator=(const T&);
 
-    static T inst() { return *instance; }
+    static T* inst() { return instance; }
     static int getRefCount() { return count; }
 
     inline T operator++() { return ++(*instance); }
@@ -87,12 +86,12 @@ TSingleton<T>& TSingleton<T>::operator=(const T& t) {
 // func tools
 template <class T>
 inline std::ostream& operator<<(std::ostream& os, const TSingleton<T>& s) {
-    return os << s.inst();
+    return os << *(s.inst());
 }
 
 template <class T>
 inline std::ostream& operator<<(std::ostream& os, TSingleton<T>& s) {
-    return os << s.inst();
+    return os << *(s.inst());
 }
 
 #endif
