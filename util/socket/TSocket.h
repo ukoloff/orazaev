@@ -31,6 +31,7 @@ public:
     TSocket Accept();
 
     void Write(std::string msg);
+    void Write(std::string msg, int size);
     std::string Read();
 
     std::string getIp();
@@ -45,7 +46,7 @@ public:
     class EWrite   : public ESocket {};
 
     //consts
-    static const int CBUF_SIZE = 256;
+    static const int CBUF_SIZE = 1024;
 };
 
 #endif

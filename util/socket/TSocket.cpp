@@ -92,6 +92,18 @@ void TSocket::Write(std::string msg) {
     }
 }
 
+void TSocket::Write(std::string msg, int size) {
+    char buf[CBUF_SIZE];
+    memset(buf, 0, CBUF_SIZE * sizeof(char));
+    
+    memcpy(buf, msg.c_str(), msg.size());
+        
+    if (write(sockfd, buf, size) < 0) {
+        std::cerr << "Error: can't write message to socket!" << std::endl;
+        throw EWrite();
+    }
+}
+
 std::string TSocket::Read() {
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
