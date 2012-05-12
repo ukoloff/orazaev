@@ -5,39 +5,43 @@
 #include "../util/thread/TThread.h"
 
 #include <string>
+#include <map>
 
 class TCMServer {
     // Operator class
-    class TThreadOperator() :: public TThread {
+    class TThreadOperator : public TThread {
         TSocket connection;
-        map<std::string, int>* pdata;
+        std::map<std::string, int>* pdata;
 
         TThreadOperator();
+        std::string its(int);
     public:
-        TThreadOperator(TSocket conn, map<std::string, int>* pd);
+        TThreadOperator(TSocket conn, std::map<std::string, int>* pd);
         virtual void run();
     };
 
     // Listener class
-    class TThreadListener() :: public TThread {
+    class TThreadListener : public TThread {
         TSocket listenSocket;
         int isStop;
+        TCMServer* parent;
     public:
         TThreadListener(int portno);
         virtual void run();
 
         void stop();
+        inline void setParent(TCMServer*);
     };
 
-    map<std::string, int> data;
+    std::map<std::string, int> data;
     TThreadListener listener;
     bool isListening;
-    void operateConnection(TSocket conn);
+    inline void operateConnection(TSocket conn);
 public:
     TCMServer(int portno);
     
-    void startListen();
-    void stopListen();
+    inline void startListen();
+    inline void stopListen();
 };
 
 #endif

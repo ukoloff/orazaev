@@ -1,0 +1,63 @@
+#ifndef TESTER_H
+#define TESTER_H
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <string>
+#include <iostream>
+#include <sstream>
+
+namespace Tester {
+
+    template< class T >
+    void ptest(T x, T y) {
+        bool res = (x == y);
+        std::string ok;
+
+        std::ostringstream out(std::ostringstream::out);
+
+        out << x << " == " << y;
+        ok = out.str();
+        ok.resize(70, ' ');
+        
+        ok += res ? "[TRUE]" : "[FALSE]";
+
+        std::cout << ok << std::endl;
+    }
+
+
+    template< class T >
+    bool test(T x, T y) {
+        return (x == y);
+    }
+
+
+} /* namespace Tester */
+
+template< class A, class B >
+class TPair {
+    A first;
+    B second;
+public:
+    TPair()
+        : first()
+        , second() {
+    }
+    
+    TPair(A cfirst, B csecond)
+        : first(cfirst)
+        , second(csecond) {
+    }
+
+    inline A& First() { return first; }
+    inline B& Second() { return second; }
+};
+
+template< class A, class B >
+inline std::ostream& operator<<(std::ostream& os, const TPair<A, B> pair) {
+    os << "(" << (A) pair.First() << ", " << (B) pair.Second() << ")";
+    return os;
+}
+
+
+#endif /* TESTER_H */

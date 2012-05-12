@@ -6,7 +6,7 @@ TThread::TThread() : thread(0), SMutex() {
 TThread::~TThread() {}
 
 void TThread::Create() {
-    if (!thread) {
+    if (thread) {
         std::cerr << "Thread already create!" << std::endl;
         throw ECreate();
     }

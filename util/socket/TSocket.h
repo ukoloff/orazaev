@@ -17,8 +17,8 @@ class TSocket {
     int sockfd;
     struct sockaddr_in addr;
 
-    TSocket() {}
 public:
+    TSocket() {}
 	TSocket(const std::string& hostname, const int& portno);
     TSocket(const int& Sockfd, const struct sockaddr_in& Addr);
     TSocket(const int& portno);

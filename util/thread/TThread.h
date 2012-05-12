@@ -24,7 +24,7 @@ public:
     virtual ~TThread();
 
     virtual void run() = 0;
-    virtual bool isDone() = 0;
+//    virtual bool isDone() = 0;
     
     void Create();
     void Join();
