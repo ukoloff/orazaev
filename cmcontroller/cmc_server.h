@@ -14,7 +14,16 @@ class TCMServer {
         std::map<std::string, int>* pdata;
 
         TThreadOperator();
-        std::string its(int);
+
+        inline std::string its(int);
+        inline std::string getRequest();
+        inline std::string getRequestHost(std::string );
+        inline std::string getRequestTargetName(std::string );
+        inline std::string getRequestCluster(std::string );
+        inline void addToMap(std::string request);
+
+        inline std::string operateRequest(std::string request);
+        inline void sendAns(const std::string& ans);
     public:
         TThreadOperator(TSocket conn, std::map<std::string, int>* pd);
         virtual void run();

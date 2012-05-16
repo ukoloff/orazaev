@@ -4,6 +4,10 @@
 #include <cstdlib>
 
 
+// request format is:
+// [host name][DD][target name][.cluster]
+static const std::string DD = ": ";
+
 // TCMServer base functions description
 TCMServer::TCMServer(int portno) 
     : data()
@@ -44,16 +48,15 @@ TCMServer::TThreadOperator::TThreadOperator(TSocket conn, std::map<std::string, 
 
 std::string TCMServer::TThreadOperator::its(int x) {
     char buf[100];
+
     memset(buf, 0, 100);
     sprintf(buf, "%d", x);
+
     return std::string(buf);
 } 
 
-void TCMServer::TThreadOperator::run() {
-    // Read
+std::string TCMServer::TThreadOperator::getRequest() {
     std::string request;
-    std::string ans;
-    int count;
 
     try {
         request = connection.Read();
@@ -68,27 +71,94 @@ void TCMServer::TThreadOperator::run() {
         }
     }
     
-    // Operate block
-    // It's 2 operation availiable:
-    // + --- add 1 to map[request]
-    // ? --- get value of map[request]
-    //
-    // It can be new operation description here
+    return request;
+}
+
+std::string TCMServer::TThreadOperator::getRequestHost(std::string r) {
+    int pos = r.find(DD);
+    if (pos != std::string::npos)
+        r.erase(pos, r.size() - pos);
+    else
+        r = "Unknown";
+
+    return r;
+}
+
+std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
+    int pos = r.find(DD);
+    if (pos != std::string::npos)
+        r.erase(0, pos + 2);
+    else
+        return "Unknown";
+
+    pos = r.rfind('.');
+    if (pos != std::string::npos)
+        r.erase(pos + 1, r.size() - pos - 1);
+
+    return r;
+}
+
+std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
+    int pos = r.find(DD);
+    if (pos != std::string::npos)
+        r.erase(0, pos + 2);
+    else
+        return "Unknown";
+
+    pos = r.rfind('.');
+    if (pos != std::string::npos)
+        r.erase(0, pos + 1);
+    else
+        return "";
+
+    return r;
+}
+
+void TCMServer::TThreadOperator::addToMap(std::string request) {
+    (*pdata)[request]++;
+    (*pdata)[getRequestTargetName(request)]++;
+    (*pdata)[getRequestHost(request) + DD + getRequestTargetName(request)]++;
+    std::string cluster = getRequestCluster(request);
+    if (cluster != "")
+        (*pdata)[getRequestTargetName(request) + cluster]++;
+}
+
+// It's 2 operation availiable:
+// + --- add 1 to map[request]
+// ? --- get value of map[request]
+//
+// It can be new operation description here
+std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
+    int count = 0;
+    std::string ans;
+
+
     switch(request[0]) {
         case '+':
             request.erase(0, 1);
-
+            if (request[0] == ' ')
+                request.erase(0, 1);
+            
             mutexLock();
-            if ((*pdata)[request] == 0)
+            /*if ((*pdata)[request] == 0) {
                 count = (*pdata)[request] = 1;
-            else
+                // add sameHost
+                // add diffHost
+            }
+            else {
                 count = (*pdata)[request] += 1;
+                // add sameHost
+                // add diffHost
+            }*/
+            addToMap(request);
             mutexUnlock();
 
             ans = its(count);
         break;
         case '?':
             request.erase(0, 1);
+            if (request[0] == ' ')
+                request.erase(0, 1);
 
             mutexLock();
             count = (*pdata)[request];
@@ -99,14 +169,25 @@ void TCMServer::TThreadOperator::run() {
     }
     
 
-    // Ans
+    return ans;
+}
+
+void TCMServer::TThreadOperator::sendAns(const std::string& ans) {
     try {
         connection.Write(ans);
     }
     catch(TSocket::EWrite) {
         std::cerr << "Can't answer to client " << connection.getIp() << std::endl;
         exit(1);
-    }
+    }   
+}
+
+void TCMServer::TThreadOperator::run() {
+    // Read
+    // Operate block
+    std::string ans = operateRequest(getRequest());
+    // Ans
+    sendAns(ans);
 }
 
 
