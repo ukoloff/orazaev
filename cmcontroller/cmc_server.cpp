@@ -140,16 +140,6 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
                 request.erase(0, 1);
             
             mutexLock();
-            /*if ((*pdata)[request] == 0) {
-                count = (*pdata)[request] = 1;
-                // add sameHost
-                // add diffHost
-            }
-            else {
-                count = (*pdata)[request] += 1;
-                // add sameHost
-                // add diffHost
-            }*/
             addToMap(request);
             mutexUnlock();
 

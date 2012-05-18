@@ -49,8 +49,8 @@ class TCMServer {
 public:
     TCMServer(int portno);
     
-    inline void startListen();
-    inline void stopListen();
+    void startListen();
+    void stopListen();
 };
 
 #endif

@@ -98,6 +98,15 @@ namespace Tester {
         }        
     }
 
+    template< class T >
+    bool ntest(int n, TPair<T, T>* pairmas) {
+        for(int x = 0; x < n; x++)
+            if (!test(pairmas[x]))
+                return false;
+
+        return true;
+    }
+
 } /* namespace Tester */
 
 #endif /* TESTER_H */
