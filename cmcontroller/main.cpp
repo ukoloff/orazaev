@@ -55,6 +55,8 @@ void cmc_server_start(const int& port, const std::string& pidfilename) {
         // start server in child process
         TCMServer serv(port);
         serv.startListen();
+
+        while(true) {}
     }
 }
 

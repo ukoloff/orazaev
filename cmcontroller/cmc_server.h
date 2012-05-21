@@ -6,6 +6,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 
 class TCMServer {
     // Operator class
@@ -45,6 +46,7 @@ class TCMServer {
     std::map<std::string, int> data;
     TThreadListener listener;
     bool isListening;
+    std::list<TThreadOperator*> operatorList;
     inline void operateConnection(TSocket conn);
 public:
     TCMServer(int portno);

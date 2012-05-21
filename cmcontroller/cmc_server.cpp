@@ -2,29 +2,37 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
 
 
 // request format is:
-// [host name][DD][target name][.cluster]
+//{+?} [host name][DD][target name][.cluster]
 static const std::string DD = ": ";
 
 // TCMServer base functions description
 TCMServer::TCMServer(int portno) 
     : data()
     , listener(portno) 
-    , isListening(0) {
+    , isListening(0)
+    , operatorList() {
     listener.setParent(this);
 }
 
 void TCMServer::operateConnection(TSocket conn) {
-    TThreadOperator to(conn, &data);
-    to.Create();
-    to.Detach();
+    std::cout << "operation connection from " << conn.getIp() << std::endl;
+    TThreadOperator* to = new TThreadOperator(conn, &data);
+    operatorList.push_back(to);
+    std::cout << "Create operator" << std::endl;
+    to->Create();
+    std::cout << "Creation is ok" << std::endl;
+    to->Detach();
 }
 
 void TCMServer::startListen() {
     if (!isListening) {
+        std::cout << "Creating listen thread" << std::endl;
         listener.Create();
+        std::cout << "Creating is ok" << std::endl;
         listener.Detach();
 
         isListening = 1;
@@ -44,6 +52,7 @@ void TCMServer::stopListen() {
 TCMServer::TThreadOperator::TThreadOperator(TSocket conn, std::map<std::string, int>* pd) 
     : connection(conn) 
     , pdata(pd) {
+    std::cout << "Constructor get connection from " << connection.getIp() << std::endl;
 }
 
 std::string TCMServer::TThreadOperator::its(int x) {
@@ -70,6 +79,8 @@ std::string TCMServer::TThreadOperator::getRequest() {
             exit(1);
         }
     }
+
+    std::cout << "Got request " << request;
     
     return request;
 }
@@ -81,6 +92,7 @@ std::string TCMServer::TThreadOperator::getRequestHost(std::string r) {
     else
         r = "Unknown";
 
+    std::cout << "Host: " << r << std::endl;
     return r;
 }
 
@@ -95,6 +107,7 @@ std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
     if (pos != std::string::npos)
         r.erase(pos + 1, r.size() - pos - 1);
 
+    std::cout << "Name: " << r << std::endl;
     return r;
 }
 
@@ -111,16 +124,19 @@ std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
     else
         return "";
 
+    std::cout << "Clus: " << r << std::endl;
     return r;
 }
 
 void TCMServer::TThreadOperator::addToMap(std::string request) {
     (*pdata)[request]++;
     (*pdata)[getRequestTargetName(request)]++;
-    (*pdata)[getRequestHost(request) + DD + getRequestTargetName(request)]++;
     std::string cluster = getRequestCluster(request);
-    if (cluster != "")
+    std::cout << "Cluster: '" << cluster << "'" << std::endl;
+    if (cluster != "") {
+        (*pdata)[getRequestHost(request) + DD + getRequestTargetName(request)]++;
         (*pdata)[getRequestTargetName(request) + cluster]++;
+    }
 }
 
 // It's 2 operation availiable:
@@ -175,9 +191,12 @@ void TCMServer::TThreadOperator::sendAns(const std::string& ans) {
 void TCMServer::TThreadOperator::run() {
     // Read
     // Operate block
-    std::string ans = operateRequest(getRequest());
+    std::cout << "Operator is running" << std::endl;
+    std::string req = getRequest();
+    std::string ans = operateRequest(req);
     // Ans
     sendAns(ans);
+    connection.Close();
 }
 
 
@@ -186,6 +205,7 @@ void TCMServer::TThreadOperator::run() {
 TCMServer::TThreadListener::TThreadListener(int portno) 
     : listenSocket(portno) 
     , isStop(0) {
+    std::cout << "Listen socket with port: " << portno << std::endl;
 }
 
 void TCMServer::TThreadListener::stop() {
@@ -197,7 +217,10 @@ void TCMServer::TThreadListener::run() {
     listenSocket.Listen();
 
     while(!isStop) {
-        parent->operateConnection(listenSocket.Accept());
+        std::cout << "Listening..." << std::endl;
+        TSocket conn = listenSocket.Accept();
+        conn.setCloseable(false);
+        parent->operateConnection(conn);
     }
 
 }
