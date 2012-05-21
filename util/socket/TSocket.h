@@ -16,6 +16,7 @@
 class TSocket {
     int sockfd;
     struct sockaddr_in addr;
+    bool closeable;
 
 public:
     TSocket() {}
@@ -29,12 +30,14 @@ public:
     void Listen();
     void Bind();
     TSocket Accept();
+    void Close();
 
     void Write(std::string msg);
     void Write(std::string msg, int size);
     std::string Read();
 
     std::string getIp();
+    inline void setCloseable(bool b) { closeable = b; }
 
     //exceptions
     class ESocket {};

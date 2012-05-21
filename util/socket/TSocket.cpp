@@ -3,10 +3,14 @@
 
 #include <iostream>
 #include <cstring>
+#include <cerrno>
 #include <memory>
 
+static int errcode;
 
 TSocket::TSocket(const std::string& hostname, const int& portno) {
+    closeable = true;
+
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -22,10 +26,15 @@ TSocket::TSocket(const std::string& hostname, const int& portno) {
     bcopy((char *) serv_name->h_addr, (char *) &(this->addr.sin_addr.s_addr), serv_name->h_length);
 }
 
-TSocket::TSocket(const int& Sockfd, const struct sockaddr_in& Addr) : sockfd(Sockfd), addr(Addr) {
+TSocket::TSocket(const int& Sockfd, const struct sockaddr_in& Addr) 
+    : sockfd(Sockfd)
+    , addr(Addr)
+    , closeable(true) {
 }
 
 TSocket::TSocket(const int& portno) {
+    closeable = true;
+
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -40,7 +49,8 @@ TSocket::TSocket(const int& portno) {
 }
 
 TSocket::~TSocket() {
-    close(sockfd);
+    if (closeable)
+        close(sockfd);
 }
 
 void TSocket::Connect() {
@@ -80,6 +90,10 @@ TSocket TSocket::Accept() {
     return TSocket(conn, cli_addr);
 }
 
+void TSocket::Close() {
+    close(sockfd);
+}
+
 void TSocket::Write(std::string msg) {
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
@@ -108,8 +122,10 @@ std::string TSocket::Read() {
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
     
-    if (read(sockfd, buf, CBUF_SIZE) < 0) {
+    if ((errcode = read(sockfd, buf, CBUF_SIZE)) < 0) {
         std::cerr << "Error: can't read message from socket!" << std::endl;
+        std::cerr << "Error: errcode = " << errcode << std::endl;
+        std::cerr << "Error: errno   = " << errno << std::endl;
         throw ERead();
     }
 
