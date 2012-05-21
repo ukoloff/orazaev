@@ -6,7 +6,7 @@
 #include<stdlib.h>
 #include<getopt.h>
 
-static float version = 0.1;
+static float version = 0.3;
 
 static std::string USAGE = "\
 cmcontroll --- client-server application for cluster master tests.\n\

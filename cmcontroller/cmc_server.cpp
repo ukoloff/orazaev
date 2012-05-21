@@ -21,11 +21,10 @@ TCMServer::TCMServer(int portno)
 void TCMServer::operateConnection(TSocket conn) {
     std::cout << "operation connection from " << conn.getIp() << std::endl;
     TThreadOperator* to = new TThreadOperator(conn, &data);
-    operatorList.push_back(to);
     std::cout << "Create operator" << std::endl;
     to->Create();
+    operatorList.push_back(to);
     std::cout << "Creation is ok" << std::endl;
-    to->Detach();
 }
 
 void TCMServer::startListen() {
@@ -36,6 +35,15 @@ void TCMServer::startListen() {
         listener.Detach();
 
         isListening = 1;
+    }
+
+    while(true) {
+        while(!operatorList.empty()) {
+            TThreadOperator* po = operatorList.front();
+            po->Join();
+            operatorList.pop_front();
+            delete po;
+        }
     }
 }
 
@@ -228,4 +236,3 @@ void TCMServer::TThreadListener::run() {
 inline void TCMServer::TThreadListener::setParent(TCMServer* Parent) {
     parent = Parent;
 }
-
