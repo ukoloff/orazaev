@@ -90,6 +90,9 @@ std::string TCMServer::TThreadOperator::getRequest() {
 
     std::cout << "Got request " << request;
     
+    while (request[request.size() - 1] == '\n')
+        request.resize(request.size() - 1);
+
     return request;
 }
 
@@ -100,7 +103,6 @@ std::string TCMServer::TThreadOperator::getRequestHost(std::string r) {
     else
         r = "Unknown";
 
-    std::cout << "Host: " << r << std::endl;
     return r;
 }
 
@@ -115,7 +117,6 @@ std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
     if (pos != std::string::npos)
         r.erase(pos + 1, r.size() - pos - 1);
 
-    std::cout << "Name: " << r << std::endl;
     return r;
 }
 
@@ -132,18 +133,27 @@ std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
     else
         return "";
 
-    std::cout << "Clus: " << r << std::endl;
     return r;
 }
 
 void TCMServer::TThreadOperator::addToMap(std::string request) {
     (*pdata)[request]++;
-    (*pdata)[getRequestTargetName(request)]++;
+
+    std::string name = getRequestTargetName(request);
+    if (name != "Unknown")
+        (*pdata)[getRequestTargetName(request)]++;
+    else return;
+
     std::string cluster = getRequestCluster(request);
-    std::cout << "Cluster: '" << cluster << "'" << std::endl;
+    if (cluster == "Unknown") return;
+
     if (cluster != "") {
-        (*pdata)[getRequestHost(request) + DD + getRequestTargetName(request)]++;
-        (*pdata)[getRequestTargetName(request) + cluster]++;
+        std::string host = getRequestHost(request);
+        if (host != "Unknown") 
+            (*pdata)[host + DD + name]++;
+        else return;
+
+        (*pdata)[name + cluster]++;
     }
 }
 
