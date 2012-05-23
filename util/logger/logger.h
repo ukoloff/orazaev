@@ -4,17 +4,62 @@
 #include<fstream>
 #include<iostream>
 #include<stdlib.h>
+#include<time.h>
+#include<cstring>
+
+namespace log {
+    const std::string endl("\n\0x01");
+
+    std::string now() {
+        time_t x;
+        time(&x);
+        
+        std::string res = "[ " + std::string(ctime(&x));
+        res.resize(res.size() - 1);
+        res += " ] ";
+        
+        return res;
+    }
+}
 
 class TLogger {
     std::string fname;
     bool echo;
+    bool timeEcho;
     
     TLogger();
 
 public:
     TLogger(std::string Fname, bool Echo = true)
         : fname(Fname)
-        , echo(Echo) {
+        , echo(Echo)
+        , timeEcho(true) {
+    }
+
+    TLogger& operator<<(const std::string& s) {
+        if (!echo) return *this;
+
+        std::ofstream logFile(fname.c_str(), std::ios_base::app);
+        
+        if (!logFile.is_open()) {
+            std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
+            exit(1);
+        }
+
+        if (timeEcho) { 
+            logFile << log::now();
+            timeEcho = false;
+        }
+
+        if (s == log::endl) {
+            logFile << std::endl;
+            timeEcho = true;
+        }
+        else
+            logFile << s;
+        
+        logFile.close();
+        return *this;
     }
 
     template<class T>
@@ -26,6 +71,11 @@ public:
         if (!logFile.is_open()) {
             std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
             exit(1);
+        }
+
+        if (timeEcho) { 
+            logFile << log::now();
+            timeEcho = false;
         }
 
         logFile << t;

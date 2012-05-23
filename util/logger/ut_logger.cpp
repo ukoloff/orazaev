@@ -16,8 +16,8 @@ int main() {
 
     l.clear();
 
-    l << 0 << "\n";
-    l << 0 << " " << std::string("one") << ' ' << "two" << std::string(" ") << "\n";
+    l << 0 << "\n" << log::endl;
+    l << 0 << " " << std::string("one") << ' ' << "two" << std::string(" ") << "\n" << log::endl;
     
     A a;
 //    l << a << std::endl;
