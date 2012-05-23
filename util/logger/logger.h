@@ -10,16 +10,7 @@
 namespace log {
     const std::string endl("\n\0x01");
 
-    std::string now() {
-        time_t x;
-        time(&x);
-        
-        std::string res = "[ " + std::string(ctime(&x));
-        res.resize(res.size() - 1);
-        res += " ] ";
-        
-        return res;
-    }
+    std::string NOW();
 }
 
 class TLogger {
@@ -47,7 +38,7 @@ public:
         }
 
         if (timeEcho) { 
-            logFile << log::now();
+            logFile << log::NOW();
             timeEcho = false;
         }
 
@@ -74,7 +65,7 @@ public:
         }
 
         if (timeEcho) { 
-            logFile << log::now();
+            logFile << log::NOW();
             timeEcho = false;
         }
 

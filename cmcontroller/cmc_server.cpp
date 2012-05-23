@@ -7,6 +7,7 @@
 
 // request format is:
 //{+?} [host name][DD][target name][.cluster]
+// need new command to dump, @ filename
 static const std::string DD = ": ";
 
 // TCMServer base functions description
@@ -14,24 +15,25 @@ TCMServer::TCMServer(int portno)
     : data()
     , listener(portno) 
     , isListening(0)
-    , operatorList() {
+    , operatorList()
+    , msgLog(0)
+    , mainLog(0) {
     listener.setParent(this);
 }
 
 void TCMServer::operateConnection(TSocket conn) {
-    std::cout << "operation connection from " << conn.getIp() << std::endl;
+    if (mainLog.get()) *mainLog << "get connection from " << conn.getIp() << log::endl;
     TThreadOperator* to = new TThreadOperator(conn, &data);
-    std::cout << "Create operator" << std::endl;
+    to->setParent(this);
+
     to->Create();
     operatorList.push_back(to);
-    std::cout << "Creation is ok" << std::endl;
 }
 
 void TCMServer::startListen() {
     if (!isListening) {
-        std::cout << "Creating listen thread" << std::endl;
+        if (mainLog.get()) *mainLog << "start listening." << log::endl;
         listener.Create();
-        std::cout << "Creating is ok" << std::endl;
         listener.Detach();
 
         isListening = 1;
@@ -60,7 +62,6 @@ void TCMServer::stopListen() {
 TCMServer::TThreadOperator::TThreadOperator(TSocket conn, std::map<std::string, int>* pd) 
     : connection(conn) 
     , pdata(pd) {
-    std::cout << "Constructor get connection from " << connection.getIp() << std::endl;
 }
 
 std::string TCMServer::TThreadOperator::its(int x) {
@@ -88,11 +89,16 @@ std::string TCMServer::TThreadOperator::getRequest() {
         }
     }
 
-    std::cout << "Got request " << request;
-    
     while (request[request.size() - 1] == '\n')
         request.resize(request.size() - 1);
 
+    mutexLock();
+    if (parent->msgLog.get()) {
+        *(parent->msgLog) << connection.getIp() << " got request '" << request;
+        *(parent->msgLog) << "'" << log::endl;
+    }
+    mutexUnlock();
+ 
     return request;
 }
 
@@ -113,7 +119,7 @@ std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
     else
         return "Unknown";
 
-    pos = r.rfind('.');
+    pos = r.find('.');
     if (pos != std::string::npos)
         r.erase(pos + 1, r.size() - pos - 1);
 
@@ -127,7 +133,7 @@ std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
     else
         return "Unknown";
 
-    pos = r.rfind('.');
+    pos = r.find('.');
     if (pos != std::string::npos)
         r.erase(0, pos + 1);
     else
@@ -147,14 +153,24 @@ void TCMServer::TThreadOperator::addToMap(std::string request) {
     std::string cluster = getRequestCluster(request);
     if (cluster == "Unknown") return;
 
+    std::string host;
     if (cluster != "") {
-        std::string host = getRequestHost(request);
+        host = getRequestHost(request);
         if (host != "Unknown") 
             (*pdata)[host + DD + name]++;
         else return;
 
         (*pdata)[name + cluster]++;
     }
+
+    if (parent->msgLog.get()) {
+        *(parent->msgLog) << "addToMap()";
+        *(parent->msgLog) << "\n    + '" << request;
+        *(parent->msgLog) << "\n    + '" << host;
+        *(parent->msgLog) << "\n    + '" << name;
+        *(parent->msgLog) << "\n    + '" << cluster << log::endl;
+    }
+        
 }
 
 // It's 2 operation availiable:
@@ -163,7 +179,6 @@ void TCMServer::TThreadOperator::addToMap(std::string request) {
 //
 // It can be new operation description here
 std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
-    int count = 0;
     std::string ans;
 
 
@@ -177,9 +192,11 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
             addToMap(request);
             mutexUnlock();
 
-            ans = its(count);
+            ans = "0";
         break;
         case '?':
+            int count = 0;
+
             request.erase(0, 1);
             if (request[0] == ' ')
                 request.erase(0, 1);

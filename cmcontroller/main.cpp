@@ -19,6 +19,8 @@ Options:\n\
     -p --port     : set port.\n\
     -s --host     : set host.\n\
     -r --request  : set request to server.\n\
+    -l --main-log : set main log. \n\
+    -m --msg-log  : set message log. \n\
     -v --version  : print version.\n\
     -h --help     : print this message.";
 
@@ -30,7 +32,7 @@ void cmc_client_start(const std::string& host, const int& port, const std::strin
     //get ans
 }
     
-void cmc_server_start(const int& port, const std::string& pidfilename) {
+void cmc_server_start(const int& port, const std::string& pidfilename, const std::string& mainLog, const std::string& msgLog) {
     int pid = fork();
 
     if (pid < 0) {
@@ -54,9 +56,13 @@ void cmc_server_start(const int& port, const std::string& pidfilename) {
     else {
         // start server in child process
         TCMServer serv(port);
+
+        if (!mainLog.empty()) serv.setMainLog(mainLog);
+        if (!msgLog.empty())  serv.setMsgLog(msgLog);
+        
         serv.startListen();
 
-        while(true) {}
+        //while(true) {}
     }
 }
 
@@ -65,32 +71,37 @@ void cmc_start(int argc, char** argv) {
     std::string host = "";
     int port = 0;
     std::string request = "";
-
     std::string pidfile = "";
+    std::string mainLog = "";
+    std::string msgLog  = "";
     
     while (1) {
         static struct option long_opts[] = {
-            {"help",    no_argument,          0, 'h'},
-            {"port",    required_argument,    0, 'p'},
-            {"host",    required_argument,    0, 's'},
-            {"request", required_argument,    0, 'r'},
-            {"version", no_argument,          0, 'v'},
-            {"pid",     required_argument,    0, 'P'},
+            {"help",     no_argument,          0, 'h'},
+            {"port",     required_argument,    0, 'p'},
+            {"host",     required_argument,    0, 's'},
+            {"request",  required_argument,    0, 'r'},
+            {"version",  no_argument,          0, 'v'},
+            {"pid",      required_argument,    0, 'P'},
+            {"msg-log",  required_argument,    0, 'm'},
+            {"main-log", required_argument,    0, 'l'},
             {0, 0, 0, 0}
         };
 
         int opt_index = 0;
     
-        opt = getopt_long(argc, argv, "hvp:s:r:P:", long_opts, &opt_index);
+        opt = getopt_long(argc, argv, "hvp:s:r:P:l:m:", long_opts, &opt_index);
 
         if (opt == -1)
             break;
 
         switch(opt) {
-            case 's': host = std::string(optarg); break;
             case 'p': port = atoi(optarg); break;
+            case 's': host    = std::string(optarg); break;
             case 'r': request = std::string(optarg); break;
             case 'P': pidfile = std::string(optarg); break;
+            case 'm': msgLog  = std::string(optarg); break;
+            case 'l': mainLog = std::string(optarg); break;
             case 'h': 
                 std::cout << USAGE << std::endl; 
                 exit(0); 
@@ -121,7 +132,7 @@ void cmc_start(int argc, char** argv) {
     }
     else {
         //server
-        cmc_server_start(port, pidfile);
+        cmc_server_start(port, pidfile, mainLog, msgLog);
     }
 }
 
