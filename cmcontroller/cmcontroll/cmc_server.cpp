@@ -11,7 +11,7 @@
 //{+?} [host name][DD][target name][.cluster]
 // need new command to dump, @ filename
 static const std::string DD = ": ";
-static const int dump_buf_size = 128;
+static const int dump_buf_size = CM_DUMP_BUF_SIZE;
 
 // TCMServer base functions description
 TCMServer::TCMServer(int portno) 

@@ -8,10 +8,11 @@ compile_flags   :=
 
 headers		 := \
 				cmc_server.h \
+				$(orazaev_root)/cmcontroller/cmdefinitions.h \
 				$(orazaev_root)/util/logger/logger.h  \
 				$(orazaev_root)/util/socket/TSocket.h \
 				$(orazaev_root)/util/thread/TMutex.h \
-				$(orazaev_root)/util/thread/TThread.h \
+				$(orazaev_root)/util/thread/TThread.h
 				   
 sources		 := \
 				main.cpp \
@@ -31,5 +32,4 @@ $(program_name):
 .PHONY: clean
 
 clean:
-		rm $(program_name); \
-        rm *.h.gch || echo "There are no *.h.gch in project dir";
+		rm $(program_name); 

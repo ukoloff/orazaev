@@ -6,7 +6,7 @@ CPP			 := g++
 libraries	   := 
 compile_flags   :=
 
-headers		 := 
+headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h
 				   
 sources		 := cmundumper.cpp
 
@@ -20,5 +20,4 @@ $(program_name):
 .PHONY: clean
 
 clean:
-		rm $(program_name); \
-        rm *.h.gch || echo "There are no *.h.gch in project";
+		rm $(program_name);

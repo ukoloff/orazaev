@@ -1,14 +1,15 @@
 #ifndef CMC_SERVER_H
 #define CMC_SERVER_H
 
-#include <util/socket/TSocket.h>
-#include <util/thread/TThread.h>
-#include <util/logger/logger.h>
+#include<cmcontroller/cmdefinitions.h>
+#include<util/socket/TSocket.h>
+#include<util/thread/TThread.h>
+#include<util/logger/logger.h>
 
-#include <string>
-#include <map>
-#include <list>
-#include <memory>
+#include<string>
+#include<map>
+#include<list>
+#include<memory>
 
 class TCMServer {
     // Operator class

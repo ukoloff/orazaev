@@ -3,7 +3,9 @@
 #include<cstdio>
 #include<iostream>
 
-const int buf_size = 128;
+#include<cmcontroller/cmdefinitions.h> 
+
+const int buf_size = CM_DUMP_BUF_SIZE;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) return 1;
