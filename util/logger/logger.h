@@ -85,7 +85,7 @@ public:
 
         if (!logFile.is_open()) {
             std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
-            return *this;
+            return;
             //exit(1);
         }
 
