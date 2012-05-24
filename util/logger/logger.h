@@ -34,7 +34,8 @@ public:
         
         if (!logFile.is_open()) {
             std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
-            exit(1);
+            //exit(1);
+            return *this;
         }
 
         if (timeEcho) { 
@@ -61,7 +62,8 @@ public:
         
         if (!logFile.is_open()) {
             std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
-            exit(1);
+            //exit(1);
+            return *this;
         }
 
         if (timeEcho) { 
@@ -83,7 +85,8 @@ public:
 
         if (!logFile.is_open()) {
             std::cerr << "Error: Can't open file " << fname << " with append mode." << std::endl;
-            exit(1);
+            return *this;
+            //exit(1);
         }
 
         logFile.close();
