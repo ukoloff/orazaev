@@ -268,7 +268,7 @@ void TCMServer::TThreadOperator::sendAns(const std::string& ans) {
 }
 
 void TCMServer::TThreadOperator::run() {
-    if (parent->mainLog.get()) *(parent->mainLog) << "Operate connection " << connection.getIp() << log::endl;
+    //if (parent->mainLog.get()) *(parent->mainLog) << "Operate connection " << connection.getIp() << log::endl;
     std::string req = getRequest();
     std::string ans = operateRequest(req);
     sendAns(ans);

@@ -6,10 +6,10 @@
 #include<stdlib.h>
 #include<getopt.h>
 
-static float version = 0.4;
+static float version = CMC_VERSION;
 
 static std::string USAGE = "\
-cmcontroll --- client-server application for cluster master tests.\n\
+cmcontroll --- server application for cluster master tests.\n\
 \n\
 Usage:\n\
     cmcontroll --port NUM [-l LOG] [-m MSG] [-P PID]            : start cmcontroll server on port NUM.\n\

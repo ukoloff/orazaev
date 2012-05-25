@@ -55,7 +55,7 @@ TSocket::~TSocket() {
 
 void TSocket::Connect() {
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        std::cerr << "Error: can't connect to host!" << std::endl;
+        //std::cerr << "Error: can't connect to host!" << std::endl;
         throw EConnect();
     }   
 }
@@ -91,7 +91,8 @@ TSocket TSocket::Accept() {
 }
 
 void TSocket::Close() {
-    close(sockfd);
+    if (!closeable)
+        close(sockfd);
 }
 
 void TSocket::Write(std::string msg) {
