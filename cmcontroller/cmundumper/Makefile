@@ -8,7 +8,7 @@ compile_flags   :=
 
 headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h
 				   
-sources		 := cmundumper.cpp
+sources		 := main.cpp
 
 
 all: $(program_name)

@@ -25,13 +25,13 @@ Options:\n\
     -? --help     : print this message.\n\
 \n\
 --------------------------------------------------------------------------------------------------------\n\
-Requests syntax.(Warning: All requests without quetes!)\n\
+Requests syntax.(Warning: All requests without quotes!)\n\
     Addition: \n\
-    '+ HOST: STARGET'                                           : +1 for non cluster target STARGET on host HOST.\n\
+    + HOST: STARGET                                             : +1 for non cluster target STARGET on host HOST.\n\
                                                                   It add in data next sentances:\n\
                                                                   *) 'HOST: STARGET'       --- all request.\n\
                                                                   *) 'STARGET'             --- only target name. \n\
-    '+ HOST: TARGET.CLUSTER'                                    : +1 for target TARGET with cluster CLUSTER on host HOST.\n\
+    + HOST: TARGET.CLUSTER                                      : +1 for target TARGET with cluster CLUSTER on host HOST.\n\
                                                                   It add in data next sentances:\n\
                                                                   *) 'HOST: TARGET.CLUSTER' --- all request.\n\
                                                                   *) 'TARGET.'              --- target name(with period).\n\
@@ -39,21 +39,21 @@ Requests syntax.(Warning: All requests without quetes!)\n\
                                                                   *) 'HOST: TARGET.'        --- host with target name.\n\
     \n\
     Request count of complete targets: \n\
-    '? HOST: NAME'                                              : If non cluster target NAME is complete in host HOST,\n\
+    ? HOST: NAME                                                : If non cluster target NAME is complete in host HOST,\n\
                                                                   that request return 1, becouse count of complete\n\
                                                                   targets by this request is 1.(If hard, see addition).\n\
-    '? HOST: NAME.'                                             : Get count of complete cluster targets NAME on host HOST.'\n\
-    '? HOST: NAME.CLUSTER'                                      : Is cluster CLUSTER of target NAME complete on host HOST?\n\
+    ? HOST: NAME.                                               : Get count of complete cluster targets NAME on host HOST.'\n\
+    ? HOST: NAME.CLUSTER                                        : Is cluster CLUSTER of target NAME complete on host HOST?\n\
                                                                   If it so, request get 1.\n\
-    '? NAME'                                                    : Get count of non cluster target NAME execution on \n\
+    ? NAME                                                      : Get count of non cluster target NAME execution on \n\
                                                                   all hosts.\n\
-    '? NAME.'                                                   : Get count of all clusters of target NAME execution on\n\
+    ? NAME.                                                     : Get count of all clusters of target NAME execution on\n\
                                                                   all hosts.\n\
-    '? NAME.CLUSTER'                                            : Get count of all executions of NAME.CLUSTER on\n\
+    ? NAME.CLUSTER                                              : Get count of all executions of NAME.CLUSTER on\n\
                                                                   all hosts.\n\
     \n\
     Dump data:\n\
-    'd FNAME'                                                   : Dump server information about executed targets\n\
+    d FNAME                                                     : Dump server information about executed targets\n\
                                                                   to file FILENAME.\n\
     \n\
     If it's hard to understand what it is --- just ask me. (orazaev@)";
@@ -138,7 +138,8 @@ void cmc_start(int argc, char** argv) {
     }
 
     if (port == 0) {
-        std::cout << "Error: you must set port number to start server" << std::endl;
+        std::cerr << "Error: you must set port number to start server" << std::endl;
+        std::cerr << "Try cmcontroll --help or -?" << std::endl;
         exit(1);
     }
 

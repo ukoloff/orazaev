@@ -10,7 +10,6 @@
 // request format is:
 //{+?} [host name][DD][target name][.cluster]
 // need new command to dump, @ filename
-static const std::string DD = ": ";
 static const int dump_buf_size = CM_DUMP_BUF_SIZE;
 
 // TCMServer base functions description
@@ -74,6 +73,8 @@ int TCMServer::dumpData(const std::string& fname) {
         memcpy(buf, it->first.c_str(), it->first.size() * sizeof(char));
         fwrite(buf, sizeof(char), dump_buf_size, f);
         fwrite(&(it->second), 1, sizeof(int), f);
+    
+        *msgLog << "DUMP: '" << it->first << " " << it->second << "'" << log::endl;
     }
 
     fclose(f);
@@ -113,8 +114,12 @@ std::string TCMServer::TThreadOperator::getRequest() {
         }
     }
 
-    while (request[request.size() - 1] == '\n' || request[request.size() - 1] == '\r')
+    //strip request
+    while (request[request.size() - 1] == '\n' || request[request.size() - 1] == '\r' || request[request.size() - 1] == ' ')
         request.resize(request.size() - 1);
+    while (request[0] == '\n' || request[0] == '\r' || request[0] == ' ')
+        request.erase(0, 1);
+
 
     mutexLock();
     if (parent->msgLog.get()) {
@@ -139,7 +144,7 @@ std::string TCMServer::TThreadOperator::getRequestHost(std::string r) {
 std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
     int pos = r.find(DD);
     if (pos != std::string::npos)
-        r.erase(0, pos + 2);
+        r.erase(0, pos + DD.size());
     else
         return "Unknown";
 
@@ -153,7 +158,7 @@ std::string TCMServer::TThreadOperator::getRequestTargetName(std::string r) {
 std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
     int pos = r.find(DD);
     if (pos != std::string::npos)
-        r.erase(0, pos + 2);
+        r.erase(0, pos + DD.size());
     else
         return "Unknown";
 
@@ -166,7 +171,25 @@ std::string TCMServer::TThreadOperator::getRequestCluster(std::string r) {
     return r;
 }
 
+void TCMServer::TThreadOperator::stripAddRequest(std::string& request) {
+    int x = request.find(DD); 
+    if (x == std::string::npos) 
+        return;
+    else 
+        x--;
+    
+    while(x >= 0 && request[x] == ' ') {
+        request.erase(x, 1);
+        x--;
+    }
+
+    x = request.find(DD) + 1;
+    while(x != request.size() && request[x] == ' ')
+        request.erase(x, 1);
+}
+
 void TCMServer::TThreadOperator::addToMap(std::string request) {
+    stripAddRequest(request);
     (*pdata)[request]++;
 
     std::string name = getRequestTargetName(request);
@@ -199,7 +222,7 @@ void TCMServer::TThreadOperator::addToMap(std::string request) {
         
 }
 
-// It's 2 operation availiable:
+// It's 3 operation availiable:
 // + --- add 1 to map[request]
 // ? --- get value of map[request]
 // d --- dump map to file as arg
@@ -212,7 +235,7 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
     switch(request[0]) {
         case '+':
             request.erase(0, 1);
-            if (request[0] == ' ')
+            while(!request.empty() && request[0] == ' ')
                 request.erase(0, 1);
             
             mutexLock();
@@ -226,9 +249,10 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
             int count = 0;
 
             request.erase(0, 1);
-            if (request[0] == ' ')
+            while(!request.empty() && request[0] == ' ')
                 request.erase(0, 1);
 
+            stripAddRequest(request);
             mutexLock();
             count = (*pdata)[request];
             mutexUnlock();
@@ -238,7 +262,7 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
         break;
         case 'd':
             request.erase(0, 1);
-            if (!request.empty() && request[0] == ' ')
+            while(!request.empty() && request[0] == ' ')
                 request.erase(0, 1); 
 
             if (request.empty()) 
@@ -268,7 +292,6 @@ void TCMServer::TThreadOperator::sendAns(const std::string& ans) {
 }
 
 void TCMServer::TThreadOperator::run() {
-    //if (parent->mainLog.get()) *(parent->mainLog) << "Operate connection " << connection.getIp() << log::endl;
     std::string req = getRequest();
     std::string ans = operateRequest(req);
     sendAns(ans);

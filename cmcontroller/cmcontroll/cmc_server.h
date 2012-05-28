@@ -25,6 +25,7 @@ class TCMServer {
         inline std::string getRequestHost(std::string );
         inline std::string getRequestTargetName(std::string );
         inline std::string getRequestCluster(std::string );
+        inline void stripAddRequest(std::string&);
         inline void addToMap(std::string request);
 
         inline std::string operateRequest(std::string request);
