@@ -41,7 +41,7 @@ void TCMServer::startListen() {
         isListening = 1;
     }
 
-    while(isListening) {
+    while(isListening || !operatorList.empty()) {
         while(!operatorList.empty()) {
             TThreadOperator* po = operatorList.front();
             po->Join();
@@ -73,8 +73,6 @@ int TCMServer::dumpData(const std::string& fname) {
         memcpy(buf, it->first.c_str(), it->first.size() * sizeof(char));
         fwrite(buf, sizeof(char), dump_buf_size, f);
         fwrite(&(it->second), 1, sizeof(int), f);
-    
-        *msgLog << "DUMP: '" << it->first << " " << it->second << "'" << log::endl;
     }
 
     fclose(f);
@@ -230,14 +228,17 @@ void TCMServer::TThreadOperator::addToMap(std::string request) {
 // It can be new operation description here
 std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
     std::string ans;
+    char command = ' ';
+    if (!request.empty()) {
+        command = request[0];
+        request.erase(0, 1);
+    }
 
+    while(!request.empty() && request[0] == ' ')
+        request.erase(0, 1);
 
-    switch(request[0]) {
+    switch(command) {
         case '+':
-            request.erase(0, 1);
-            while(!request.empty() && request[0] == ' ')
-                request.erase(0, 1);
-            
             mutexLock();
             addToMap(request);
             mutexUnlock();
@@ -248,10 +249,6 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
         {
             int count = 0;
 
-            request.erase(0, 1);
-            while(!request.empty() && request[0] == ' ')
-                request.erase(0, 1);
-
             stripAddRequest(request);
             mutexLock();
             count = (*pdata)[request];
@@ -261,10 +258,6 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
         }
         break;
         case 'd':
-            request.erase(0, 1);
-            while(!request.empty() && request[0] == ' ')
-                request.erase(0, 1); 
-
             if (request.empty()) 
                 return std::string("1");
 
@@ -275,8 +268,11 @@ std::string TCMServer::TThreadOperator::operateRequest(std::string request) {
                 ans = "1";
             mutexUnlock();
         break;
+        case '@':
+            if (request == "exit")
+                parent->stopListen();
+        break;
     }
-    
 
     return ans;
 }
