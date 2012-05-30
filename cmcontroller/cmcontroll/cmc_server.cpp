@@ -15,12 +15,15 @@ static const int dump_buf_size = CM_DUMP_BUF_SIZE;
 // TCMServer base functions description
 TCMServer::TCMServer(int portno) 
     : data()
-    , listener(portno) 
+    , listenSocket(portno)
+    , listener() 
     , isListening(0)
     , operatorList()
     , msgLog(0)
     , mainLog(0) {
+
     listener.setParent(this);
+    listener.setSocket(listenSocket);
 }
 
 void TCMServer::operateConnection(TSocket conn) {
@@ -36,7 +39,6 @@ void TCMServer::startListen() {
     if (!isListening) {
         if (mainLog.get()) *mainLog << "start listening." << log::endl;
         listener.Create();
-        listener.Detach();
 
         isListening = 1;
     }
@@ -49,11 +51,14 @@ void TCMServer::startListen() {
             delete po;
         }
     }
+
+    listener.Join();
+    listenSocket.Close();
 }
 
 void TCMServer::stopListen() {
     if (isListening) {
-        listener.stop();
+        TThread::Cancel(listener);
 
         isListening = 0;
     }
@@ -298,23 +303,17 @@ void TCMServer::TThreadOperator::run() {
 
 // TCMServer::TThreadListener description
 // Just listen and create ThreadOperator on accept
-TCMServer::TThreadListener::TThreadListener(int portno) 
-    : listenSocket(portno) 
-    , isStop(0) {
-}
-
-void TCMServer::TThreadListener::stop() {
-    isStop = 1;
+TCMServer::TThreadListener::TThreadListener() 
+    : listenSocket() {
 }
 
 void TCMServer::TThreadListener::run() {
     listenSocket.Bind();
     listenSocket.Listen();
 
-    while(!isStop) {
+    while(1) {
         if (parent->mainLog.get()) *(parent->mainLog) << "Start listening..."  << log::endl;
         TSocket conn = listenSocket.Accept();
-        conn.setCloseable(false);
         parent->operateConnection(conn);
     }
 

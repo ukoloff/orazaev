@@ -37,20 +37,25 @@ class TCMServer {
         inline void setParent(TCMServer* p) { parent = p; }
     };
 
+
     // Listener class
     class TThreadListener : public TThread {
         TSocket listenSocket;
-        int isStop;
         TCMServer* parent;
     public:
-        TThreadListener(int portno);
+        TThreadListener();
         virtual void run();
 
-        void stop();
         inline void setParent(TCMServer*);
+        inline void setSocket(const TSocket& ls) {
+            listenSocket = ls;
+        }
     };
 
+
     std::map<std::string, int> data;
+
+    TSocket listenSocket;
     TThreadListener listener;
     bool isListening;
     std::list<TThreadOperator*> operatorList;
@@ -60,6 +65,7 @@ class TCMServer {
 
     inline void operateConnection(TSocket conn);
     int dumpData(const std::string& fname);
+
 public:
     TCMServer(int portno);
     

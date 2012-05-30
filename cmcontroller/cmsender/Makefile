@@ -6,7 +6,8 @@ CPP			 := g++
 libraries	   := 
 compile_flags   :=
 
-headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h \
+headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h    \
+                $(orazaev_root)/util/TError.h                   \
 				$(orazaev_root)/util/socket/TSocket.h
 				   
 sources		 := main.cpp \

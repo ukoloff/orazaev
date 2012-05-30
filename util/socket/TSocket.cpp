@@ -9,8 +9,6 @@
 static int errcode;
 
 TSocket::TSocket(const std::string& hostname, const int& portno) {
-    closeable = true;
-
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -28,13 +26,10 @@ TSocket::TSocket(const std::string& hostname, const int& portno) {
 
 TSocket::TSocket(const int& Sockfd, const struct sockaddr_in& Addr) 
     : sockfd(Sockfd)
-    , addr(Addr)
-    , closeable(true) {
+    , addr(Addr) {
 }
 
 TSocket::TSocket(const int& portno) {
-    closeable = true;
-
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -49,8 +44,6 @@ TSocket::TSocket(const int& portno) {
 }
 
 TSocket::~TSocket() {
-    if (closeable)
-        close(sockfd);
 }
 
 void TSocket::Connect() {
@@ -91,7 +84,6 @@ TSocket TSocket::Accept() {
 }
 
 void TSocket::Close() {
-    if (!closeable)
         close(sockfd);
 }
 

@@ -38,6 +38,13 @@ public:
     class ECreate : public EThread {};
     class EJoin   : public EThread {};
     class EDetach : public EThread {};
+    class ECancel : public EThread {};
+    
+    static void Cancel(const TThread& th) {
+        if (pthread_cancel(th.thread) != 0)
+            throw ECancel();
+    }
+
 };
 
 #endif
