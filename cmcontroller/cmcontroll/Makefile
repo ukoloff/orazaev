@@ -9,7 +9,7 @@ compile_flags   :=
 headers		 := \
 				cmc_server.h \
 				$(orazaev_root)/cmcontroller/cmdefinitions.h \
-                $(orazaev_root)/TError.h \
+                $(orazaev_root)/util/TError.h \
 				$(orazaev_root)/util/logger/logger.h  \
 				$(orazaev_root)/util/socket/TSocket.h \
 				$(orazaev_root)/util/thread/TMutex.h \

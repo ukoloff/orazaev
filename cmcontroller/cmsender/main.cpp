@@ -67,8 +67,8 @@ Requests syntax.(Warning: All requests without quetes!)\n\
 void cmc_send(const std::string& host, const int& port, std::string& request, const std::string& lfname, const int& timeout) {
     if (request == "") 
         return;
-    if (request.size() > CM_BUF_SIZE)
-        request.resize(CM_BUF_SIZE);
+    if (request.size() > CM_DUMP_BUF_SIZE)
+        request.resize(CM_DUMP_BUF_SIZE);
     
     TSocket connection(host, port);
 
