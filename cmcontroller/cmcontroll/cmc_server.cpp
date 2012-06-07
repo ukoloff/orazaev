@@ -312,7 +312,7 @@ void TCMServer::TThreadListener::run() {
     listenSocket.Listen();
 
     while(1) {
-        if (parent->mainLog.get()) *(parent->mainLog) << "Start listening..."  << log::endl;
+        //if (parent->mainLog.get()) *(parent->mainLog) << "Start listening..."  << log::endl;
         TSocket conn = listenSocket.Accept();
         parent->operateConnection(conn);
     }
