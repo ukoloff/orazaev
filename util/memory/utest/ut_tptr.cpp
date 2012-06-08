@@ -76,6 +76,26 @@ int main() {
         std::cout << " [ FAIL ]" << std::endl;
     else
         std::cout << " [ PASS ]" << std::endl;
+
+    std::cout << addSpaces("VECTOR SELF ADDITION");
+    pvector.push_back(pvector[0]);
+    pvector.push_back(pvector[1]);
+    pvector.push_back(pvector[2]);
+    if (e.getRefCount() != 5 || *pvector[0] != *e || *pvector[1] != *e || *pvector[2] != *e || *pvector[3] != *e || pvector[3].getRefCount() != 5)
+        std::cout << " [ FAIL ]" << std::endl; 
+    else
+        std::cout << " [ PASS ]" << std::endl;
+
+    std::cout << addSpaces("VECTOR CLEAR");
+    pvector.clear();
+    if (e.getRefCount() != 1)
+        std::cout << " [ FAIL ]" << std::endl;
+    else
+        std::cout << " [ PASS ]" << std::endl;
+
+
+
+
     
     
     return 0;
