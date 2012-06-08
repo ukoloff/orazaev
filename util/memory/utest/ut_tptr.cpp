@@ -14,9 +14,18 @@ std::string addSpaces(std::string s, int x = 50) {
     return s;
 }
 
+class A {
+public:
+    A()  {}
+    ~A() {}
+    int print_pass() {
+        std::cout << " [ PASS ]" << std::endl;
+        return 0;
+    }
+};
 
 int main() {
-    std::cout << addSpaces("CONSTRUCTION WITHOUT ARGS");
+    std::cout << addSpaces("construction without args");
     TPtr<std::string> a;
     TPtr<std::string> b;
     TPtr<std::string> c;
@@ -24,14 +33,14 @@ int main() {
 
 
 
-    std::cout << addSpaces("CONSTRUCTION WITH ARGS");
+    std::cout << addSpaces("construction with args");
     TPtr<std::string> d(new std::string("Hello, memory!"));
     TPtr<int> e(new int(777));
     std::cout << " [ PASS ]" << std::endl;
 
 
 
-    std::cout << addSpaces("REFCOUNT TEST");
+    std::cout << addSpaces("refcount");
     c = d;
     if (a.getRefCount() != 0 || b.getRefCount() != 0 || c.getRefCount() != 2 || d.getRefCount() != 2 || e.getRefCount() != 1)
         std::cout << " [ FAIL ]" << std::endl;
@@ -40,7 +49,7 @@ int main() {
     
 
 
-    std::cout << addSpaces("DESTRUCTION AND COPY CONSTRUCTION");
+    std::cout << addSpaces("destruction and copy");
     c = TPtr<std::string>();
     {
         TPtr<std::string> tempd = d;
@@ -52,7 +61,7 @@ int main() {
 
 
 
-    std::cout << addSpaces("OPERATIONS");
+    std::cout << addSpaces("operations");
     *e -= 444;
     *d = std::string("Hello, memory! I'm here!");
     a = b;
@@ -66,7 +75,7 @@ int main() {
 
 
 
-    std::cout << addSpaces("AS FUNCTION ARG");
+    std::cout << addSpaces("as function argument");
     std::vector<TPtr<int> > pvector;
     pvector.push_back(e);
     pvector.push_back(e);
@@ -77,7 +86,9 @@ int main() {
     else
         std::cout << " [ PASS ]" << std::endl;
 
-    std::cout << addSpaces("VECTOR SELF ADDITION");
+
+
+    std::cout << addSpaces("vector self addition");
     pvector.push_back(pvector[0]);
     pvector.push_back(pvector[1]);
     pvector.push_back(pvector[2]);
@@ -86,7 +97,9 @@ int main() {
     else
         std::cout << " [ PASS ]" << std::endl;
 
-    std::cout << addSpaces("VECTOR CLEAR");
+
+
+    std::cout << addSpaces("vector clear");
     pvector.clear();
     if (e.getRefCount() != 1)
         std::cout << " [ FAIL ]" << std::endl;
@@ -95,8 +108,10 @@ int main() {
 
 
 
-
-    
+    std::cout << addSpaces("operator->");
+    TPtr<A> pa = new A();
+    if (pa->print_pass())
+        std::cout << " [ FAIL ]" << std::endl;
     
     return 0;
 }

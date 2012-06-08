@@ -1,19 +1,18 @@
 #ifndef TPTR_H
 #define TPTR_H
-#include <iostream>
 
 template <class T>
 class TPtr {
-    T*              data;
+    T*              pointed_data;
     unsigned int*   refcount;
 public:
     TPtr()
-        : data(0)
+        : pointed_data(0)
         , refcount(0) {
     }
 
     TPtr(T* t)
-        : data(t)
+        : pointed_data(t)
         , refcount(new unsigned(1)) {
     }
 
@@ -21,7 +20,7 @@ public:
         refcount = p.refcount;
         if (refcount)
             *refcount += 1;
-        data = p.data;
+        pointed_data = p.pointed_data;
     }
 
     TPtr<T>& operator=(const TPtr<T>& p) throw() {
@@ -29,7 +28,7 @@ public:
             if (refcount) {
                 *refcount -= 1;
                 if (*refcount == 0) {
-                    delete data;
+                    delete pointed_data;
                     delete refcount;
                 }
             }
@@ -37,20 +36,24 @@ public:
             refcount = p.refcount;
             if (refcount)
                 *refcount += 1;
-            data = p.data;
+            pointed_data = p.pointed_data;
         }
     }
 
-    T* operator->() const throw() {
-        return &data;
+    T* operator->() throw() {
+        return pointed_data;
+    }
+    
+    const T* operator->() const throw() {
+        return pointed_data;
     }
     
     T& operator*() const throw() {
-        return *data;
+        return *pointed_data;
     }
 
     T* get() throw() {
-        return data;
+        return pointed_data;
     }
 
     int getRefCount() const throw() {
@@ -63,7 +66,7 @@ public:
         if (refcount != 0) {
             *refcount -= 1;
             if (*refcount == 0) {
-                delete data;
+                delete pointed_data;
                 delete refcount;
             }
         }
