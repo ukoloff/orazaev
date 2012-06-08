@@ -4,7 +4,7 @@ orazaev_root	:= ../../../
 
 CPP			 := g++
 libraries	   := 
-compile_flags   :=
+compile_flags   := -pedantic -Wall
 
 headers		 := \
 				$(orazaev_root)/util/memory/tptr.h
