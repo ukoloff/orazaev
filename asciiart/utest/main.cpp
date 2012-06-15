@@ -1,17 +1,12 @@
 #include"asciiart/asciiart.h"
 
 int main() {
-    TPlotWindow tp(25, 6, 1);
-    tp.rectangle(0, 0, 25, 6, 3);
-    tp.dot(1, 1);
+    TPlotWindow tp(50, 50);
+    tp.rectangle(11, 25, 27, 25, '.');
+    tp.line(11, 25, 24, 12);
+    tp.line(24, 12, 37, 25);
     tp.print();
-    tp.dot(1, 2);
-    tp.print();
-    tp.dot(1, 3);
-    tp.print();
-    tp.dot(1, 4);
-    tp.print();
-    tp.dot(1, 5);
+    tp.setHX2(true);
     tp.print();
     
     return 0;

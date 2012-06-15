@@ -21,17 +21,15 @@ private:
 
 class TPlotWindow {
 public:
-    TPlotWindow(const unsigned& w, const unsigned& h, const unsigned& b_force = 0);
-    TPlotWindow(const unsigned& w, const unsigned& h, const TCharBrush& cb, const unsigned& b_force = 0);
+    TPlotWindow(const unsigned& w, const unsigned& h, const char& b = ' ');
     virtual ~TPlotWindow();
 
-
-    void setBrush(const TCharBrush& b);
-    TCharBrush brush();
+    void setHX2(const bool& b);
 
     void print();
-    void dot(const int& x, const int& y, const unsigned& b_force = 4);
-    void rectangle(const int& x, const int& y, const int& w, const int& h, const unsigned& b_force = 4);
+    void dot(const int& x, const int& y, const char& b = '.');
+    void rectangle(const int& x, const int& y, const int& w, const int& h, const char& b = '.');
+    void line(int x0, int y0, int x1, int y1, const char& b = '.');
 
 private:
     unsigned H;

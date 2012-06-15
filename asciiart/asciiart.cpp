@@ -25,34 +25,22 @@ unsigned TCharBrush::size() {
 }
  
 /* TPlotWindow description */
-TPlotWindow::TPlotWindow(const unsigned& w, const unsigned& h, const unsigned& b_force)
+TPlotWindow::TPlotWindow(const unsigned& w, const unsigned& h, const char& b)
     : H(h)
     , W(w)
     , matrix(0)
     , char_brush()
-    , horizontal_X2_zoom(true) {
+    , horizontal_X2_zoom(false) {
     matrix = new char[W * H];
-    if (b_force > char_brush.size())
-        memset(matrix, char_brush[0], W * H);
-    else
-        memset(matrix, char_brush[b_force], W * H);
-}
-
-TPlotWindow::TPlotWindow(const unsigned& w, const unsigned& h, const TCharBrush& cb, const unsigned& b_force)
-    : H(h)
-    , W(w)
-    , matrix(0)
-    , char_brush(cb)
-    , horizontal_X2_zoom(true) {
-    matrix = new char[W * H];
-    if (b_force > char_brush.size())
-        memset(matrix, char_brush[0], W * H);
-    else
-        memset(matrix, char_brush[b_force], W * H);
+    memset(matrix, b, W * H);
 }
 
 TPlotWindow::~TPlotWindow() {
     delete[] matrix;
+}
+
+void TPlotWindow::setHX2(const bool& b) {
+    horizontal_X2_zoom = b;
 }
 
 void TPlotWindow::print() {
@@ -66,28 +54,12 @@ void TPlotWindow::print() {
     }
 }
 
-void TPlotWindow::setBrush(const TCharBrush& b) {
-    char_brush = b;
-}
-
-TCharBrush TPlotWindow::brush() {
-    return char_brush;
-}
-
-void TPlotWindow::dot(const int& x, const int& y, const unsigned& b_force) {
-    unsigned bb = b_force;
-    if (bb > char_brush.size())
-        bb = char_brush.size() - 1;
-
+void TPlotWindow::dot(const int& x, const int& y, const char& b) {
     if (x >= 0 && y >= 0 && x * H + y < W * H)
-        matrix[x * H + y] = char_brush[bb];
+        matrix[x * H + y] = b;
 }
 
-void TPlotWindow::rectangle(const int& x, const int& y, const int& w, const int& h, const unsigned& b_force) {
-    unsigned bb = b_force;
-    if (bb > char_brush.size())
-        bb = char_brush.size() - 1;
-
+void TPlotWindow::rectangle(const int& x, const int& y, const int& w, const int& h, const char& b) {
     if (w < 0 || h < 0) {
         int new_x = w < 0 ? x + w + 1 : x;
         int new_y = h < 0 ? y + h + 1 : y;
@@ -98,15 +70,48 @@ void TPlotWindow::rectangle(const int& x, const int& y, const int& w, const int&
 
     for(int p = x; p < x + w ; p++) {
         if (p * H + y < W * H && p >= 0 && y >= 0)
-            matrix[p * H + y] = char_brush[bb];
+            matrix[p * H + y] = b;
         if (p * H + y + h - 1 < W * H && p >= 0 && y + h - 1 >= 0)
-            matrix[p * H + y + h - 1] = char_brush[bb];
+            matrix[p * H + y + h - 1] = b;
     }
 
     for(int p = y; p < y + h ; p++) {
         if (x * H + p < W * H && p >= 0 && x >= 0)
-            matrix[x * H + p] = char_brush[bb];
+            matrix[x * H + p] = b;
         if ((x + w - 1) * H + p < W * H && p >= 0 && x + w - 1 >= 0)
-            matrix[(x + w - 1) * H + p] = char_brush[bb];
+            matrix[(x + w - 1) * H + p] = b;
     }
 }
+
+void TPlotWindow::line(int x0, int y0, int x1, int y1, const char& b) {
+/**
+TPlotWindow::line(x0, y0, x1, y1) --- draw line from (x0, y0) to (x1, y1)
+
+Use Bresenham algorithm: 
+http://en.wikipedia.org/wiki/Bresenham_algorithm
+*/
+    const int dx    = std::abs(x1 - x0);
+    const int dy    = std::abs(y1 - y0);
+    const int signx = x0 < x1 ? 1 : -1;
+    const int signy = y0 < y1 ? 1 : -1;
+    
+    int error = dx - dy;
+
+    this->dot(x1, y1, b);
+    
+    while(x0 != x1 || y0 != y1) {
+        this->dot(x0, y0, b);
+        const int error2 = error * 2;
+        if (error2 > -dy) {
+            error -= dy;
+            x0 += signx;
+        }
+
+        if (error2 < dx) {
+            error += dx;
+            y0 += signy;
+        }
+    }
+}
+
+
