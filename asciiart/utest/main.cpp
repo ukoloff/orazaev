@@ -1,7 +1,7 @@
 #include"asciiart/asciiart.h"
 
 int main() {
-    TPlotWindow tp(50, 50);
+    TCharMap tp(50, 50);
     tp.rectangle(11, 25, 27, 25, '.');
     tp.line(11, 25, 24, 12);
     tp.line(24, 12, 37, 25);

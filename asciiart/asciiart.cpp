@@ -24,8 +24,8 @@ unsigned TCharBrush::size() {
     return this->sz;
 }
  
-/* TPlotWindow description */
-TPlotWindow::TPlotWindow(const unsigned& w, const unsigned& h, const char& b)
+/* TCharMap description */
+TCharMap::TCharMap(const unsigned& w, const unsigned& h, const char& b)
     : H(h)
     , W(w)
     , matrix(0)
@@ -35,15 +35,15 @@ TPlotWindow::TPlotWindow(const unsigned& w, const unsigned& h, const char& b)
     memset(matrix, b, W * H);
 }
 
-TPlotWindow::~TPlotWindow() {
+TCharMap::~TCharMap() {
     delete[] matrix;
 }
 
-void TPlotWindow::setHX2(const bool& b) {
+void TCharMap::setHX2(const bool& b) {
     horizontal_X2_zoom = b;
 }
 
-void TPlotWindow::print() {
+void TCharMap::print() {
     for(unsigned y = 0; y < H; y++) {
         for(unsigned x = 0; x < W; x++) {
             std::cout << matrix[x * H + y];
@@ -54,12 +54,12 @@ void TPlotWindow::print() {
     }
 }
 
-void TPlotWindow::dot(const int& x, const int& y, const char& b) {
+void TCharMap::dot(const int& x, const int& y, const char& b) {
     if (x >= 0 && y >= 0 && x * H + y < W * H)
         matrix[x * H + y] = b;
 }
 
-void TPlotWindow::rectangle(const int& x, const int& y, const int& w, const int& h, const char& b) {
+void TCharMap::rectangle(const int& x, const int& y, const int& w, const int& h, const char& b) {
     if (w < 0 || h < 0) {
         int new_x = w < 0 ? x + w + 1 : x;
         int new_y = h < 0 ? y + h + 1 : y;
@@ -83,9 +83,9 @@ void TPlotWindow::rectangle(const int& x, const int& y, const int& w, const int&
     }
 }
 
-void TPlotWindow::line(int x0, int y0, int x1, int y1, const char& b) {
+void TCharMap::line(int x0, int y0, int x1, int y1, const char& b) {
 /**
-TPlotWindow::line(x0, y0, x1, y1) --- draw line from (x0, y0) to (x1, y1)
+TCharMap::line(x0, y0, x1, y1) --- draw line from (x0, y0) to (x1, y1)
 
 Use Bresenham algorithm: 
 http://en.wikipedia.org/wiki/Bresenham_algorithm

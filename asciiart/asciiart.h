@@ -19,10 +19,10 @@ private:
     static const unsigned sz = 5;
 };
 
-class TPlotWindow {
+class TCharMap {
 public:
-    TPlotWindow(const unsigned& w, const unsigned& h, const char& b = ' ');
-    virtual ~TPlotWindow();
+    TCharMap(const unsigned& w, const unsigned& h, const char& b = ' ');
+    virtual ~TCharMap();
 
     void setHX2(const bool& b);
 
@@ -38,5 +38,6 @@ private:
     TCharBrush char_brush;
     bool horizontal_X2_zoom;
 };
+
 
 #endif /* ASCIIART_H */
