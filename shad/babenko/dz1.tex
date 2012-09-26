@@ -10,6 +10,11 @@
 \textheight=220mm
 \textwidth=160mm
 
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\NA}{\operatorname{NA}}
+\newcommand{\OR}{\operatorname{ or }}
+%\DeclareMathOperator{\sgn}{sgn}
+
 \title{\bf Домашнее задание по курсу \\ <<Методы
 и структуры данных поиска.>>}
 \author{А.Е. Оразаев}
@@ -24,7 +29,44 @@
 
 \section{Задача 1-1.}
 \paragraph{Описание алгоритма.}
+Прибегнем к помощи методов динамического программирования для решения задачи.
 
+У нас есть последовательность $ \alpha = \alpha_0\alpha_1\dots\alpha_{n-1} $. 
+Заведем 2 вектора: $ maxLength $ и $ p $. В $ maxLength[i] $ будем хранить
+максимальную длину чередующейся подпоследовательности для $ \alpha_0\dots\alpha_i $.
+В $ p[i] $ будем хранить предыдущий элемент для $ \alpha_i $ в максимальной
+чередующейся подпоследовательности которая заканчивается в $ \alpha_i $.
+
+Инициализируем $ maxLength $ единицами, а $ p $ значениями $ \NA $.
+Пробежим по элементам $ \alpha $, от первого до последнего, для каждого элемента
+$ \alpha_i $ найдем значения $ maxLength[i] $ и $ p[i] $. Для этого 
+пробежим по элементам от $ \alpha_0 $ до $ \alpha_{i - 1} $ и выберем самый левый
+элемент, такой что:
+$$ 
+    \max\limits_{\tiny\begin{array}{c} j \in [0; i - 1] \\ \sgn(\alpha_j - \alpha_i) \ne \sgn(\alpha_j - \alpha_{p[j]}) \\ \alpha_i \ne \alpha_j \end{array} } (maxLength(j))
+$$
+Здесь $ \sgn $ - это сигнум. Стоит заметит, что в случае когда $ p[j] = \NA $, условие $ \sgn(\alpha_j - \alpha_i) \ne \sgn(\alpha_j - \alpha_{p[j]}) $ опускается.
+
+В конце выбираем самый левый максимум в $ maxLength $ и восстанавливаем последовательность с помощью $ p $.
+
+\paragraph{Алгоритм по шагам.}
+\begin{enumerate}
+    \item $ n \leftarrow \alpha.size() $ \\
+          $ \NA \leftarrow static\_cast<size_t> (-1)$ \\
+          $ std::vector<size\_t> p \leftarrow std::vector<size\_t>(n, \NA) $ \\
+          $ std::vector<size\_t> maxLength \leftarrow std::vector<size\_t>(n, \NA)$
+          $ i \leftarrow 0 $
+    \item Если $ i < n $, то переходим к следующему шагу, иначе шаг 8.
+    \item $ j \leftarrow 0 $
+    \item Если $ j < i $, то переходим к следующему шагу, иначе шаг 2.
+    \item Если $ maxLength[i] \le maxLength[j] \mbox{   and   } (p[j] = \NA \mbox{   or   } \sgn(\alpha_j - \alpha_i) \ne \sgn(\alpha_j - \alpha_{p[j]}) $,
+          то ++$maxLength[i]$, $ p[i] \leftarrow j $.
+    \item ++$j$, переходим к шагу 4
+    \item ++$i$, переходим к шагу 2.
+    \item Берем самый левый максимум из $ maxLength $, восстанавливаем последовательность с помощью $ p $.
+    \item Переворачиваем восстановленую последовательность. Выводим на экран.
+\end{enumerate}
+В итоге сложность по времени $ O(n^2) $, алгоритм требует $ O(n) $ дополнительной памяти.
 
 
 
