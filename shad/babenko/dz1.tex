@@ -53,13 +53,13 @@ $$
 \paragraph{Алгоритм по шагам.}
 \begin{enumerate}
     \item $ n \leftarrow \alpha.size() $ \\
-          $ \NA \leftarrow static\_cast<size_t> (-1)$ \\
+          $ \NA \leftarrow static\_cast<size\_t> (-1)$ \\
           $ std::vector<size\_t> p \leftarrow std::vector<size\_t>(n, \NA) $ \\
           $ std::vector<size\_t> maxLength \leftarrow std::vector<size\_t>(n, \NA)$
           $ i \leftarrow 0 $
     \item Если $ i < n $, то переходим к следующему шагу, иначе шаг 8.
     \item $ j \leftarrow 0 $
-    \item Если $ j < i $, то переходим к следующему шагу, иначе шаг 2.
+    \item Если $ j < i $, то переходим к следующему шагу, иначе шаг 7.
     \item Если $ maxLength[i] \le maxLength[j] \mbox{   and   } (p[j] = \NA \mbox{   or   } \sgn(\alpha_j - \alpha_i) \ne \sgn(\alpha_j - \alpha_{p[j]}) $,
           то ++$maxLength[i]$, $ p[i] \leftarrow j $.
     \item ++$j$, переходим к шагу 4
