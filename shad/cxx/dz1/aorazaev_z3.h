@@ -14,7 +14,7 @@
 
 template <typename T>
 void shift(T begin, T end) {
-    if (begin == end || end - begin == 1)
+    if (end - begin <= 1)
         return;
 
     std::swap(*begin++, *--end);
