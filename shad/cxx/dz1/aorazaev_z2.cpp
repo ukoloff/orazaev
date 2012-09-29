@@ -62,11 +62,12 @@ void stressTest(int N) {
             continue;
 
         if ((ans*a) % n != 1) {
-            std::cout << "Inverse error!" << std::endl;
-            std::cout << "a       = " << a << std::endl
+            std::cout << "Inverse error!" << std::endl
+                      << "a       = " << a << std::endl
                       << "n       = " << n << std::endl
                       << "inverse = " << ans << std::endl
-                      << "ans*a mod n = " << (ans * a) % n << std::endl;
+                      << "ans*a mod n = " << (ans * a) % n 
+                      << std::endl;
             throw std::runtime_error("Test filed!");
         } 
     }
