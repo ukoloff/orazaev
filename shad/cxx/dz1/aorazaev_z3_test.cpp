@@ -7,10 +7,10 @@
 
 
 
-using NTestCase::equalArrays;
-using NTestCase::equalVectors;
-using NTestCase::randomArray;
-using NTestCase::randomVector;
+using NTest::equalArrays;
+using NTest::equalVectors;
+using NTest::randomArray;
+using NTest::randomVector;
 
 
 
@@ -20,7 +20,7 @@ void vectorTrivialTest() {
     
     for(int i = -20; i <= 20; ++i) {
         rotate(v.begin(), v.end(), 0);
-        NTestCase::equalVectors(v, z);
+        equalVectors(v, z);
     }
 }
 

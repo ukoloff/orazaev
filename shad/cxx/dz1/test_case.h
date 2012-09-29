@@ -5,7 +5,7 @@
 #include<vector>
 #include<cstdlib>
 
-namespace NTestCase {
+namespace NTest {
 
     /* Specification here             */
     /* You can find realization above */
@@ -124,6 +124,6 @@ namespace NTestCase {
         return size;
     }
 
-} /* NTestCase */
+} /* NTest */
 
 #endif /* TEST_CASE_H */
