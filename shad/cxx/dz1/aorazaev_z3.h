@@ -26,9 +26,6 @@ void shift(T begin, T end) {
 
 template <typename T>
 void rotate(T begin, T end, int k) {
-    if (begin == end)
-        return;
-    
     while (k < 0)
         k += end - begin;
 
