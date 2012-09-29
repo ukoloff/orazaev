@@ -45,14 +45,14 @@ int inverse(int a, int n) {
 
 void stressTest(int N) {
     for(int i = 1; i <= N; ++i) {
-        int a = rand() % 2000 - 1000;
+        std::cout << "Test number: " << i << std::endl;
 
         // There are no inverse if n <= 0,
         // becouse x % n always will be < 0, and
         // never be 1.
         int n = rand() % 1000000 + 1;
+        int a = rand() % 2000 - 1000;
         int ans = inverse(a, n);
-        std::cout << "Test number: " << i << std::endl;
 
         // There are no inverse if a == 0, n == 1 
         // and if gcd(a, n) != 1
