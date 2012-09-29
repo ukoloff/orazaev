@@ -10,6 +10,10 @@
 
 #include<algorithm>
 
+// Need for demo().
+#include<vector>
+#include<iostream>
+
 
 
 template <typename T>
@@ -33,6 +37,27 @@ void rotate(T begin, T end, int k) {
         shift(begin, end);
 }
 
+
+// Rotate demonstration using
+// std::vector and array
+void demo() {
+    int a[5] = {0, 1, 2, 3, 4};
+    std::vector<int> v(a, a + 5);
+    
+    rotate(a, a + 5, 3);
+    rotate(v.begin(), v.end(), -3);
+
+    std::cout << "rotate(vector(0..4), -3): ";
+    for(std::vector<int>::const_iterator it = v.begin();
+        it != v.end(); ++it)
+        std::cout << *it << " ";
+    std::cout << std::endl;
+
+    std::cout << "rotate(array(0..4), 3): ";
+    for(int i = 0; i < 5; ++i)
+        std::cout << a[i] << " ";
+    std::cout << std::endl;
+}
 
 
 #endif /* AROAZAEV_DZ1_Z3_H */
