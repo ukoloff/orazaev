@@ -9,9 +9,7 @@
 #include<cstdlib>
 #include<cmath>
 
-int sign(int a) {
-    return a == 0 ? 0 : (a > 0 ? 1 : -1);
-}
+
 
 int gcdex(int a, int b, int & x, int & y) {
     if (a == 0) {
@@ -26,6 +24,11 @@ int gcdex(int a, int b, int & x, int & y) {
    return d;
 }
 
+// Mathematical description:
+//     inverse(a, n) * a = 1 (mod n)
+//
+// If there are no inverse,
+//     return 0
 int inverse(int a, int n) {
     int x, y;
     int d = gcdex(a, n, x, y);
@@ -38,14 +41,25 @@ int inverse(int a, int n) {
     }
 }
 
+
+
 void stressTest(int N) {
     for(int i = 1; i <= N; ++i) {
         int a = rand() % 2000 - 1000;
-        int n = rand() % 1000000 + 1;
-        int x, y;
+
+        // There are no inverse if n < 0,
+        // becouse x % n always will be < 0, and
+        // never be 1.
+        int n = rand() % 1000000;
         int ans = inverse(a, n);
         std::cout << "Test number: " << i << std::endl;
-        if (a == 0 || n == 1 || gcdex(a, n, x, y) != 1) continue;
+
+        // There are no inverse if a == 0, n == 1 
+        // and if gcd(a, n) != 1
+        int x, y;
+        if (a == 0 || n == 1 || gcdex(a, n, x, y) != 1) 
+            continue;
+
         if ((ans*a) % n != 1) {
             std::cout << "Inverse error!" << std::endl;
             std::cout << "a       = " << a << std::endl
@@ -58,13 +72,7 @@ void stressTest(int N) {
 }
 
 int main(int argc, char* argv[]) {
-    std::srand(36);
-    stressTest(1000000);
-    stressTest(1000000);
-    stressTest(1000000);
-    stressTest(1000000);
-    stressTest(1000000);
-    stressTest(1000000);
+    std::srand(360);
     stressTest(1000000);
     return 0;
 }
