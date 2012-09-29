@@ -19,7 +19,7 @@ void shift(T begin, T end) {
 
     std::swap(*begin++, *--end);
 
-    for (T it = (end); it != begin; --it) {
+    for (T it = end; it != begin; --it) {
         std::swap(*it, *(it - 1));
     }
 }
