@@ -8,6 +8,7 @@
 #include<iostream>
 #include<cstdlib>
 #include<cmath>
+#include<stdexcept>
 
 
 
@@ -66,7 +67,7 @@ void stressTest(int N) {
                       << "n       = " << n << std::endl
                       << "inverse = " << ans << std::endl
                       << "ans*a mod n = " << (ans * a) % n << std::endl;
-            throw 1;
+            throw std::runtime_error("Test filed!");
         } 
     }
 }
