@@ -1,4 +1,6 @@
 Задача 1
+Автор: Аман Оразаев
+
 Работая над алгоритмом быстрого вычисления a^n студент ошибся и написал код:
 unsigned long f (unsigned int a, unsigned int n) {
     unsigned long r = 1;
