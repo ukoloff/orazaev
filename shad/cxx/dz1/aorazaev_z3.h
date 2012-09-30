@@ -5,8 +5,8 @@
  *
  *      Author: Aman Orazaev
  */
-#ifndef AROAZAEV_DZ1_Z3_H
-#define AORAZAEV_DZ1_Z3_H
+#ifndef AROAZAEV_CXX_DZ1_Z3_H
+#define AORAZAEV_CXX_DZ1_Z3_H
 
 #include<algorithm>
 
@@ -60,4 +60,4 @@ void demo() {
 }
 
 
-#endif /* AROAZAEV_DZ1_Z3_H */
+#endif /* AROAZAEV_CXX_DZ1_Z3_H */
