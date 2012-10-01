@@ -34,11 +34,11 @@ int inverse(int a, int n) {
     int x, y;
     int d = gcdex(a, n, x, y);
     
-    if (d != 1 || a == 0 || n <= 0) {
+    if (d != 1 || a == 0 || n == 0) {
         return 0;
     } else {
         int ans = y > 0 ? n - std::abs(x) : x;
-        return a < 0 ? -ans : ans;
+        return (a*ans) < 0 ? -ans : ans;
     }
 }
 
@@ -48,18 +48,17 @@ void stressTest(int N) {
     for(int i = 1; i <= N; ++i) {
         std::cout << "Test number: " << i << std::endl;
 
-        // There are no inverse if n <= 0,
-        // becouse x % n always will be < 0, and
-        // never be 1.
-        int n = rand() % 1000000 + 1;
-        int a = rand() % 2000 - 1000;
+        int n = rand() % 10000 - 5000;
+        int a = rand() % 200000 - 100000;
         int ans = inverse(a, n);
 
-        // There are no inverse if a == 0, n == 1 
+        // There are no inverse if a == 0, abs(n) <= 1 
         // and if gcd(a, n) != 1
         int x, y;
-        if (a == 0 || n == 1 || gcdex(a, n, x, y) != 1) 
+        if (a == 0 || std::abs(n) <= 1 || 
+            gcdex(a, n, x, y) != 1) {
             continue;
+        }
 
         if ((ans*a) % n != 1) {
             std::cout << "Inverse error!" << std::endl
