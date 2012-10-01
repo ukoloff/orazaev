@@ -1,0 +1,198 @@
+/* What to do next? */
+
+It's good to separete your data to 3 sets:
+J_train-- training set.
+J_CV   -- cross-validatin set.
+J_test -- its your testing set.
+
+When you get new algorithm, learned on your
+J_train, you should minimize error of lamda 
+parameter on your J_CV set, and only then get
+your algorithm error on J_test.
+
+Best practice is separete your data set like this:
+60 % -- training set.
+20 % -- CV set.
+20 % -- test set.
+
+
+List of learning algorighm problems:
+high variance -- is overfitting problem.
+high bias     -- is underfitting problem.
+
+
+There are many ways to make your learning algorithm better:
+* Collect more data                 -> fix high variance
+* Try smaller set of features       -> fix high variance
+* Try getting additional features   -> fix high bias
+* Add polynomial features           -> fix high bias
+* Try decreasing lambda             -> fix high bias
+* Try increasing lambda             -> fix high variance
+
+"Small" neural network more prone to underfitting, and
+"Large" neural network more prone to overfitting problem.
+
+
+
+
+/* Machine learning system desine */
+
+Spam classification problem:
+* spam is 1
+* non spam is 0
+
+Problems:
+* misspellings like "watches" -> "w4tches"
+
+We cah choose features set as: if letter have some
+words like "discount" and "buy", or "your_name_here",
+and learn our algorithm.
+
+
+How to spend our time to get small error?
+* Collect lots of data ("honeypot" project)
+* Develop sophisticated features based on email routing
+  from email header.
+* Develop sophisticated features for message body, e.g.
+  should "discount" and "discounts" be treated as the same word?
+  How about "deal" and "Dealer"? Features about punctuation?
+* Develop sophisticated algorithm to detect misspellings (e.g.
+  (m0rtgage, med1cine, w4tches.)
+
+
+Recommended approach
+* Start with a simple algorithm that you can implement quickly.
+  Implement it and test it on your CV data.
+* Plot leaerning curves to decide if more data, more features, etc.
+  are likely to help
+* Error analysis: Manually examine the examples (in CV set)
+  that your algorithm made errors on. See if you spot any
+  systematic trend in what type of examples it is making errors on.
+
+Error analysis.
+m_cv = 500 examples in cross validatin set
+
+Algorithm missclassifies 100 emails.
+Manyally examine th 100 errors, and categorize them base on:
+* what type of email it is (pharma, replica, steal password)
+  [ ] pharma: 12
+  [ ] replica: 4
+  [*] steal password: 53
+  [ ] other: 31
+* What cues (features) you think would have helped the algorithm
+  classify them correctly:
+  [ ] Deliberate misspellings: 5
+  [ ] unusual email routing: 16
+  [*] Unusual(spamming) punctuation: 32
+It is manually error data analys.
+
+But error analysis not the good idea sometimes. For some features or 
+ways is only good idea is try and analys. For stemming example:
+[*] With stemming: 3% error
+[ ] Without stemming: 5% error
+or Distinguish upper vs. lower cas(Mom/mom).
+[ ] With: 3.2% error(increased)
+[*] Without(only stemming): 3.0% error
+
+Strongly recommended to do error analysis on your CV set.
+
+
+Scew classes.
+Cancer classification example: Train logistic regression model.
+Find that you got 1% error on test set.
+(99% correct diagnoses)
+
+But only 0.5% of patients have cancer. And:
+"""
+function y = predict Cancer(x):
+    y = 0; % ignore x!
+return
+"""
+will have 0.5% error!
+
+So we changed our algorithm, and get:
+* 99.2% accuracy
+* 99.5% accuracy
+
+What algorithm is better?
+It's hard to choose algorithm using only accuracy for scew
+classes. It need different precision metric Precision/Recall.
+
+
+Precision/Recall metric.
+y = 1 in presence of rare class that we want to detect.
+
+           Actual class
+             1    0
+           *---------*
+Predict  1 |(1) | (2)|
+class      |---------|
+         0 |(3) | (4)|
+           *---------*
+
+(1) -- True positive
+(2) -- False positive
+(3) -- False negative
+(4) -- True negative
+
+First number we gonna compute is precision:
+(Of all patients where we predicted y = 1, what fraction
+actually has cancer?)
+Precision = True positives / #predicted positives ...
+          = True positive / (True positive + False positive)
+
+(Of all patients that actually have cancer, what fraction
+did we correctly detects as having cancer)
+Recall = True positives / #actual positives ...
+       = True positive / (True positive + False negative)
+
+If y = 0 always, it will get Recall = 0.
+
+
+Trading off precision and recall:
+"Cancer logistic regression"
+Predict 1 if h_o(x) \ge 0.5
+Predict 0 if h_o(x) < 0.5
+
+Suppose we want to predict y = 1(cancer)
+only if very confident:
+shift threshold to 0.7:
+predict 1 h_o(x) \ge 0.7
+predcit 0 h_o(x) < 0.7
+(Higher precision, lower recall)
+
+Suppose we want to avoid missing too many
+cases of cancer(avoid false negatives).
+We can shift threshold to 0.3
+(Higher recall, lower precision)
+
+More generally: Predict 1 if h_o \ge threshold.
+How to choose threshold automatically?
+
+F_1 score(F score):
+F_1 = 2 * P * R / (P + R)
+
+Real story:
+E.g. Classifiy between confusable words.
+   {to, two, too} {then, than}
+   For breakfast I ate ___ eggs.
+Algorithms:
+   - Preceptron(Logistic regression)
+   - winnow
+   - memory-based
+   - native bayes
+And all algorithms got very similar result.
+All grows then training set size is increased.
+
+So when got more date is the good idea?
+Large data rationale:
+* Assume feature x \in R^{n+1} has sufficient information 
+  to predict y accurately.
+  Useful Test: Given the input x, can human expert
+               confidently predict y?
+  Example: Confusable words.
+  Counterexample: Predict house price using only feet^2
+* Use a learning algorithm with many parameters.
+  (neural network with many hidden layers,
+  low bias algorithm). Use a very large training set
+  is unlikely to overfit.
