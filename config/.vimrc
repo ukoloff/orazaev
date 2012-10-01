@@ -1,14 +1,14 @@
-set tabstop=4 shiftwidth=4 expandtab
+" set numbers
+set number
+
+" set incremental highlight search
+set is
 set hlsearch
+
+" replase tabs with spaces
+set tabstop=4 shiftwidth=4 expandtab
+
+" UI options
 syntax on
 colors hickop
 set guifont=monaco
-
-" Add lines numeration
-set number
-
-" Set incremental search
-set is
-
-" Set ignore case
-set ignorecase
