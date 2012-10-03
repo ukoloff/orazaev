@@ -68,10 +68,10 @@
     \item Для этого пробежимся по всем элементам $ \alpha $ от $ \alpha_0 $ до $ \alpha_{i - 1} $. Для
     текущего элемента $ \alpha_j $ проверим следующие условия:
     \begin{enumerate}
-        \item Если $ \alpha_j < \alpha_i $ и ($ P_>[j] \ne \NA $ или $ L_>[j] \ge L_<[i] $), то
+        \item Если $ \alpha_j < \alpha_i $ и $ L_>[j] \ge L_<[i] $, то
         полагаем $ L_<[i] \leftarrow L_>[j] + 1 $, а $ P_<[i] \leftarrow j $.
         
-        \item Если $ \alpha_j > \alpha_i $ и ($ P_<[j] \ne \NA $ или $ L_<[j] \ge L_>[i] $), то
+        \item Если $ \alpha_j > \alpha_i $ и $ L_<[j] \ge L_>[i] $, то
         полагаем $ L_>[i] \leftarrow L_<[j] + 1 $, а $ P_>[i] \leftarrow j $.
     \end{enumerate}
 
