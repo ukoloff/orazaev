@@ -7,6 +7,7 @@
  *
  *  TODO:
  *  [ ] fix LCA recovery bug. find better recovering.
+ *  [ ] There are bug with choose previouse elem in LCA.
  */
 #include<iostream>
 #include<vector>
@@ -53,53 +54,41 @@ int compareAS(const std::vector<int> & seq,
     return ans;
 }
 
-size_t getGreaterLAS(const std::vector<int> * L) {
-    size_t ans = LT;
-    for(size_t i = L[LT].size(); i > 0; --i) {
-        if (L[LT][i - 1] == L[GT][i - 1])
-            continue;
-
-        ans = L[LT][i - 1] > L[GT][i - 1] ? LT : GT;
-        break;
+size_t comparePreviousIndex(const std::vector<size_t> * const P,
+                            size_t j0, size_t j1, char c) {
+    std::vector<size_t> indx0(1, j0);
+    std::vector<size_t> indx1(1, j1);
+    
+    
+    for(j0 = P[c][j0], j1 = P[c][j1]; j0 != NA;
+        j0 = P[c][j0], j1 = P[c][j1]) {
+        indx0.push_back(j0);
+        indx1.push_back(j1);
+        c = (c + 1) % 2;
+    }
+    
+    size_t ans = j0;
+    
+    while(!indx0.empty()) {
+        if (indx0.back() != indx1.back()) {
+            ans = indx0.back() > indx1.back() ? j1 : j0;
+            break;
+        }
+        indx0.pop_back();
+        indx1.pop_back();
     }
 
     return ans;
 }
+            
 
-
-std::vector<int> LAS(const std::vector<int> & seq) {
-    if (seq.empty())
-        return std::vector<int>();
-
-    std::vector<int> L[2] = { 
-        std::vector<int>(seq.size(), 1),
-        std::vector<int>(seq.size(), 1)
-    };
-    std::vector<int> P[2] = { 
-        std::vector<int>(seq.size(), NA),
-        std::vector<int>(seq.size(), NA)
-    };
-
-    for(int i = 0; i < seq.size(); ++i) {
-        for(int j = 0; j < i; ++j) {
-            if (seq[j] < seq[i] && L[GT][j] >= L[LT][i]) {
-                L[LT][i] = L[GT][j] + 1;
-                P[LT][i] = j;
-            }
-            if (seq[j] > seq[i] && L[LT][j] >= L[GT][i]) {
-                L[GT][i] = L[LT][j] + 1;
-                P[GT][i] = j;
-            }
-        }
-    }
-
-    size_t c = getGreaterLAS(L);
-    size_t e = std::max_element(L[c].begin(), L[c].end()) - L[c].begin();
-    std::cout << e << std::endl;
-    
+std::vector<size_t> recoverIndexesFromLP(const std::vector<int> & seq,
+                                       const std::vector<int> * const L, 
+                                       const std::vector<size_t> * const P,
+                                       size_t c) {
     std::vector<size_t> ansIndx;
-
-    for(; e < seq.size(); ++e) {
+    for(size_t e = std::max_element(L[c].begin(), L[c].end()) - L[c].begin();
+        e < L[c].size(); ++e) {
         size_t tryE = e;
         size_t tryC = c;
         std::vector<size_t> tryIndx;
@@ -111,8 +100,6 @@ std::vector<int> LAS(const std::vector<int> & seq) {
             tryC = (tryC + 1) % 2;
         }
         std::reverse(tryIndx.begin(), tryIndx.end());
-        printElements(tryIndx.begin(), tryIndx.end());
-        printElements(ansIndx.begin(), ansIndx.end());
 
         if (ansIndx.empty()) {
             ansIndx = tryIndx;
@@ -121,9 +108,53 @@ std::vector<int> LAS(const std::vector<int> & seq) {
         }
     }
 
+    return ansIndx;
+}
+
+std::vector<int> LAS(const std::vector<int> & seq) {
+    if (seq.empty())
+        return std::vector<int>();
+
+    std::vector<int> L[2] = { 
+        std::vector<int>(seq.size(), 1),
+        std::vector<int>(seq.size(), 1)
+    };
+    std::vector<size_t> P[2] = { 
+        std::vector<size_t>(seq.size(), NA),
+        std::vector<size_t>(seq.size(), NA)
+    };
+
+    for(int i = 0; i < seq.size(); ++i) {
+        for(int j = 0; j < i; ++j) {
+            if (seq[j] < seq[i] && L[GT][j] >= L[LT][i]) {
+                L[LT][i] = L[GT][j] + 1;
+                P[LT][i] = j; // Wrong way. TODO 2 here.
+                continue;
+            }
+            if (seq[j] > seq[i] && L[LT][j] >= L[GT][i]) {
+                L[GT][i] = L[LT][j] + 1;
+                P[GT][i] = j; // Wrong way. TODO 2 here.
+                continue;
+            }
+
+            if (seq[j] < seq[i] && L[GT][j] == (L[LT][i] - 1)) {
+                P[LT][i] = comparePreviousIndex(P, j, P[LT][i], LT);
+            }
+            if (seq[j] > seq[i] && L[LT][j] == (L[LT][i] - 1)) {
+                P[GT][i] = comparePreviousIndex(P, j, P[GT][i], GT);
+            }
+        }
+    }
+
+    std::vector<size_t> ansIndx0 = recoverIndexesFromLP(seq, L, P, LT);
+    std::vector<size_t> ansIndx1 = recoverIndexesFromLP(seq, L, P, GT);
+
+    std::vector<size_t> * ansIndx = 
+        compareAS(seq, ansIndx0, ansIndx1) > 0 ? &ansIndx0 : &ansIndx1;
+                                    
     std::vector<int> ans;
-    for(std::vector<size_t>::const_iterator it = ansIndx.begin();
-        it != ansIndx.end(); ++it)
+    for(std::vector<size_t>::const_iterator it = ansIndx->begin();
+        it != ansIndx->end(); ++it)
         ans.push_back(seq[*it]);
 
     return ans;
