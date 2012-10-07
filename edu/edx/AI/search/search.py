@@ -138,16 +138,19 @@ def uniformCostSearch(problem):
 
     result = []
     state = problem.getStartState()
+    totalCost = 0
     while not problem.isGoalState(state):
+        print totalCost
         if not wasHere.has_key(state):
             wasHere[state] = 1
 
             for s in problem.getSuccessors(state):
                 if not wasHere.has_key(s[0]):
                     l = result[:]; l.append(s[1])
-                    pqueue.push((l, s[0]), s[2])
+                    newCost = totalCost + s[2]
+                    pqueue.push((l, s[0], newCost), newCost)
 
-        result, state = pqueue.pop()
+        result, state, totalCost = pqueue.pop()
         
     return result
     util.raiseNotDefined()
