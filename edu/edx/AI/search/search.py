@@ -140,7 +140,6 @@ def uniformCostSearch(problem):
     state = problem.getStartState()
     totalCost = 0
     while not problem.isGoalState(state):
-        print totalCost
         if not wasHere.has_key(state):
             wasHere[state] = 1
 
@@ -153,7 +152,6 @@ def uniformCostSearch(problem):
         result, state, totalCost = pqueue.pop()
         
     return result
-    util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
     """
@@ -165,7 +163,25 @@ def nullHeuristic(state, problem=None):
 def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pqueue = util.PriorityQueue()
+    wasHere = {}
+
+    result = []
+    state = problem.getStartState()
+    totalCost = 0
+    while not problem.isGoalState(state):
+        if not wasHere.has_key(state):
+            wasHere[state] = 1
+
+            for s in problem.getSuccessors(state):
+                if not wasHere.has_key(s[0]):
+                    l = result[:]; l.append(s[1])
+                    newCost = totalCost + s[2] + heuristic(s[0], problem)
+                    pqueue.push((l, s[0], newCost), newCost)
+
+        result, state, totalCost = pqueue.pop()
+        
+    return result
 
 
 # Abbreviations
