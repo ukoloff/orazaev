@@ -56,6 +56,11 @@ int compareAS(const std::vector<int> & seq,
 
 size_t comparePreviousIndex(const std::vector<size_t> * const P,
                             size_t j0, size_t j1, char c) {
+    if (j1 == NA)
+        return j0;
+    if (j0 == NA)
+        return j1;
+
     std::vector<size_t> indx0(1, j0);
     std::vector<size_t> indx1(1, j1);
     
@@ -128,20 +133,28 @@ std::vector<int> LAS(const std::vector<int> & seq) {
         for(int j = 0; j < i; ++j) {
             if (seq[j] < seq[i] && L[GT][j] >= L[LT][i]) {
                 L[LT][i] = L[GT][j] + 1;
-                P[LT][i] = j; // Wrong way. TODO 2 here.
+                P[LT][i] = j;
                 continue;
             }
             if (seq[j] > seq[i] && L[LT][j] >= L[GT][i]) {
                 L[GT][i] = L[LT][j] + 1;
-                P[GT][i] = j; // Wrong way. TODO 2 here.
+                P[GT][i] = j;
                 continue;
             }
 
             if (seq[j] < seq[i] && L[GT][j] == (L[LT][i] - 1)) {
-                P[LT][i] = comparePreviousIndex(P, j, P[LT][i], LT);
+                printElements(seq.begin(), seq.end());
+                printElements(L[GT].begin(), L[GT].end());
+                printElements(P[GT].begin(), P[GT].end());
+                std::cout << (int) LT << " " << j << " " << P[LT][i] << std::endl;
+                P[LT][i] = comparePreviousIndex(P, j, P[LT][i], GT);
             }
             if (seq[j] > seq[i] && L[LT][j] == (L[LT][i] - 1)) {
-                P[GT][i] = comparePreviousIndex(P, j, P[GT][i], GT);
+                printElements(seq.begin(), seq.end());
+                printElements(L[GT].begin(), L[GT].end());
+                printElements(P[GT].begin(), P[GT].end());
+                std::cout << (int) GT << " " << j << " " << P[GT][i] << std::endl;
+                P[GT][i] = comparePreviousIndex(P, j, P[GT][i], LT);
             }
         }
     }
@@ -177,22 +190,32 @@ void assertEqualVectors(const std::vector<T> & v1, const std::vector<T> & v2) {
 }
 
 void emptySequenceTest() {
+    std::cout << "EMPTY SEQUENSE TEST ... [ START ]" << std::endl;
+
     std::vector<int> seq;
     std::vector<int> ans = LAS(seq);
     
     if (!ans.empty())
         throw std::runtime_error("TEST FAILED: empty sequence.");
+
+    std::cout << "EMPTY SEQUENSE TEST ... [ OK ]" << std::endl;
 }
 
 void trivialSequenceTest() {
+    std::cout << "TRIVIAL SEQUENS TEST ... [ START ]" << std::endl;
+
     std::vector<int> seq(20, 360);
     std::vector<int> rightAns(1, 360);
 
     std::vector<int> ans = LAS(seq);
     assertEqualVectors(ans, rightAns);
+
+    std::cout << "TRIVIAL SEQUENS TEST ... [ OK ]" << std::endl;
 }
 
 void bigSequenceTest() {
+    std::cout << "BIG SEQUENS TEST ... [ START ]" << std::endl;
+
     std::vector<int> seq;
     for(int i = 0; i < 1000; ++i) {
         seq.push_back(i % 2 == 0 ? NA - 1 : 1 - NA);
@@ -200,9 +223,13 @@ void bigSequenceTest() {
 
     std::vector<int> ans = LAS(seq);
     assertEqualVectors(ans, seq);
+
+    std::cout << "BIG SEQUENS TEST ... [ OK ]" << std::endl;
 }
 
 void simpleSequenceTest() {
+    std::cout << "SIMPLE SEQUENS TEST ... [ START ]" << std::endl;
+
     std::vector<int> seq;
     seq.push_back(7);
     seq.push_back(1);
@@ -219,6 +246,8 @@ void simpleSequenceTest() {
     rightAns.push_back(4);
 
     assertEqualVectors(ans, rightAns);
+
+    std::cout << "SIMPLE SEQUENS TEST ... [ START ]" << std::endl;
 }
 
 std::vector<int> randomVector(int maxValue, int minValue, 
@@ -313,7 +342,8 @@ void LAS_TestCase() {
 }
 
 int main() {
-    LAS_TestCase();
+    simpleSequenceTest();
+    //LAS_TestCase();
     
     return 0;
 }
