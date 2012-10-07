@@ -168,7 +168,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     result = []
     state = problem.getStartState()
-    totalCost = 0
+    totalCost = heuristic(state, problem)
     while not problem.isGoalState(state):
         if not wasHere.has_key(state):
             wasHere[state] = 1
