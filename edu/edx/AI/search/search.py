@@ -88,18 +88,21 @@ def depthFirstSearch(problem):
     wasHere = {}
 
     result = []
-    states = [problem.getStartState()]
-    while not problem.isGoalState(states[-1]):
-        if not wasHere.has_key(states[-1]):
-            wasHere[states[-1]] = 1
+    state = problem.getStartState()
+    while not problem.isGoalState(state):
+        if not wasHere.has_key(state):
+            wasHere[state] = 1
 
-            for s in problem.getSuccessors(states[-1]):
+            # Need to set priority for chidren
+            # of one node
+            factor = 0
+            for s in problem.getSuccessors(state):
                 if not wasHere.has_key(s[0]):
                     l = result[:]; l.append(s[1])
-                    x = states[:]; x.append(s[0])
-                    pqueue.push((l, x), (-len(l), x[-1]))
+                    pqueue.push((l, s[0]), -4 * len(l) - factor)
+                    factor += 1
 
-        result, states = pqueue.pop()
+        result, state = pqueue.pop()
         
     return result
 
@@ -113,24 +116,40 @@ def breadthFirstSearch(problem):
     wasHere = {}
 
     result = []
-    states = [problem.getStartState()]
-    while not problem.isGoalState(states[-1]):
-        if not wasHere.has_key(states[-1]):
-            wasHere[states[-1]] = 1
+    state = problem.getStartState()
+    while not problem.isGoalState(state):
+        if not wasHere.has_key(state):
+            wasHere[state] = 1
 
-            for s in problem.getSuccessors(states[-1]):
+            for s in problem.getSuccessors(state):
                 if not wasHere.has_key(s[0]):
                     l = result[:]; l.append(s[1])
-                    x = states[:]; x.append(s[0])
-                    pqueue.push((l, x), len(l))
+                    pqueue.push((l, s[0]), len(l))
 
-        result, states = pqueue.pop()
+        result, state = pqueue.pop()
         
     return result
 
 def uniformCostSearch(problem):
     "Search the node of least total cost first. "
     "*** YOUR CODE HERE ***"
+    pqueue = util.PriorityQueue()
+    wasHere = {}
+
+    result = []
+    state = problem.getStartState()
+    while not problem.isGoalState(state):
+        if not wasHere.has_key(state):
+            wasHere[state] = 1
+
+            for s in problem.getSuccessors(state):
+                if not wasHere.has_key(s[0]):
+                    l = result[:]; l.append(s[1])
+                    pqueue.push((l, s[0]), s[2])
+
+        result, state = pqueue.pop()
+        
+    return result
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
