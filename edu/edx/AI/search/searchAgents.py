@@ -367,12 +367,13 @@ def cornersHeuristic(state, problem):
     if walls[x][y]:
         return 9999
 
-    res = 1.0
+    res = 0
     for (i, j) in c:
-        res *= ((x - i)**2 + (y - j)**2)**0.5
+        t = abs(x - i) + abs(y - j)
+        if t > res:
+            res = t
 
-    res /= 4
-    return res 
+    return int(res)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -463,7 +464,23 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    walls = problem.walls
+    x, y = position
+    if walls[x][y]:
+        return 9999
+    euclidRes = 0
+    manhatRes = 0
+    for i, j in foodGrid.asList():
+        t = ((x - i)**2 + (y - j)**2)**0.5
+        if t > euclidRes:
+            euclidRes = t
+        t = abs(x - i) + abs(y - j)
+        if t > manhatRes:
+            manhatRes = t
+    
+    if manhatRes > euclidRes:
+        return manhatRes
+    return euclidRes
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"

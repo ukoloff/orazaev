@@ -168,7 +168,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
 
     result = []
     state = problem.getStartState()
-    totalCost = heuristic(state, problem)
+    totalCost = 0
     while not problem.isGoalState(state):
         if not wasHere.has_key(state):
             wasHere[state] = 1
@@ -176,8 +176,8 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             for s in problem.getSuccessors(state):
                 if not wasHere.has_key(s[0]):
                     l = result[:]; l.append(s[1])
-                    newCost = totalCost + s[2] + heuristic(s[0], problem)
-                    pqueue.push((l, s[0], newCost), newCost)
+                    newCost = totalCost + s[2] 
+                    pqueue.push((l, s[0], newCost), newCost + heuristic(s[0], problem))
 
         result, state, totalCost = pqueue.pop()
         
