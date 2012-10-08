@@ -365,12 +365,13 @@ def cornersHeuristic(state, problem):
     "*** YOUR CODE HERE ***"
     x, y, c = state
     if walls[x][y]:
-        return 99999999
+        return 9999
 
-    res = 1
+    res = 1.0
     for (i, j) in c:
-        res *= (x - i)**2 + (y - j)**2
+        res *= ((x - i)**2 + (y - j)**2)**0.5
 
+    res /= 4
     return res 
 
 class AStarCornersAgent(SearchAgent):
