@@ -465,22 +465,59 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     walls = problem.walls
+    foodList = foodGrid.asList()
+
     x, y = position
     if walls[x][y]:
         return 9999
-    euclidRes = 0
-    manhatRes = 0
-    for i, j in foodGrid.asList():
-        t = ((x - i)**2 + (y - j)**2)**0.5
-        if t > euclidRes:
-            euclidRes = t
+
+    def manhattanDist(a, b):
+        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+    mDst = manhattanDist
+
+    nodeList = foodList[:]
+
+    manhatRes = 0.0
+    x0, y0 = x, y
+    for i, j in foodList:
         t = abs(x - i) + abs(y - j)
         if t > manhatRes:
+            x0, y0 = i, j
             manhatRes = t
-    
-    if manhatRes > euclidRes:
-        return manhatRes
-    return euclidRes
+
+    factor = 0.0
+    x1, y1 = x, y
+    dist = 0
+    missNodes = []
+    for i, j in foodList:
+        if (i - x) * (x0 - x) >= 0 and \
+           (j - y) * (y0 - y) >= 0:
+            missNodes.append((i, j))
+            factor += 1
+
+    edges = []
+    forest = {}
+    k = 0
+    for n in missNodes:
+        out = ""
+        for nn in missNodes:
+            if n != nn:
+                dist = mDst(n, nn) # abs(n[0] - nn[0]) + abs(n[1] - nn[1])
+                edges.append((dist, (n, nn)))
+        forest[n] = k
+        k += 1
+
+    edges.sort()
+    MST = 0
+    for e in edges:
+        if forest[e[1][0]] != forest[e[1][1]]:
+            MST += e[0]
+            for k, v in forest.items():
+                if v == forest[e[1][1]]:
+                    forest[k] = forest[e[1][0]]
+
+
+    return manhatRes + len(foodList) - factor
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
