@@ -34,7 +34,7 @@ void removeCommentsFromCxxProgram(
     StatesType state = CODE;
     bool disabled = false;
 
-    std::string buffer = "";
+    std::string buffer = "$";
 
     char ch;
     while(in.get(ch)) {
@@ -95,7 +95,7 @@ void removeCommentsFromCxxProgram(
             case MULTILINE_COMMENT:
                 if (buffer == multilineCommentEnd) {
                     state = CODE;
-                    buffer = "";
+                    buffer = "$";
                 }
                 break;
             default:
