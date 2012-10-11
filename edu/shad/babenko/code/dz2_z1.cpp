@@ -1,3 +1,11 @@
+/*
+ *  Homework 2, Problem 1
+ *
+ *  Longest common sequence. (LCS)
+ *
+ *  Author: Orazaev Aman
+ *
+ */
 #include<iostream>
 #include<vector>
 #include<stdexcept>
@@ -175,6 +183,7 @@ std::vector<size_t> getLcsIndex(
     return LCSindx;
 }
 
+// Very slow implementation
 size_t trivialSizeOfLCS(const std::vector<int> seq0,
     const std::vector<int> seq1) {
 
