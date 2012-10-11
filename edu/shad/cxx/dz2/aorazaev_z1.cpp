@@ -1,3 +1,10 @@
+/*
+ *      C++ homework. Problem 1.
+ *
+ *      Due date: 25.09.12
+ *
+ *      Author: Aman Orazaev
+ */
 #include<iostream>
 #include<string>
 #include<stdio.h>
