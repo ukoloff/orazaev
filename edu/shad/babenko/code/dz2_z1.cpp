@@ -121,8 +121,8 @@ void bigTest() {
     std::cout << " " << time << " secondes" << std::endl;
 }
 
-std::vector<int> randomVector(
-    int maxValue, int minValue, size_t maxSize) {
+std::vector<int> randomVector(int maxValue,
+    int minValue, size_t maxSize) {
 
     size_t size = rand() % maxSize + 1;
     std::vector<int> res(size, 0);
@@ -134,36 +134,80 @@ std::vector<int> randomVector(
     return res;
 }
 
-//std::vector<size_t> getLcsIndex(
-//    const std::vector<int> & seq0,
-//    const std::vector<int> & seq1,
-//    const std::vector<int> * indx) {
-//
-//    if (isCS(seq0, seq1, indx)) {
-//        return indx;
-//    }
-//
-//    std::vector<size_t> LCSindx;
-//
-//    for(size_t i = indx.size(); i > 0; --i) {
-//        std::vector<size_t> tindx(indx);
-//        tindx.erase(tindx.begin() + i - 1);
-//
-//        std::vector<size_t> ans = getLcsIndex(seq0, seq1, tindx);
-//        if (ans.size() > LCSindx.size()) {
-//            LCSindx = ans;
-//        }
-//    }
-//
-//    return LCSindx;
-//}
+bool isCS(const std::vector<int> & seq0,
+    const std::vector<int> & seq1,
+    const std::vector<size_t> & indx) {
+
+    size_t i = 0;
+    for(std::vector<int>::const_iterator it = seq1.begin();
+        it != seq1.end() && i < indx.size(); ++it) {
+        if (*it == seq0[indx[i]]) {
+            ++i;
+        }
+    }
+
+    if (i == indx.size())
+        return true;
+    return false;
+}
+
+std::vector<size_t> getLcsIndex(
+    const std::vector<int> & seq0,
+    const std::vector<int> & seq1,
+    const std::vector<size_t> & indx) {
+
+    if (isCS(seq0, seq1, indx)) {
+        return indx;
+    }
+
+    std::vector<size_t> LCSindx;
+
+    for(size_t i = indx.size(); i > 0; --i) {
+        std::vector<size_t> tindx(indx);
+        tindx.erase(tindx.begin() + i - 1);
+
+        std::vector<size_t> ans = getLcsIndex(seq0, seq1, tindx);
+        if (ans.size() > LCSindx.size()) {
+            LCSindx = ans;
+        }
+    }
+
+    return LCSindx;
+}
+
+size_t trivialSizeOfLCS(const std::vector<int> seq0,
+    const std::vector<int> seq1) {
+
+    std::vector<size_t> indx(seq0.size(), 0);
+
+    for(size_t i = 1; i < indx.size(); ++i)
+        indx[i] = i;
+
+    return getLcsIndex(seq0, seq1, indx).size();
+}
+
+void stressTest(size_t N) {
+    for(size_t i = 0; i < N; ++i) {
+        std::vector<int> seq0(randomVector(7, 0, 10));
+        std::vector<int> seq1(randomVector(7, 0, 10));
+
+        std::cout << "Stress test" << i << "...";
+        size_t expected = trivialSizeOfLCS(seq0, seq1);
+        double time =
+            sizeOfLcsIs(seq0.begin(), seq0.end(),
+                        seq1.begin(), seq1.end(), expected);
+        std::cout << " " << time << " secondes" << std::endl;
+    }
+}
 
 void testSuite() {
+    std::srand(360);
     emptyTest();
     trivialTest(1, 2, 0, 1);
     trivialTest(1, 1, 1, 2);
     simpleTest();
     bigTest();
+    stressTest(100);
 }
 
 int main() {
