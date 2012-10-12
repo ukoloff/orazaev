@@ -83,7 +83,8 @@ void stateProcessing(
 
 void removeCommentsFromCxxProgram(
     std::istream & in,
-    std::ostream & out) {
+    std::ostream & out)
+{
 
     StatesType state = CODE;
     bool disabled = false;
