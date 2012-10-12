@@ -27,6 +27,60 @@ enum StatesType {
     MULTILINE_COMMENT   // Multiline comment "/* comment */"
 };
 
+void stateProcessing(
+    StatesType & state,
+    std::string & buffer,
+    std::ostream & out)
+{
+    switch(state) {
+        case CODE:
+            if (buffer[buffer.size() - 1] == dquote) {
+                state = DQUOTTED_STRING;
+                out << buffer[buffer.size() - 1];
+            } else if (buffer[buffer.size() - 1] == quote) {
+                state = QUOTTED_CHAR;
+                out << buffer[buffer.size() - 1];
+            } else if (buffer == lineComment) {
+                state = LINE_COMMENT;
+            } else if (buffer == multilineCommentStart) {
+                state = MULTILINE_COMMENT;
+            } else if (buffer[0] == slash) {
+                out << buffer;
+            } else if (buffer[buffer.size() - 1] != slash) {
+                out << buffer[buffer.size() - 1];
+            }
+            break;
+
+        case DQUOTTED_STRING:
+            if (buffer[1] == dquote) {
+                state = CODE;
+            }
+            out << buffer[buffer.size() - 1];
+            break;
+
+        case QUOTTED_CHAR:
+            if (buffer[1] == quote) {
+                state = CODE;
+            }
+            out << buffer[buffer.size() - 1];
+            break;
+
+        case LINE_COMMENT:
+            if (buffer[buffer.size() - 1] == '\n') {
+                out << '\n';
+                state = CODE;
+            }
+            break;
+
+        case MULTILINE_COMMENT:
+            if (buffer == multilineCommentEnd) {
+                state = CODE;
+                buffer = "$";
+            }
+            break;
+    };
+}
+
 void removeCommentsFromCxxProgram(
     std::istream & in,
     std::ostream & out) {
@@ -52,58 +106,7 @@ void removeCommentsFromCxxProgram(
             disabled = true;
             continue;
         }
-        switch(state) {
-            case CODE:
-                if (buffer[buffer.size() - 1] == dquote) {
-                    state = DQUOTTED_STRING;
-                    out << buffer[buffer.size() - 1];
-                } else if (buffer[buffer.size() - 1] == quote) {
-                    state = QUOTTED_CHAR;
-                    out << buffer[buffer.size() - 1];
-                } else if (buffer == lineComment) {
-                    state = LINE_COMMENT;
-                } else if (buffer == multilineCommentStart) {
-                    state = MULTILINE_COMMENT;
-                } else if (buffer[0] == slash) {
-                    out << buffer;
-                } else if (buffer[buffer.size() - 1] != slash) {
-                    out << buffer[buffer.size() - 1];
-                }
-                break;
-
-            case DQUOTTED_STRING:
-                if (buffer[1] == dquote) {
-                    state = CODE;
-                }
-                out << buffer[buffer.size() - 1];
-                break;
-
-            case QUOTTED_CHAR:
-                if (buffer[1] == quote) {
-                    state = CODE;
-                }
-                out << buffer[buffer.size() - 1];
-                break;
-
-            case LINE_COMMENT:
-                if (buffer[buffer.size() - 1] == '\n') {
-                    out << '\n';
-                    state = CODE;
-                }
-                break;
-
-            case MULTILINE_COMMENT:
-                if (buffer == multilineCommentEnd) {
-                    state = CODE;
-                    buffer = "$";
-                }
-                break;
-            default:
-                throw 1;
-        };
-        /* std::cout << (int) state << std::endl; */
-        /* std::cout << " " << (int) state << " " <<  buffer
-                  << " " << disabled << std::endl; */
+        stateProcessing(state, buffer, out);
     }
 }
 
