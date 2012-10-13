@@ -111,21 +111,6 @@ void TSocket::Write(std::string msg, int size) {
     }
 }
 
-void TSocket::Send(const std::string & msg) {
-    if (msg.size() > CBUF_SIZE) {
-        std::cerr << "Size of message is bigger than buffer" << std::endl;
-        throw ESend();
-    }
-    char buf[CBUF_SIZE];
-    memset(buf, 0, CBUF_SIZE * sizeof(char));
-
-    memcpy(buf, msg,c_str(), msg.size());
-    if (send(sockfd, buf, CBUF_SIZE * sizeof(char), 0) <0) {
-        std::cerr << "Error: can't send message to socket!" << std::endl;
-        throw ESend();
-    }
-}
-
 void TSocket::Send(const std::string & msg, size_t size) {
     if (size > CBUF_SIZE) {
         std::cerr << "Size of message is bigger than buffer" << std::endl;
@@ -134,12 +119,44 @@ void TSocket::Send(const std::string & msg, size_t size) {
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
 
-    memcpy(buf, msg,c_str(), size);
-    if (send(sockfd, buf, CBUF_SIZE * sizeof(char), 0) <0) {
+    memcpy(buf, msg.c_str(), size);
+    if (send(sockfd, buf, CBUF_SIZE * sizeof(char), MSG_NOSIGNAL) < 0) {
         std::cerr << "Error: can't send message to socket!" << std::endl;
         throw ESend();
     }
 }
+
+void TSocket::Send(const std::string & msg) {
+    return Send(msg, msg.size());
+}
+
+std::string TSocket::Recv(size_t size) {
+    if (size > CBUF_SIZE) {
+        std::cerr << "Size of recved message is bigger than buffer!" << std::endl;
+        throw ERecv();
+    }
+    char buf[CBUF_SIZE + 1];
+    memset(buf, 0, CBUF_SIZE * sizeof(char));
+
+    size_t totalReceved = 0;
+    while(totalReceved != size) {
+        size_t receved = recv(sockfd, buf + totalReceved, size, 0);
+        
+        if (receved < 0) {
+            std::cerr << "Error: can't recv message from socket!" << std::endl;
+            throw ERecv();
+        }
+
+        totalReceved += receved;
+    }
+    buf[totalReceved] = '\0';
+    return std::string(buf);
+}
+
+std::string TSocket::Recv() {
+    return Recv(CBUF_SIZE);
+}
+
 
 std::string TSocket::Read() {
     char buf[CBUF_SIZE];

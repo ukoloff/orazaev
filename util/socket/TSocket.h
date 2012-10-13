@@ -36,6 +36,8 @@ public:
     std::string Read();
     void Send(const std::string& msg);
     void Send(const std::string& msg, size_t size);
+    std::string Recv(size_t size);
+    std::string Recv();
 
     std::string getIp();
 
@@ -48,6 +50,7 @@ public:
     class ERead    : public ESocket {};
     class EWrite   : public ESocket {};
     class ESend    : public ESocket {};
+    class ERecv    : public ESocket {};
 
     //consts
     static const int CBUF_SIZE = 1024;
