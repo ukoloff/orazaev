@@ -3,8 +3,8 @@ GOBJ := g++ -c
 FLAGS := -g
 
 mainSrc := $(shell ls *.cpp)
-sockSrc := ../TSocket.cpp
-sockHeader := ../TSocket.h
+sockSrc := ../socket.cpp
+sockHeader := ../socket.h
 
 mainObj := $(mainSrc:.cpp=.o)
 sockObj := $(sockSrc:.cpp=.o)
