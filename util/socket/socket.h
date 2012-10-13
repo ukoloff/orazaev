@@ -1,10 +1,3 @@
-/*
- *	POSIX tcp socket wrapper.
- *
- *	by AOrazaev.
- *
- *	gmail me: AOrazaev[at]gmail.com
- */
 #ifndef TSOCKET_H
 #define TSOCKET_H
 #include <string>
@@ -17,7 +10,6 @@ public:
 
     virtual ~TAbstarctSocket() {};
 
-    virtual void Listen() = 0;
     virtual void Bind() = 0;
     virtual void Close() = 0;
 

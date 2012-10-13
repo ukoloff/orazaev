@@ -1,3 +1,10 @@
+/*
+ *	POSIX tcp socket wrapper.
+ *
+ *	by AOrazaev.
+ *
+ *	gmail me: AOrazaev[at]gmail.com
+ */
 #ifndef TTCPSOCKET_H
 #define TTCPSOCKET_H
 
