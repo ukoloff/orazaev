@@ -41,6 +41,12 @@ public:
 
     std::string getIp();
 
+    class ESocket : public TError {
+    public:
+        ESocket(const std::string& m) throw()
+            : TError(m)
+        { }
+    };
 
 private:
     int sockfd;

@@ -7,7 +7,7 @@
 #include "../../util/thread/TMutex.h"
 #include "../../util/socket/socket.h"
 
-void start_server(TTCPSocket& connection) {
+void start_server(TCMSocket& connection) {
 
     std::string buf = "";
     buf = connection.Read();
@@ -59,14 +59,14 @@ int main(int argc, char** argv) {
     int portno = atoi(argv[1]);
     
     try {
-        TTCPSocket s(portno);
+        TCMSocket s(portno);
         s.Bind();
         s.Listen();
-        TTCPSocket connection = s.Accept();
+        TCMSocket connection = s.Accept();
         while(true)
             start_server(connection);
     }
-    catch (TTCPSocket::ESocket) {
+    catch (TCMSocket::ESocket) {
         std::cerr << "Error: ESocket catched --- something goes wrong." << std::endl;
 
         return 1;

@@ -10,13 +10,6 @@
 #include <string>
 #include <util/TError.h>
 
-class ESocket : public TError {
-public:
-    ESocket(const std::string& m) throw()
-        : TError(m)
-    { }
-};
-
 template <size_t BUF_SIZE>
 class TAbstarctSocket {
 public:

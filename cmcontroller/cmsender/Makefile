@@ -10,8 +10,7 @@ headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h    \
                 $(orazaev_root)/util/TError.h                   \
 				$(orazaev_root)/util/socket/socket.h
 				   
-sources		 := main.cpp \
-				$(orazaev_root)/util/socket/socket.cpp 
+sources		 := main.cpp
 
 
 all: $(program_name)

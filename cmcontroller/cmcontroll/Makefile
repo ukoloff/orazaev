@@ -19,7 +19,6 @@ sources		 := \
 				main.cpp \
 				cmc_server.cpp \
 				$(orazaev_root)/util/logger/logger.cpp \
-				$(orazaev_root)/util/socket/socket.cpp \
 				$(orazaev_root)/util/thread/TMutex.cpp \
 				$(orazaev_root)/util/thread/TThread.cpp
 

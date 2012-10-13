@@ -47,7 +47,7 @@ class UThreadOperator : private TCMServer::TThreadOperator {
 
 
 public:
-    UThreadOperator(int portno, std::map<std::string, int>* ppd) : TTHreadOperator(TTCPSocket(portno), 0) {
+    UThreadOperator(int portno, std::map<std::string, int>* ppd) : TTHreadOperator(TCMSocket(portno), 0) {
         pdata = new std::map<std::string, int>();
     }
 
