@@ -1,5 +1,7 @@
-GXX := g++
-GOBJ := g++ -c
+orazaev_root := ../../..
+
+GXX := g++ -I $(orazaev_root)
+GOBJ := g++ -c -I $(orazaev_root)
 FLAGS := -g
 
 mainSrc := $(shell ls *.cpp)

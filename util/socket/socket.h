@@ -5,13 +5,15 @@
  *
  *	gmail me: AOrazaev[at]gmail.com
  */
-#ifndef SOCKET_H
-#define SOCKET_H
+#ifndef TSOCKET_H
+#define TSOCKET_H
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h> 
 #include <netinet/in.h>
 #include <netdb.h>
+
+#include <util/TError.h>
 
 // TCP socket
 class TTCPSocket {
@@ -43,16 +45,13 @@ public:
 
     std::string getIp();
 
-    //exceptions
-    class ESocket {};
-    class EBind    : public ESocket {};
-    class EConnect : public ESocket {};
-    class EListen  : public ESocket {};
-    class EAccept  : public ESocket {};
-    class ERead    : public ESocket {};
-    class EWrite   : public ESocket {};
-    class ESend    : public ESocket {};
-    class ERecv    : public ESocket {};
+    //exception
+    class ESocket : public TError {
+    public:
+        ESocket(const std::string& m) throw()
+            : TError(m)
+        { }
+    };
 
     //consts
     static const int CBUF_SIZE = 1024;

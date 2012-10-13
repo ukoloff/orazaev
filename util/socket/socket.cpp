@@ -12,8 +12,7 @@ TTCPSocket::TTCPSocket(const std::string& hostname, const int& portno) {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
-        std::cerr << "Error: can't create socket!" << std::endl;
-        throw ESocket();
+        throw ESocket("Error: can't create socket!");
     }
 
     memset(&addr, 0, sizeof(addr));
@@ -33,8 +32,7 @@ TTCPSocket::TTCPSocket(const int& portno) {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
-        std::cerr << "Error: can't create socket!" << std::endl;
-        throw ESocket();
+        throw ESocket("Error: can't create socket!");
     }
 
     memset(&addr, 0, sizeof(addr));
@@ -48,22 +46,19 @@ TTCPSocket::~TTCPSocket() {
 
 void TTCPSocket::Connect() {
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        //std::cerr << "Error: can't connect to host!" << std::endl;
-        throw EConnect();
+        throw ESocket("Error: can't connect to host!");
     }   
 }
 
 void TTCPSocket::Listen() {
     if (listen(sockfd, 5) < 0) {
-        std::cerr << "Error: can't set port as listening!" << std::endl;
-        throw EListen();
+        throw ESocket("Error: can't set port as listening!");
     }
 }
 
 void TTCPSocket::Bind() {
     if (bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
-        std::cerr << "Error: can't bind socket!" << std::endl;
-        throw EBind();
+        throw ESocket("Error: can't bind socket!");
     }
 }
 
@@ -76,8 +71,7 @@ TTCPSocket TTCPSocket::Accept() {
     conn = accept(sockfd, (struct sockaddr *) &cli_addr, &tsize);
 
     if (conn < 0) {
-        std::cout << "Error: can't accepting connection!" << std::endl;
-        throw EAccept();
+        throw ESocket("Error: can't accepting connection!");
     }
     
     return TTCPSocket(conn, cli_addr);
@@ -90,16 +84,14 @@ void TTCPSocket::Close() {
 
 void TTCPSocket::Send(const std::string & msg, size_t size) {
     if (size > CBUF_SIZE) {
-        std::cerr << "Size of message is bigger than buffer" << std::endl;
-        throw ESend();
+        throw ESocket("Size of message is bigger than buffer");
     }
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
 
     memcpy(buf, msg.c_str(), size);
     if (send(sockfd, buf, CBUF_SIZE * sizeof(char), MSG_NOSIGNAL) < 0) {
-        std::cerr << "Error: can't send message to socket!" << std::endl;
-        throw ESend();
+        throw ESocket("Error: can't send message to socket!");
     }
 }
 
@@ -109,8 +101,7 @@ void TTCPSocket::Send(const std::string & msg) {
 
 std::string TTCPSocket::Recv(size_t size) {
     if (size > CBUF_SIZE) {
-        std::cerr << "Size of recved message is bigger than buffer!" << std::endl;
-        throw ERecv();
+        throw ESocket("Size of recved message is bigger than buffer!");
     }
     char buf[CBUF_SIZE + 1];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
@@ -120,8 +111,7 @@ std::string TTCPSocket::Recv(size_t size) {
         size_t receved = recv(sockfd, buf + totalReceved, size, 0);
         
         if (receved < 0) {
-            std::cerr << "Error: can't recv message from socket!" << std::endl;
-            throw ERecv();
+            throw ESocket("Error: can't recv message from socket!");
         }
 
         totalReceved += receved;
