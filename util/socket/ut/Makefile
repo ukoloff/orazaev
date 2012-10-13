@@ -17,7 +17,7 @@ out := $(mainSrc:.cpp=.out)
 all: $(out)
 	$(info ==> Cleaning obj and gch...)
 	@rm -f *.o *.h.gch
-	@rm -f ../TSocket.h.gch
+	@rm -f ../socket.h.gch
 	$(info ==> Complete.)
 
 $(out): obj

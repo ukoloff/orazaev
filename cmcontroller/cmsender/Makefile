@@ -8,10 +8,10 @@ compile_flags   :=
 
 headers		 := $(orazaev_root)/cmcontroller/cmdefinitions.h    \
                 $(orazaev_root)/util/TError.h                   \
-				$(orazaev_root)/util/socket/TSocket.h
+				$(orazaev_root)/util/socket/socket.h
 				   
 sources		 := main.cpp \
-				$(orazaev_root)/util/socket/TSocket.cpp 
+				$(orazaev_root)/util/socket/socket.cpp 
 
 
 all: $(program_name)

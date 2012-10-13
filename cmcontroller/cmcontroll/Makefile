@@ -11,7 +11,7 @@ headers		 := \
 				$(orazaev_root)/cmcontroller/cmdefinitions.h \
                 $(orazaev_root)/util/TError.h \
 				$(orazaev_root)/util/logger/logger.h  \
-				$(orazaev_root)/util/socket/TSocket.h \
+				$(orazaev_root)/util/socket/socket.h \
 				$(orazaev_root)/util/thread/TMutex.h \
 				$(orazaev_root)/util/thread/TThread.h
 				   
@@ -19,7 +19,7 @@ sources		 := \
 				main.cpp \
 				cmc_server.cpp \
 				$(orazaev_root)/util/logger/logger.cpp \
-				$(orazaev_root)/util/socket/TSocket.cpp \
+				$(orazaev_root)/util/socket/socket.cpp \
 				$(orazaev_root)/util/thread/TMutex.cpp \
 				$(orazaev_root)/util/thread/TThread.cpp
 

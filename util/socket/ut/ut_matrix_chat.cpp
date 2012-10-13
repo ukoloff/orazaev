@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    TSocket serv(atoi(argv[1]));
+    TTCPSocket serv(atoi(argv[1]));
     
     serv.Bind();
     serv.Listen();
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     if ( pid == 0 ) {
-        TSocket client = serv.Accept();
+        TTCPSocket client = serv.Accept();
         std::string ans = "";
     
         std::cout << "Server: Get connection from " << client.getIp() << std::endl;
@@ -40,7 +40,7 @@ int main(int argc, char** argv) {
     }
     else if ( pid > 0 ) {
         std::string sans = "";
-        TSocket cli("127.0.0.1", atoi(argv[1]));
+        TTCPSocket cli("127.0.0.1", atoi(argv[1]));
         
         cli.Connect();
         sans = cli.Recv();

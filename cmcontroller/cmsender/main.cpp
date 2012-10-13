@@ -1,5 +1,5 @@
 #include<cmcontroller/cmdefinitions.h>
-#include<util/socket/TSocket.h>
+#include<util/socket/socket.h>
 #include<util/logger/logger.h>
 
 #include<iostream>
@@ -70,14 +70,14 @@ void cmc_send(const std::string& host, const int& port, std::string& request, co
     if (request.size() > CM_DUMP_BUF_SIZE)
         request.resize(CM_DUMP_BUF_SIZE);
     
-    TSocket connection(host, port);
+    TTCPSocket connection(host, port);
 
     time_t start_time = time(0);
     while (true) {
         try {
             connection.Connect();
         }
-        catch (TSocket::ESocket) {
+        catch (TTCPSocket::ESocket) {
             if (!timeout)
                 continue;
 

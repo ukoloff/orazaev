@@ -5,8 +5,8 @@
  *
  *	gmail me: AOrazaev[at]gmail.com
  */
-#ifndef TSOCKET_H
-#define TSOCKET_H
+#ifndef SOCKET_H
+#define SOCKET_H
 #include <string>
 #include <sys/socket.h>
 #include <sys/types.h> 
@@ -14,22 +14,22 @@
 #include <netdb.h>
 
 // TCP socket
-class TSocket {
+class TTCPSocket {
     int sockfd;
     struct sockaddr_in addr;
 
 public:
-    TSocket() {}
-	TSocket(const std::string& hostname, const int& portno);
-    TSocket(const int& Sockfd, const struct sockaddr_in& Addr);
-    TSocket(const int& portno);
+    TTCPSocket() {}
+	TTCPSocket(const std::string& hostname, const int& portno);
+    TTCPSocket(const int& Sockfd, const struct sockaddr_in& Addr);
+    TTCPSocket(const int& portno);
 
-    virtual ~TSocket(); 
+    virtual ~TTCPSocket(); 
 
     void Connect();
     void Listen();
     void Bind();
-    TSocket Accept();
+    TTCPSocket Accept();
     void Close();
 
     void Send(const std::string& msg);

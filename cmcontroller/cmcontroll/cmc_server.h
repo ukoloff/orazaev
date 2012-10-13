@@ -2,7 +2,7 @@
 #define CMC_SERVER_H
 
 #include<cmcontroller/cmdefinitions.h>
-#include<util/socket/TSocket.h>
+#include<util/socket/socket.h>
 #include<util/thread/TThread.h>
 #include<util/logger/logger.h>
 
@@ -14,7 +14,7 @@
 class TCMServer {
     // Operator class
     class TThreadOperator : public TThread {
-        TSocket connection;
+        TTCPSocket connection;
         std::map<std::string, int>* pdata;
         TCMServer* parent;
 
@@ -31,7 +31,7 @@ class TCMServer {
         inline std::string operateRequest(std::string request);
         inline void sendAns(const std::string& ans);
     public:
-        TThreadOperator(TSocket conn, std::map<std::string, int>* pd);
+        TThreadOperator(TTCPSocket conn, std::map<std::string, int>* pd);
         virtual void run();
 
         inline void setParent(TCMServer* p) { parent = p; }
@@ -40,14 +40,14 @@ class TCMServer {
 
     // Listener class
     class TThreadListener : public TThread {
-        TSocket listenSocket;
+        TTCPSocket listenSocket;
         TCMServer* parent;
     public:
         TThreadListener();
         virtual void run();
 
         inline void setParent(TCMServer*);
-        inline void setSocket(const TSocket& ls) {
+        inline void setSocket(const TTCPSocket& ls) {
             listenSocket = ls;
         }
     };
@@ -55,7 +55,7 @@ class TCMServer {
 
     std::map<std::string, int> data;
 
-    TSocket listenSocket;
+    TTCPSocket listenSocket;
     TThreadListener listener;
     bool isListening;
     std::list<TThreadOperator*> operatorList;
@@ -63,7 +63,7 @@ class TCMServer {
     std::auto_ptr<TLogger> msgLog;
     std::auto_ptr<TLogger> mainLog;
 
-    inline void operateConnection(TSocket conn);
+    inline void operateConnection(TTCPSocket conn);
     int dumpData(const std::string& fname);
 
 public:

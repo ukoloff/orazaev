@@ -26,7 +26,7 @@ TCMServer::TCMServer(int portno)
     listener.setSocket(listenSocket);
 }
 
-void TCMServer::operateConnection(TSocket conn) {
+void TCMServer::operateConnection(TTCPSocket conn) {
     if (mainLog.get()) *mainLog << "get connection from " << conn.getIp() << log::endl;
     TThreadOperator* to = new TThreadOperator(conn, &data);
     to->setParent(this);
@@ -87,7 +87,7 @@ int TCMServer::dumpData(const std::string& fname) {
 
 
 // TCMServer::TThreadOperator description
-TCMServer::TThreadOperator::TThreadOperator(TSocket conn, std::map<std::string, int>* pd) 
+TCMServer::TThreadOperator::TThreadOperator(TTCPSocket conn, std::map<std::string, int>* pd) 
     : connection(conn) 
     , pdata(pd) {
 }
@@ -107,11 +107,11 @@ std::string TCMServer::TThreadOperator::getRequest() {
     try {
         request = connection.Read();
     }
-    catch (TSocket::ERead) {
+    catch (TTCPSocket::ESocket) {
         try {
             connection.Write("?");
         }
-        catch (TSocket::EWrite) {
+        catch (TTCPSocket::ESocket) {
             std::cerr << "Connection problem." << std::endl;
             exit(1);
         }
@@ -286,7 +286,7 @@ void TCMServer::TThreadOperator::sendAns(const std::string& ans) {
     try {
         connection.Write(ans);
     }
-    catch(TSocket::EWrite) {
+    catch(TTCPSocket::ESocket) {
         std::cerr << "Can't answer to client " << connection.getIp() << std::endl;
         exit(1);
     }   
@@ -313,7 +313,7 @@ void TCMServer::TThreadListener::run() {
 
     while(1) {
         //if (parent->mainLog.get()) *(parent->mainLog) << "Start listening..."  << log::endl;
-        TSocket conn = listenSocket.Accept();
+        TTCPSocket conn = listenSocket.Accept();
         parent->operateConnection(conn);
     }
 

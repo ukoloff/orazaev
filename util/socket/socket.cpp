@@ -8,7 +8,7 @@
 
 static int errcode;
 
-TSocket::TSocket(const std::string& hostname, const int& portno) {
+TTCPSocket::TTCPSocket(const std::string& hostname, const int& portno) {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -24,12 +24,12 @@ TSocket::TSocket(const std::string& hostname, const int& portno) {
     bcopy((char *) serv_name->h_addr, (char *) &(this->addr.sin_addr.s_addr), serv_name->h_length);
 }
 
-TSocket::TSocket(const int& Sockfd, const struct sockaddr_in& Addr) 
+TTCPSocket::TTCPSocket(const int& Sockfd, const struct sockaddr_in& Addr) 
     : sockfd(Sockfd)
     , addr(Addr) {
 }
 
-TSocket::TSocket(const int& portno) {
+TTCPSocket::TTCPSocket(const int& portno) {
     this->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->sockfd < 0) {
@@ -43,31 +43,31 @@ TSocket::TSocket(const int& portno) {
     this->addr.sin_addr.s_addr = INADDR_ANY;
 }
 
-TSocket::~TSocket() {
+TTCPSocket::~TTCPSocket() {
 }
 
-void TSocket::Connect() {
+void TTCPSocket::Connect() {
     if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         //std::cerr << "Error: can't connect to host!" << std::endl;
         throw EConnect();
     }   
 }
 
-void TSocket::Listen() {
+void TTCPSocket::Listen() {
     if (listen(sockfd, 5) < 0) {
         std::cerr << "Error: can't set port as listening!" << std::endl;
         throw EListen();
     }
 }
 
-void TSocket::Bind() {
+void TTCPSocket::Bind() {
     if (bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
         std::cerr << "Error: can't bind socket!" << std::endl;
         throw EBind();
     }
 }
 
-TSocket TSocket::Accept() {
+TTCPSocket TTCPSocket::Accept() {
     struct sockaddr_in cli_addr;
     int conn;
     unsigned int tsize = sizeof(cli_addr);
@@ -80,15 +80,15 @@ TSocket TSocket::Accept() {
         throw EAccept();
     }
     
-    return TSocket(conn, cli_addr);
+    return TTCPSocket(conn, cli_addr);
 }
 
-void TSocket::Close() {
+void TTCPSocket::Close() {
         close(sockfd);
 }
 
 
-void TSocket::Send(const std::string & msg, size_t size) {
+void TTCPSocket::Send(const std::string & msg, size_t size) {
     if (size > CBUF_SIZE) {
         std::cerr << "Size of message is bigger than buffer" << std::endl;
         throw ESend();
@@ -103,11 +103,11 @@ void TSocket::Send(const std::string & msg, size_t size) {
     }
 }
 
-void TSocket::Send(const std::string & msg) {
+void TTCPSocket::Send(const std::string & msg) {
     return Send(msg, msg.size());
 }
 
-std::string TSocket::Recv(size_t size) {
+std::string TTCPSocket::Recv(size_t size) {
     if (size > CBUF_SIZE) {
         std::cerr << "Size of recved message is bigger than buffer!" << std::endl;
         throw ERecv();
@@ -130,24 +130,24 @@ std::string TSocket::Recv(size_t size) {
     return std::string(buf);
 }
 
-std::string TSocket::Recv() {
+std::string TTCPSocket::Recv() {
     return Recv(CBUF_SIZE);
 }
 
 
-std::string TSocket::Read() {
+std::string TTCPSocket::Read() {
     return Recv();
 }
 
-void TSocket::Write(const std::string& msg) {
+void TTCPSocket::Write(const std::string& msg) {
     Send(msg);
 }
 
-void TSocket::Write(const std::string& msg, size_t size) {
+void TTCPSocket::Write(const std::string& msg, size_t size) {
     Send(msg, size);
 }
 
-std::string TSocket::getIp() {
+std::string TTCPSocket::getIp() {
     char ipAddr[CBUF_SIZE];
     memset(ipAddr, 0, CBUF_SIZE * sizeof(char));
     

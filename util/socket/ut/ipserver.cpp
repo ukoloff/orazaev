@@ -9,13 +9,13 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    TSocket serv(atoi(argv[1]));
+    TTCPSocket serv(atoi(argv[1]));
     
     serv.Bind();
     serv.Listen();
     
     while(1) {
-    TSocket client = serv.Accept();
+    TTCPSocket client = serv.Accept();
     
     std::cout << "Get connection from " << client.getIp() << std::endl;
     std::cout << "Sending him his IP address!" << std::endl;

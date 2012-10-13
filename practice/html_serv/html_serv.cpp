@@ -5,9 +5,9 @@
 
 #include "../../util/thread/TThread.h"
 #include "../../util/thread/TMutex.h"
-#include "../../util/socket/TSocket.h"
+#include "../../util/socket/socket.h"
 
-void start_server(TSocket& connection) {
+void start_server(TTCPSocket& connection) {
 
     std::string buf = "";
     buf = connection.Read();
@@ -59,14 +59,14 @@ int main(int argc, char** argv) {
     int portno = atoi(argv[1]);
     
     try {
-        TSocket s(portno);
+        TTCPSocket s(portno);
         s.Bind();
         s.Listen();
-        TSocket connection = s.Accept();
+        TTCPSocket connection = s.Accept();
         while(true)
             start_server(connection);
     }
-    catch (TSocket::ESocket) {
+    catch (TTCPSocket::ESocket) {
         std::cerr << "Error: ESocket catched --- something goes wrong." << std::endl;
 
         return 1;
