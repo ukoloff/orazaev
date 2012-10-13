@@ -13,6 +13,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+// TCP socket
 class TSocket {
     int sockfd;
     struct sockaddr_in addr;
