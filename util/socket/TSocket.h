@@ -31,13 +31,14 @@ public:
     TSocket Accept();
     void Close();
 
-    void Write(std::string msg);
-    void Write(std::string msg, int size);
-    std::string Read();
     void Send(const std::string& msg);
     void Send(const std::string& msg, size_t size);
     std::string Recv(size_t size);
     std::string Recv();
+
+    void Write(const std::string& msg);
+    void Write(const std::string& msg, size_t size);
+    std::string Read();
 
     std::string getIp();
 

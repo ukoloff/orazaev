@@ -87,29 +87,6 @@ void TSocket::Close() {
         close(sockfd);
 }
 
-void TSocket::Write(std::string msg) {
-    char buf[CBUF_SIZE];
-    memset(buf, 0, CBUF_SIZE * sizeof(char));
-    
-    memcpy(buf, msg.c_str(), msg.size());
-        
-    if (write(sockfd, buf, CBUF_SIZE) < 0) {
-        std::cerr << "Error: can't write message to socket!" << std::endl;
-        throw EWrite();
-    }
-}
-
-void TSocket::Write(std::string msg, int size) {
-    char buf[CBUF_SIZE];
-    memset(buf, 0, CBUF_SIZE * sizeof(char));
-    
-    memcpy(buf, msg.c_str(), msg.size());
-        
-    if (write(sockfd, buf, size) < 0) {
-        std::cerr << "Error: can't write message to socket!" << std::endl;
-        throw EWrite();
-    }
-}
 
 void TSocket::Send(const std::string & msg, size_t size) {
     if (size > CBUF_SIZE) {
@@ -159,17 +136,15 @@ std::string TSocket::Recv() {
 
 
 std::string TSocket::Read() {
-    char buf[CBUF_SIZE];
-    memset(buf, 0, CBUF_SIZE * sizeof(char));
-    
-    if ((errcode = read(sockfd, buf, CBUF_SIZE)) < 0) {
-        std::cerr << "Error: can't read message from socket!" << std::endl;
-        std::cerr << "Error: errcode = " << errcode << std::endl;
-        std::cerr << "Error: errno   = " << errno << std::endl;
-        throw ERead();
-    }
+    return Recv();
+}
 
-    return std::string(buf);
+void TSocket::Write(const std::string& msg) {
+    Send(msg);
+}
+
+void TSocket::Write(const std::string& msg, size_t size) {
+    Send(msg, size);
 }
 
 std::string TSocket::getIp() {
