@@ -26,15 +26,15 @@ int main(int argc, char** argv) {
     
         std::cout << "Server: Get connection from " << client.getIp() << std::endl;
         
-        client.Write("Hello, Neo!");
-        ans = client.Read();
+        client.Send("Hello, Neo!");
+        ans = client.Recv();
         std::cout << "Client: " << ans << std::endl;
 
-        client.Write("Follow the white rabbit!");
-        ans = client.Read();
+        client.Send("Follow the white rabbit!");
+        ans = client.Recv();
         std::cout << "Client: " << ans << std::endl;
 
-        client.Write("Knock knock, Neo!");
+        client.Send("Knock knock, Neo!");
 
         //std::cout << "OK" << std::endl;
     }
@@ -43,15 +43,15 @@ int main(int argc, char** argv) {
         TSocket cli("127.0.0.1", atoi(argv[1]));
         
         cli.Connect();
-        sans = cli.Read();
+        sans = cli.Recv();
         std::cout << "Server: " << sans << std::endl;
         
-        cli.Write("Who are you?");
-        sans = cli.Read();
+        cli.Send("Who are you?");
+        sans = cli.Recv();
         std::cout << "Server: " << sans << std::endl;
     
-        cli.Write("What a white rabbit?");
-        sans = cli.Read();
+        cli.Send("What a white rabbit?");
+        sans = cli.Recv();
         std::cout << "Server :" << sans << std::endl;
     }
 

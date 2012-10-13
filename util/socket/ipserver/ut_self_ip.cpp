@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
         std::cout << "Get connection from " << client.getIp() << std::endl;
         std::cout << "Sending him his IP address!" << std::endl;
     
-        client.Write(client.getIp());
+        client.Send(client.getIp());
 
         std::cout << "OK" << std::endl;
     }
@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
         
         cli.Connect();
         
-        std::string ans = cli.Read();
+        std::string ans = cli.Recv();
         
         std::cout << "Client: Got answer = " << ans << std::endl;
     }
