@@ -15,11 +15,12 @@ public:
     void Unlock();
 
     //exceptions
-    class EMutex   : public TError {};
-    class EInit    : public EMutex {};
-    class ELock    : public EMutex {};
-    class EUnlock  : public EMutex {};
-    class EDestroy : public EMutex {};
+    class EMutex   : public TError {
+    public:
+        EMutex(const std::string & m)
+            : TError(m) 
+        { }
+    };
 };
 
 #endif
