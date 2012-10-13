@@ -5,7 +5,7 @@ GOBJ := g++ -c -I $(orazaev_root)
 FLAGS := -g
 
 mainSrc := $(shell ls *.cpp)
-sockSrc := ../socket.cpp
+sockSrc :=
 sockHeader := ../socket.h
 
 mainObj := $(mainSrc:.cpp=.o)

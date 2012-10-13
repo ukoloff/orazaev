@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    TTCPSocket serv(atoi(argv[1]));
+    TMbTCPSocket serv(atoi(argv[1]));
     
     serv.Bind();
     serv.Listen();
@@ -21,7 +21,7 @@ int main(int argc, char** argv) {
         return 1;
     }
     if ( pid == 0 ) {
-        TTCPSocket client = serv.Accept();
+        TMbTCPSocket client = serv.Accept();
     
         std::cout << "Get connection from " << client.getIp() << std::endl;
         std::cout << "Sending him his IP address!" << std::endl;
@@ -32,7 +32,7 @@ int main(int argc, char** argv) {
     }
     else if ( pid > 0 ) {
         std::cout << "Client: I was forked! pid = " << pid << std::endl;
-        TTCPSocket cli("127.0.0.1", atoi(argv[1]));
+        TMbTCPSocket cli("127.0.0.1", atoi(argv[1]));
         
         cli.Connect();
         
