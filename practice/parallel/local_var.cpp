@@ -1,4 +1,4 @@
-#include "../../util/thread/TThread.h"
+#include "../../util/thread/thread.h"
 #include <stdlib.h>
 
 class TFoo : public TThread {

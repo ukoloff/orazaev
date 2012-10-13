@@ -1,6 +1,6 @@
 #include <pthread.h>
 #include <iostream>
-#include "../TMutex.h"
+#include <util/thread/mutex.h>
 
 
 static TMutex m;

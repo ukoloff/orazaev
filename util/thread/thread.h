@@ -10,7 +10,7 @@
 
 #include <pthread.h>
 #include "../patterns/TSingleton.h"
-#include "TMutex.h"
+#include "mutex.h"
 
 class TThread {
     pthread_t thread;

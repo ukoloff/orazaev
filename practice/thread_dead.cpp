@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <vector>
 
-#include "../util/thread/TThread.h"
+#include "../util/thread/thread.h"
 
 class TBar : public TThread {
 public:

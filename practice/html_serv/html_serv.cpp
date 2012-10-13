@@ -3,8 +3,8 @@
 #include <string>
 #include <cstdio>
 
-#include "../../util/thread/TThread.h"
-#include "../../util/thread/TMutex.h"
+#include "../../util/thread/thread.h"
+#include "../../util/thread/mutex.h"
 #include "../../util/socket/socket.h"
 
 void start_server(TCMSocket& connection) {

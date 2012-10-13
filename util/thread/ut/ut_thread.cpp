@@ -1,4 +1,4 @@
-#include "../TThread.h"
+#include <util/thread/thread.h>
 #include <iostream>
 #include <sstream>
 

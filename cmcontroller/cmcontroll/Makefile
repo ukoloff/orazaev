@@ -12,15 +12,15 @@ headers		 := \
                 $(orazaev_root)/util/TError.h \
 				$(orazaev_root)/util/logger/logger.h  \
 				$(orazaev_root)/util/socket/socket.h \
-				$(orazaev_root)/util/thread/TMutex.h \
-				$(orazaev_root)/util/thread/TThread.h
+				$(orazaev_root)/util/thread/mutex.h \
+				$(orazaev_root)/util/thread/thread.h
 				   
 sources		 := \
 				main.cpp \
 				cmc_server.cpp \
 				$(orazaev_root)/util/logger/logger.cpp \
-				$(orazaev_root)/util/thread/TMutex.cpp \
-				$(orazaev_root)/util/thread/TThread.cpp
+				$(orazaev_root)/util/thread/mutex.cpp \
+				$(orazaev_root)/util/thread/thread.cpp
 
 
 all: $(program_name)

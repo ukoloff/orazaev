@@ -1,4 +1,4 @@
-#include "TThread.h"
+#include "thread.h"
 
 TThread::TThread() : thread(0), SMutex() {
 }

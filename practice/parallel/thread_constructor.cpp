@@ -1,7 +1,7 @@
 #include <iostream>
 #include <list>
 
-#include "../../util/thread/TThread.h"
+#include "../../util/thread/thread.h"
 
 class TFoo {
     std::list<int> pdata;

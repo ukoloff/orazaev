@@ -1,4 +1,4 @@
-#include "TMutex.h"
+#include "mutex.h"
 #include <iostream>
 
 TMutex::TMutex() : mut() {

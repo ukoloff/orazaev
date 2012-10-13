@@ -1,10 +1,11 @@
-GXX := g++
-GOBJ := g++ -c
+orazaev_root := ../../..
+GXX := g++ -I $(orazaev_root)
+GOBJ := g++ -I $(orazaev_root) -c
 FLAGS := -g -lpthread
 
 mainSrc := $(shell ls *.cpp)
-unitSrc := ../TMutex.cpp ../TThread.cpp
-unitHeader := ../TMutex.cpp ../TThread.cpp
+unitSrc := ../mutex.cpp ../thread.cpp
+unitHeader := ../mutex.cpp ../thread.cpp
 
 mainObj := $(mainSrc:.cpp=.o)
 unitObj := $(unitSrc:.cpp=.o)
@@ -17,8 +18,8 @@ out := $(mainSrc:.cpp=.out)
 all: $(out)
 	$(info ==> Cleaning obj and gch...)
 	@rm -f *.o *.h.gch
-	@rm -f ../TMutex.h.gch
-	@rm -f ../TThread.h.gch
+	@rm -f ../mutex.h.gch
+	@rm -f ../thread.h.gch
 	$(info ==> Complete.)
 
 $(out): obj

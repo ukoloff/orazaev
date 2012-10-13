@@ -2,7 +2,7 @@
 #define CMC_SERVER_H
 
 #include<cmcontroller/cmdefinitions.h>
-#include<util/thread/TThread.h>
+#include<util/thread/thread.h>
 #include<util/logger/logger.h>
 
 #include<string>
