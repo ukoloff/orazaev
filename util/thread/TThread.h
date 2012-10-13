@@ -33,16 +33,16 @@ public:
     void mutexLock();
     void mutexUnlock();
 
-    //exceptions
-    class EThread : public TError {};
-    class ECreate : public EThread {};
-    class EJoin   : public EThread {};
-    class EDetach : public EThread {};
-    class ECancel : public EThread {};
+    class EThread : public TError {
+    public:
+        EThread(const std::string & m) throw()
+            : TError(m)
+        { }
+    };
     
     static void Cancel(const TThread& th) {
         if (pthread_cancel(th.thread) != 0)
-            throw ECancel();
+            throw EThread("Can't cancel thread");
     }
 
 };

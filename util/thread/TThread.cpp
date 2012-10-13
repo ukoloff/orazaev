@@ -7,26 +7,22 @@ TThread::~TThread() {}
 
 void TThread::Create() {
     if (thread) {
-        std::cerr << "Thread already create!" << std::endl;
-        throw ECreate();
+        throw EThread("Thread is already created!");
     }
     if (pthread_create(&thread, 0, TThread::thread_func, (void*) this) != 0 ) {
-        std::cerr << "Can't create new thread!" << std::endl;
-        throw ECreate();
+        throw EThread("Can't create new thread!");
     } 
 }
 
 void TThread::Join() {
     if (pthread_join(thread, 0) != 0) {
-        std::cerr << "Thread can't join!" << std::endl;
-        throw EJoin();
+        throw EThread("Thread can't join!");
     }
 }
 
 void TThread::Detach() {
     if (pthread_detach(thread) != 0) {
-        std::cerr << "Can't detach thread" << std::endl;
-        throw EDetach();
+        throw EThread("Can't detach thread!");
     }
 }
 
