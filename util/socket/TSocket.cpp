@@ -111,6 +111,36 @@ void TSocket::Write(std::string msg, int size) {
     }
 }
 
+void TSocket::Send(const std::string & msg) {
+    if (msg.size() > CBUF_SIZE) {
+        std::cerr << "Size of message is bigger than buffer" << std::endl;
+        throw ESend();
+    }
+    char buf[CBUF_SIZE];
+    memset(buf, 0, CBUF_SIZE * sizeof(char));
+
+    memcpy(buf, msg,c_str(), msg.size());
+    if (send(sockfd, buf, CBUF_SIZE * sizeof(char), 0) <0) {
+        std::cerr << "Error: can't send message to socket!" << std::endl;
+        throw ESend();
+    }
+}
+
+void TSocket::Send(const std::string & msg, size_t size) {
+    if (size > CBUF_SIZE) {
+        std::cerr << "Size of message is bigger than buffer" << std::endl;
+        throw ESend();
+    }
+    char buf[CBUF_SIZE];
+    memset(buf, 0, CBUF_SIZE * sizeof(char));
+
+    memcpy(buf, msg,c_str(), size);
+    if (send(sockfd, buf, CBUF_SIZE * sizeof(char), 0) <0) {
+        std::cerr << "Error: can't send message to socket!" << std::endl;
+        throw ESend();
+    }
+}
+
 std::string TSocket::Read() {
     char buf[CBUF_SIZE];
     memset(buf, 0, CBUF_SIZE * sizeof(char));
