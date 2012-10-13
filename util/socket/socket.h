@@ -1,7 +1,7 @@
 #ifndef TSOCKET_H
 #define TSOCKET_H
 #include <string>
-#include <util/TError.h>
+#include <util/error.h>
 
 template <size_t BUF_SIZE>
 class TAbstarctSocket {

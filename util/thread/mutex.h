@@ -3,7 +3,7 @@
 
 #include<pthread.h>
 
-#include"../TError.h"
+#include"../error.h"
 
 class TMutex {
     pthread_mutex_t mut;

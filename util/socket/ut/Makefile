@@ -17,9 +17,8 @@ out := $(mainSrc:.cpp=.out)
 
 .PHONY: all
 all: $(out)
-	$(info ==> Cleaning obj and gch...)
-	@rm -f *.o *.h.gch
-	@rm -f ../socket.h.gch
+	$(info ==> Cleaning obj...)
+	@rm -f *.o
 	$(info ==> Complete.)
 
 $(out): obj
@@ -28,15 +27,11 @@ $(out): obj
 .PHONY: obj
 obj: $(sockObj) $(mainObj)
 
-$(sockObj): $(sockHeader) $(sockSrc)
+$(sockObj): $(sockSrc)
 	$(GOBJ) $(@:.o=.cpp)
 	
-$(mainObj): $(sockHeader) $(mainSrc)
+$(mainObj): $(mainSrc)
 	$(GOBJ) $(@:.o=.cpp)
-
-$(sockHeader):
-	$(GXX) $(sockHeader)
-
 
 .PHONY: clean
 clean::

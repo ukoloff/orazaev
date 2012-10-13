@@ -16,10 +16,8 @@ out := $(mainSrc:.cpp=.out)
 
 .PHONY: all
 all: $(out)
-	$(info ==> Cleaning obj and gch...)
-	@rm -f *.o *.h.gch
-	@rm -f ../mutex.h.gch
-	@rm -f ../thread.h.gch
+	$(info ==> Cleaning obj...)
+	@rm -f *.o
 	$(info ==> Complete.)
 
 $(out): obj
@@ -28,14 +26,11 @@ $(out): obj
 .PHONY: obj
 obj: $(unitObj) $(mainObj)
 
-$(unitObj): $(unitHeader) $(unitSrc)
+$(unitObj): $(unitSrc)
 	$(GOBJ) $(@:.o=.cpp)
 	
-$(mainObj): $(unitHeader) $(mainSrc)
+$(mainObj): $(mainSrc)
 	$(GOBJ) $(@:.o=.cpp)
-
-$(unitHeader):
-	$(GXX) $(unitHeader)
 
 
 .PHONY: clean

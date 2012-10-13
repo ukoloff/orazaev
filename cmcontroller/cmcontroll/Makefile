@@ -9,7 +9,7 @@ compile_flags   :=
 headers		 := \
 				cmc_server.h \
 				$(orazaev_root)/cmcontroller/cmdefinitions.h \
-                $(orazaev_root)/util/TError.h \
+                $(orazaev_root)/util/error.h \
 				$(orazaev_root)/util/logger/logger.h  \
 				$(orazaev_root)/util/socket/socket.h \
 				$(orazaev_root)/util/thread/mutex.h \
@@ -26,8 +26,7 @@ sources		 := \
 all: $(program_name)
 
 $(program_name): 
-		$(CPP) -I $(orazaev_root) $(headers) $(compile_flags) || echo "There are no headers in project"; \
-		$(CPP) -I $(orazaev_root) $(sources) $(compile_frags) $(libraries) -o $(program_name); \
+		$(CPP) -I $(orazaev_root) $(sources) $(compile_frags) $(libraries) -o $(program_name);
 
 .PHONY: clean
 
