@@ -15,11 +15,32 @@
 
 #include <util/TError.h>
 
-// TCP socket
-class TTCPSocket {
-    int sockfd;
-    struct sockaddr_in addr;
+class TAbstarctSocket {
+public:
+    TAbstarctSocket() {};
 
+    virtual ~TAbstarctSocket() {};
+
+    virtual void Listen() = 0;
+    virtual void Bind() = 0;
+    virtual void Close() = 0;
+
+    virtual void Send(const std::string& msg) = 0;
+    virtual void Send(const std::string& msg, size_t size) = 0;
+    virtual std::string Recv() = 0;
+    virtual std::string Recv(size_t size) = 0;
+
+    //exception
+    class ESocket : public TError {
+    public:
+        ESocket(const std::string& m) throw()
+            : TError(m)
+        { }
+    };
+};
+
+// TCP socket
+class TTCPSocket : public TAbstarctSocket {
 public:
     TTCPSocket() {}
 	TTCPSocket(const std::string& hostname, const int& portno);
@@ -45,15 +66,10 @@ public:
 
     std::string getIp();
 
-    //exception
-    class ESocket : public TError {
-    public:
-        ESocket(const std::string& m) throw()
-            : TError(m)
-        { }
-    };
 
-    //consts
+private:
+    int sockfd;
+    struct sockaddr_in addr;
     static const int CBUF_SIZE = 1024;
 };
 
