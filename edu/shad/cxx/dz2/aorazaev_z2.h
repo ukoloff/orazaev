@@ -36,6 +36,8 @@ public:
     Polynomial<T> operator - (const Polynomial<T> &) const;
     Polynomial<T> operator * (const Polynomial<T> &) const;
 
+    Polynomial<T> operator / (const Polynomial<T> &) const;
+
     T operator() (const T &) const;
 
     typedef typename std::vector<T>::const_iterator const_iterator;
@@ -55,11 +57,14 @@ public:
     template <typename A>
     friend std::ostream & operator << (std::ostream &, const Polynomial<A> &);
 
-
 private:
     std::vector<T> coefficients;
 
     void normalize();
+
+    size_t size() const {
+        return coefficients.size();
+    }
 };
 
 
@@ -167,6 +172,32 @@ template <typename T>
 Polynomial<T> Polynomial<T>::operator * (const Polynomial<T> & p) const {
     Polynomial<T> ans(*this);
     return ans *= p;
+}
+
+
+
+template <typename T>
+Polynomial<T> Polynomial<T>::operator / (const Polynomial<T> & q) const {
+    if (q.size() > size()) {
+        return Polynomial<T>(0);
+    }
+
+    Polynomial<T> res;
+    res.coefficients =
+        std::vector<T>(size() - q.size() + 1, 0);
+    Polynomial<T> num(*this);
+
+    while(num.size() >= q.size()) {
+        size_t cur = num.size() - q.size();
+        res[cur] =
+            num[num.size() - 1] / q[q.size() - 1];
+        num -= q *
+            Polynomial<T>(res.begin(), res.begin() + cur + 1);
+        std::cout << "DEBUG:" << num << std::endl;
+        num.normalize();
+    }
+
+    return res;
 }
 
 

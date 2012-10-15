@@ -210,5 +210,16 @@ int main() {
         endTest();
     }
 
+    {
+        int a[4] = {-42, 0, 12, 1};
+        int b[2] = {-3, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(b, b + 2);
+        int e[3] = {-27, -9, 1};
+
+        startTest("Operator /");
+        assertEqual(p / q, Polynomial<int>(e, e + 3));
+        endTest();
+    }
     return 0;
 }
