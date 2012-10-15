@@ -64,6 +64,9 @@ private:
 
 
 
+
+
+
 template <typename T>
 T& Polynomial<T>::operator[] (std::size_t n) {
     if (n >= coefficients.size()) {
@@ -72,6 +75,8 @@ T& Polynomial<T>::operator[] (std::size_t n) {
     return coefficients[n];
 }
 
+
+
 template <typename T>
 T Polynomial<T>::operator[] (std::size_t n) const {
     if (n >= coefficients.size()) {
@@ -79,6 +84,8 @@ T Polynomial<T>::operator[] (std::size_t n) const {
     }
     return coefficients[n];
 }
+
+
 
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator += (const Polynomial<T> & q) {
@@ -97,6 +104,8 @@ Polynomial<T> & Polynomial<T>::operator += (const Polynomial<T> & q) {
     return *this;
 }
 
+
+
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator -= (const Polynomial<T> & q) {
     std::size_t i = 0;
@@ -113,6 +122,8 @@ Polynomial<T> & Polynomial<T>::operator -= (const Polynomial<T> & q) {
     normalize();
     return *this;
 }
+
+
 
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator *= (const Polynomial<T> & q) {
@@ -134,11 +145,15 @@ Polynomial<T> & Polynomial<T>::operator *= (const Polynomial<T> & q) {
     return *this;
 }
 
+
+
 template <typename T>
 Polynomial<T> Polynomial<T>::operator + (const Polynomial<T> & p) const {
     Polynomial<T> ans(*this);
     return ans += p;
 }
+
+
 
 template <typename T>
 Polynomial<T> Polynomial<T>::operator - (const Polynomial<T> & p) const {
@@ -146,11 +161,15 @@ Polynomial<T> Polynomial<T>::operator - (const Polynomial<T> & p) const {
     return ans -= p;
 }
 
+
+
 template <typename T>
 Polynomial<T> Polynomial<T>::operator * (const Polynomial<T> & p) const {
     Polynomial<T> ans(*this);
     return ans *= p;
 }
+
+
 
 template <typename T>
 T Polynomial<T>::operator() (const T & x) const {
@@ -167,25 +186,35 @@ T Polynomial<T>::operator() (const T & x) const {
     return res;
 }
 
+
+
 template <typename T>
 typename Polynomial<T>::const_iterator Polynomial<T>::begin() const {
     return coefficients.begin();
 }
+
+
 
 template <typename T>
 typename Polynomial<T>::const_iterator Polynomial<T>::end() const {
     return coefficients.end();
 }
 
+
+
 template <typename T>
 typename Polynomial<T>::iterator Polynomial<T>::begin() {
     return coefficients.begin();
 }
 
+
+
 template <typename T>
 typename Polynomial<T>::iterator Polynomial<T>::end() {
     return coefficients.end();
 }
+
+
 
 
 
@@ -195,11 +224,14 @@ bool operator == (Polynomial<A> p, Polynomial<A> q) {
     return p.coefficients == q.coefficients;
 }
 
+
+
 template <typename A>
 bool operator != (Polynomial<A> p, Polynomial<A> q) {
     p.normalize(); q.normalize();
     return p.coefficients != q.coefficients;
 }
+
 
 
 // If DEBUG defined, print python-like list.
