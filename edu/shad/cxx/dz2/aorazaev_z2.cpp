@@ -1,52 +1,214 @@
 #include<iostream>
+#include<string>
+#include<stdexcept>
 #include"aorazaev_z2.h"
+
+template <typename T>
+void assertEqual(const T & p, const T & q) {
+    if (p != q) {
+        std::cout << std::endl
+            << " ========================== " << std::endl;
+        std::cout << "Value1 = " << p << std::endl;
+        std::cout << "Value2 = " << q << std::endl;
+
+        throw std::runtime_error("ASSERT FAILED!");
+    }
+}
+
+void startTest(const std::string & s) {
+    std::cout << s << "... ";
+}
+
+void endTest() {
+    std::cout << "[ OK ]" << std::endl;
+}
 
 int main() {
     {
     int a[5] = {0, 1, 2, 3, 4};
     Polynomial<int> p(1);
     Polynomial<int> q(a, a + 5);
-    Polynomial<double> z(a, a + 5);
+    Polynomial<int> z(a, a + 5);
     Polynomial<int> t(q);
 
-    std::cout << "P(x)<int> = " << p << std::endl;
-    std::cout << "Q(x)<int> = " << q << std::endl;
+    startTest("Operator << :");
+    std::cout << q <<" ";
+    endTest();
 
-    if (q == t) {
-        std::cout << "Q<int> == T<int>" << std::endl;
+    startTest("Operator == test");
+    assertEqual(q, t);
+    endTest();
+
+
+    startTest("Operator != test");
+    if (q == p) {
+        std::runtime_error("FAILED!");
     }
+    endTest();
 
-    if (q != p) {
-        std::cout << "Q<int> != P<int>" << std::endl;
-    }
 
-    std::cout << "Q(x) += P(x)" << std::endl;
-
+    startTest("Operator += test");
     q += p;
-    std::cout << "Q(x) = " << q << std::endl;
-    std::cout << "P(x) += Q(x)" << std::endl;
+    {
+        int expect[5] = {1, 1, 2, 3, 4};
+        assertEqual(
+            q, Polynomial<int>(expect, expect + 5));
+    }
+    endTest();
+
+
+    startTest("Operator += test2");
     p += q;
-    std::cout << "P(x) = " << p << std::endl;
-    std::cout << "P -= Q" << std::endl;
+    {
+        int expect[5] = {2, 1, 2, 3, 4};
+        assertEqual(
+            p, Polynomial<int>(expect, expect + 5));
+    }
+    endTest();
+
+
+    startTest("Operator -= test");
     p -= q;
+    {
+        int expect[1] = {1};
+        assertEqual(
+            p, Polynomial<int>(expect, expect + 1));
+    }
+    endTest();
 
-    std::cout << "P(x) = " << p << std::endl;
 
-    std::cout << p << " + " << (Polynomial<int>) 1<< std::endl;
+    startTest("Operator -= test 2");
+    {
+        assertEqual(t -= z, Polynomial<int>(0));
+    }
+    endTest();
+
+
+    startTest("Operator += int test");
     p += (Polynomial<int>) 1;
-    std::cout << p << std::endl;
-    std::cout << (Polynomial<int>) 1 << std::endl;
+    {
+        int expect[1] = {2};
+        assertEqual(
+            p, Polynomial<int>(expect, expect + 1));
+    }
+    endTest();
     }
 
+
+
+    {
     int a[2] = {0, 1};
-    Polynomial<int> p(a, a + 2);
     int b[4] = {1, 2, 3 ,4};
+
+
+    {
+    startTest("Multiplication 0");
+    Polynomial<int> p(a, a + 2);
+    Polynomial<int> q(b, b + 4);
+    p *= q;
+
+    int expect[5] = {0, 1, 2, 3, 4};
+    assertEqual(
+        p, Polynomial<int>(expect, expect + 5));
+    endTest();
+    }
+
+
+    {
+    startTest("Multiplication 1");
+    Polynomial<int> p(a, a + 2);
+    Polynomial<int> q(b, b + 4);
+    q *= p;
+    int expect[5] = {0, 1, 2, 3, 4};
+    assertEqual(
+        q, Polynomial<int>(expect, expect + 5));
+    endTest();
+    }
+
+
+
+    {
+    startTest("Multiplication by zero");
+    Polynomial<int> p;
+    Polynomial<int> q(b, b + 4);
+    q *= p;
+    assertEqual(q, Polynomial<int>(0));
+    endTest();
+    }
+
+
+
+    {
+    startTest("Multiplication by zero 2");
+    Polynomial<int> p;
+    Polynomial<int> q(b, b + 4);
+    p *= q;
+    assertEqual(p, Polynomial<int>(0));
+    endTest();
+    }
+
+
+
+
+    {
+    startTest("Operator *");
+    Polynomial<int> p(a, a + 2);
     Polynomial<int> q(b, b + 4);
 
-    std::cout << " ===> MULTIPLICATION:" << std::endl;
-    std::cout << p << std::endl;
-    std::cout << q << std::endl;
-    p *= q;
-    std::cout << p << std::endl;
+    int expect[5] = {0, 1, 2, 3, 4};
+    assertEqual(
+        p * q, Polynomial<int>(expect, expect + 5));
+    endTest();
+    }
+
+
+    {
+    startTest("Operator * 2");
+    Polynomial<int> p(a, a + 2);
+    Polynomial<int> q(b, b + 4);
+    int expect[5] = {0, 1, 2, 3, 4};
+    assertEqual(
+        q * p, Polynomial<int>(expect, expect + 5));
+    endTest();
+    }
+
+
+
+    {
+    startTest("Operator * by 0");
+    Polynomial<int> p;
+    Polynomial<int> q(b, b + 4);
+    assertEqual(q * p, Polynomial<int>(0));
+    endTest();
+    }
+
+
+
+    {
+    startTest("Operator * by 0 ver2");
+    Polynomial<int> p;
+    Polynomial<int> q(b, b + 4);
+    assertEqual(p * q, Polynomial<int>(0));
+    endTest();
+    }
+    }
+
+    {
+        int a[3] = {3, 2, 1};
+        Polynomial<int> p(a, a + 3);
+
+        startTest("Operator (0)");
+        assertEqual(3, p(0));
+        endTest();
+
+        startTest("Operator (1)");
+        assertEqual(6, p(1));
+        endTest();
+
+        startTest("Operator (3)");
+        assertEqual(18, p(3));
+        endTest();
+    }
+
     return 0;
 }
