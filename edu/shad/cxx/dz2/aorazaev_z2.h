@@ -1,5 +1,5 @@
-#ifndef AORAZAEV_CXX_DZ2_Z2
-#define AORAZAEV_CXX_DZ2_Z2
+#ifndef EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
+#define EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
 
 #include<vector>
 #include<cmath>
@@ -9,7 +9,7 @@ const double EPSILON = 0.000000001;
 
 template <typename T>
 class Polynomial {
-public:
+    public:
     Polynomial()
         : coefficients(1, 0)
     { }
@@ -20,7 +20,7 @@ public:
 
     template <typename TIterator>
     Polynomial(TIterator begin, TIterator end) {
-        while(begin != end) {
+        while (begin != end) {
             coefficients.push_back(*begin++);
         }
         normalize();
@@ -36,7 +36,11 @@ public:
     Polynomial<T> operator - (const Polynomial<T> &) const;
     Polynomial<T> operator * (const Polynomial<T> &) const;
 
+    // TODO
+    Polynomial<T> & operator /= (const Polynomial<T> & q);
+    Polynomial<T> & operator %= (const Polynomial<T> &);
     Polynomial<T> operator / (const Polynomial<T> &) const;
+    Polynomial<T> operator % (const Polynomial<T> &) const;
 
     T operator() (const T &) const;
 
@@ -57,14 +61,15 @@ public:
     template <typename A>
     friend std::ostream & operator << (std::ostream &, const Polynomial<A> &);
 
-private:
+
+
+
+    private:
     std::vector<T> coefficients;
 
     void normalize();
 
-    size_t size() const {
-        return coefficients.size();
-    }
+    size_t size() const;
 };
 
 
@@ -95,13 +100,13 @@ T Polynomial<T>::operator[] (std::size_t n) const {
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator += (const Polynomial<T> & q) {
     std::size_t i = 0;
-    for(; i < coefficients.size(); ++i) {
+    for (; i < coefficients.size(); ++i) {
         if (i == q.coefficients.size()) {
             return *this;
         }
         coefficients[i] += q[i];
     }
-    for(; i < q.coefficients.size(); ++i) {
+    for (; i < q.coefficients.size(); ++i) {
         coefficients.push_back(q[i]);
     }
 
@@ -114,13 +119,13 @@ Polynomial<T> & Polynomial<T>::operator += (const Polynomial<T> & q) {
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator -= (const Polynomial<T> & q) {
     std::size_t i = 0;
-    for(; i < coefficients.size(); ++i) {
+    for (; i < coefficients.size(); ++i) {
         if (i == q.coefficients.size()) {
             return *this;
         }
         coefficients[i] -= q[i];
     }
-    for(; i < q.coefficients.size(); ++i) {
+    for (; i < q.coefficients.size(); ++i) {
         coefficients.push_back(q[i]);
     }
 
@@ -135,9 +140,9 @@ Polynomial<T> & Polynomial<T>::operator *= (const Polynomial<T> & q) {
     size_t oldSize = coefficients.size();
     coefficients.resize(coefficients.size() + q.coefficients.size() - 1, 0);
 
-    for(int i = coefficients.size(); i > 0; --i) {
+    for (int i = coefficients.size(); i > 0; --i) {
         T res = 0;
-        for(int j = i; j > 0; --j) {
+        for (int j = i; j > 0; --j) {
             if (i - j == q.coefficients.size()) {
                 break;
             }
@@ -177,27 +182,68 @@ Polynomial<T> Polynomial<T>::operator * (const Polynomial<T> & p) const {
 
 
 template <typename T>
-Polynomial<T> Polynomial<T>::operator / (const Polynomial<T> & q) const {
+Polynomial<T> & Polynomial<T>::operator /= (const Polynomial<T> & q) {
     if (q.size() > size()) {
-        return Polynomial<T>(0);
+        coefficients= std::vector<T>(1, 0);
+        return *this;
+    }
+
+    Polynomial<T> num(*this);
+
+    coefficients.resize(size() - q.size() + 1);
+    coefficients.assign(size(), 0);
+
+    while (num.size() >= q.size()) {
+        size_t cur = num.size() - q.size();
+
+        if (coefficients[cur] != 0)
+            break;
+
+        coefficients[cur] = num[num.size() - 1] / q[q.size() - 1];
+
+        num -= q * Polynomial<T>(begin(), begin() + cur + 1);
+    }
+
+    return *this;
+}
+
+
+template <typename T>
+Polynomial<T> Polynomial<T>::operator / (const Polynomial<T> & q) const {
+    Polynomial<T> res(*this);
+    return res /= q;
+}
+
+
+
+template <typename T>
+Polynomial<T> & Polynomial<T>::operator %= (const Polynomial<T> & q) {
+    if (q.size() > size()) {
+        return *this;
     }
 
     Polynomial<T> res;
-    res.coefficients =
-        std::vector<T>(size() - q.size() + 1, 0);
-    Polynomial<T> num(*this);
+    res.coefficients.resize(size() - q.size() + 1, 0);
 
-    while(num.size() >= q.size()) {
-        size_t cur = num.size() - q.size();
-        res[cur] =
-            num[num.size() - 1] / q[q.size() - 1];
-        num -= q *
-            Polynomial<T>(res.begin(), res.begin() + cur + 1);
-        std::cout << "DEBUG:" << num << std::endl;
-        num.normalize();
+    while (size() >= q.size()) {
+        size_t cur = size() - q.size();
+
+        if (res[cur] != 0)
+            break;
+        res[cur] = coefficients[size() - 1] / q[q.size() - 1];
+
+        *this -= q * Polynomial<T>(res.begin(), res.begin() + cur + 1);
     }
 
-    return res;
+    return *this;
+}
+
+
+
+template <typename T>
+Polynomial<T> Polynomial<T>::operator % (const Polynomial<T> & q) const {
+    Polynomial<T> p(*this / q);
+    return *this - p*q;
 }
 
 
@@ -207,9 +253,8 @@ T Polynomial<T>::operator() (const T & x) const {
     T res = coefficients[0];
     T pow = x;
 
-    for(const_iterator it = begin() + 1;
-        it != end(); ++it)
-    {
+    for (const_iterator it = begin() + 1;
+        it != end(); ++it) {
         res += *it * pow;
         pow *= x;
     }
@@ -247,11 +292,10 @@ typename Polynomial<T>::iterator Polynomial<T>::end() {
 
 
 
-
-
 template <typename A>
 bool operator == (Polynomial<A> p, Polynomial<A> q) {
-    p.normalize(); q.normalize();
+    p.normalize();
+    q.normalize();
     return p.coefficients == q.coefficients;
 }
 
@@ -259,7 +303,8 @@ bool operator == (Polynomial<A> p, Polynomial<A> q) {
 
 template <typename A>
 bool operator != (Polynomial<A> p, Polynomial<A> q) {
-    p.normalize(); q.normalize();
+    p.normalize();
+    q.normalize();
     return p.coefficients != q.coefficients;
 }
 
@@ -269,15 +314,13 @@ bool operator != (Polynomial<A> p, Polynomial<A> q) {
 template <typename A>
 std::ostream& operator << (
     std::ostream & out,
-    const Polynomial<A> & p)
-{
+    const Polynomial<A> & p) {
 #   ifdef DEBUG
     out << "[";
 #   endif
 
-    for(typename Polynomial<A>::const_iterator it = p.begin();
-        it != p.end(); ++it)
-    {
+    for (typename Polynomial<A>::const_iterator it = p.begin();
+        it != p.end(); ++it) {
         out << *it;
 #       ifndef DEBUG
         out << " * x^" << it - p.begin();
@@ -298,9 +341,11 @@ std::ostream& operator << (
     return out;
 }
 
+
+
 template <typename T>
 void Polynomial<T>::normalize() {
-    for(size_t x = coefficients.size(); x > 1; --x) {
+    for (size_t x = coefficients.size(); x > 1; --x) {
         if (std::abs(coefficients[x - 1]) <= EPSILON) {
             coefficients.pop_back();
         } else {
@@ -310,4 +355,10 @@ void Polynomial<T>::normalize() {
 }
 
 
-#endif /* AORAZAEV_CXX_DZ2_Z2 */
+
+template <typename T>
+size_t Polynomial<T>::size() const {
+    return coefficients.size();
+}
+
+#endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
