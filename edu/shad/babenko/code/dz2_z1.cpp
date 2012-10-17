@@ -6,11 +6,14 @@
  *  Author: Orazaev Aman
  *
  */
-#include<iostream>
-#include<vector>
-#include<stdexcept>
 #include<time.h>
 #include<cstdlib>
+
+#include<iostream>
+#include<vector>
+#include<string>
+#include<algorithm>
+#include<stdexcept>
 
 template <typename A>
 void printElements(A begin, A end, std::string space = " ");
@@ -22,7 +25,6 @@ size_t max(size_t x, size_t y) {
 /* Larges Common Subsequence size */
 template <typename A, typename B>
 size_t sizeOfLCS(A begin0, A end0, B begin1, B end1) {
-
     size_t seqSize0 = end0 - begin0;
     size_t seqSize1 = end1 - begin1;
 
@@ -32,13 +34,13 @@ size_t sizeOfLCS(A begin0, A end0, B begin1, B end1) {
     };
     int line = 0;
 
-    for(size_t i0 = 0; i0 < seqSize0; ++i0) {
+    for (size_t i0 = 0; i0 < seqSize0; ++i0) {
         for (size_t i1 = 0; i1 < seqSize1; ++i1) {
             if (*(begin0 + i0) == *(begin1 + i1)) {
                 newL[line][i1 + 1] = newL[(line + 1) % 2][i1] + 1;
             } else {
                 newL[line][i1 + 1] =
-                    max(newL[(line + 1) % 2][i1 + 1], newL[line][i1]);
+                    std::max(newL[(line + 1) % 2][i1 + 1], newL[line][i1]);
             }
         }
         line = (line + 1) % 2;
@@ -53,8 +55,7 @@ size_t sizeOfLCS(A begin0, A end0, B begin1, B end1) {
 /* Tests for sizeOfLCS */
 template <typename A>
 void printElements(A begin, A end, std::string space = " ") {
-
-    while(begin != end) {
+    while (begin != end) {
         std::cout << *begin++ << space;
     }
 
@@ -63,7 +64,6 @@ void printElements(A begin, A end, std::string space = " ") {
 
 template <typename A, typename B>
 double sizeOfLcsIs(A begin0, A end0, B begin1, B end1, size_t size) {
-
     clock_t start = clock();
     size_t result = sizeOfLCS(begin0, end0, begin1, end1);
     clock_t end = clock();
@@ -81,7 +81,7 @@ double sizeOfLcsIs(A begin0, A end0, B begin1, B end1, size_t size) {
             << size << std::endl;
         throw std::runtime_error("TEST FAILED!");
     }
-    return (double) (end - start) / CLOCKS_PER_SEC;
+    return static_cast<double> (end - start) / CLOCKS_PER_SEC;
 }
 
 
@@ -119,7 +119,7 @@ void trivialTest(int a, int b, size_t r, int n) {
 void bigTest() {
     std::vector<int> seq0(2000, 0);
     std::vector<int> seq1(2000, 0);
-    for(size_t i = 0; i < 2000; ++i) {
+    for (size_t i = 0; i < 2000; ++i) {
         seq0[i] = i;
         seq1[i] = i;
     }
@@ -135,7 +135,7 @@ std::vector<int> randomVector(int maxValue,
     size_t size = rand() % maxSize + 1;
     std::vector<int> res(size, 0);
 
-    for(int i = 0; i < size; ++i) {
+    for (int i = 0; i < size; ++i) {
         res[i] = rand() % (maxValue - minValue) + minValue;
     }
 
@@ -147,7 +147,7 @@ bool isCS(const std::vector<int> & seq0,
     const std::vector<size_t> & indx) {
 
     size_t i = 0;
-    for(std::vector<int>::const_iterator it = seq1.begin();
+    for (std::vector<int>::const_iterator it = seq1.begin();
         it != seq1.end() && i < indx.size(); ++it) {
         if (*it == seq0[indx[i]]) {
             ++i;
@@ -170,7 +170,7 @@ std::vector<size_t> getLcsIndex(
 
     std::vector<size_t> LCSindx;
 
-    for(size_t i = indx.size(); i > 0; --i) {
+    for (size_t i = indx.size(); i > 0; --i) {
         std::vector<size_t> tindx(indx);
         tindx.erase(tindx.begin() + i - 1);
 
@@ -189,14 +189,14 @@ size_t trivialSizeOfLCS(const std::vector<int> seq0,
 
     std::vector<size_t> indx(seq0.size(), 0);
 
-    for(size_t i = 1; i < indx.size(); ++i)
+    for (size_t i = 1; i < indx.size(); ++i)
         indx[i] = i;
 
     return getLcsIndex(seq0, seq1, indx).size();
 }
 
 void stressTest(size_t N) {
-    for(size_t i = 0; i < N; ++i) {
+    for (size_t i = 0; i < N; ++i) {
         std::vector<int> seq0(randomVector(7, 0, 10));
         std::vector<int> seq1(randomVector(7, 0, 10));
 
