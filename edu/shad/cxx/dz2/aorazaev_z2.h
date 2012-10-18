@@ -36,7 +36,6 @@ class Polynomial {
     Polynomial<T> operator - (const Polynomial<T> &) const;
     Polynomial<T> operator * (const Polynomial<T> &) const;
 
-    // TODO
     Polynomial<T> & operator /= (const Polynomial<T> & q);
     Polynomial<T> & operator %= (const Polynomial<T> &);
     Polynomial<T> operator / (const Polynomial<T> &) const;
@@ -68,6 +67,9 @@ class Polynomial {
     std::vector<T> coefficients;
 
     void normalize();
+    void division(Polynomial<T> * const p,
+        const Polynomial<T> & q,
+        Polynomial<T> * const mod);
 
     size_t size() const;
 };
@@ -183,26 +185,9 @@ Polynomial<T> Polynomial<T>::operator * (const Polynomial<T> & p) const {
 
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator /= (const Polynomial<T> & q) {
-    if (q.size() > size()) {
-        coefficients= std::vector<T>(1, 0);
-        return *this;
-    }
+    Polynomial<T> mod(*this);
 
-    Polynomial<T> num(*this);
-
-    coefficients.resize(size() - q.size() + 1);
-    coefficients.assign(size(), 0);
-
-    while (num.size() >= q.size()) {
-        size_t cur = num.size() - q.size();
-
-        if (coefficients[cur] != 0)
-            break;
-
-        coefficients[cur] = num[num.size() - 1] / q[q.size() - 1];
-
-        num -= q * Polynomial<T>(begin(), begin() + cur + 1);
-    }
+    division(this, q, &mod);
 
     return *this;
 }
@@ -211,6 +196,7 @@ Polynomial<T> & Polynomial<T>::operator /= (const Polynomial<T> & q) {
 template <typename T>
 Polynomial<T> Polynomial<T>::operator / (const Polynomial<T> & q) const {
     Polynomial<T> res(*this);
+
     return res /= q;
 }
 
@@ -218,22 +204,9 @@ Polynomial<T> Polynomial<T>::operator / (const Polynomial<T> & q) const {
 
 template <typename T>
 Polynomial<T> & Polynomial<T>::operator %= (const Polynomial<T> & q) {
-    if (q.size() > size()) {
-        return *this;
-    }
+    Polynomial<T> num(*this);
 
-    Polynomial<T> res;
-    res.coefficients.resize(size() - q.size() + 1, 0);
-
-    while (size() >= q.size()) {
-        size_t cur = size() - q.size();
-
-        if (res[cur] != 0)
-            break;
-        res[cur] = coefficients[size() - 1] / q[q.size() - 1];
-
-        *this -= q * Polynomial<T>(res.begin(), res.begin() + cur + 1);
-    }
+    division(&num, q, this);
 
     return *this;
 }
@@ -242,8 +215,9 @@ Polynomial<T> & Polynomial<T>::operator %= (const Polynomial<T> & q) {
 
 template <typename T>
 Polynomial<T> Polynomial<T>::operator % (const Polynomial<T> & q) const {
-    Polynomial<T> p(*this / q);
-    return *this - p*q;
+    Polynomial<T> res(*this);
+
+    return res %= q;
 }
 
 
@@ -351,6 +325,34 @@ void Polynomial<T>::normalize() {
         } else {
             break;
         }
+    }
+}
+
+
+template <typename T>
+void Polynomial<T>::division(Polynomial<T> * const p,
+    const Polynomial<T> & q,
+    Polynomial<T> * const mod)
+{
+    if (q.size() > p->size()) {
+        p->coefficients = std::vector<T>(1, 0);
+        *mod = q;
+        return;
+    }
+
+    p->coefficients.resize(p->size() - q.size() + 1);
+    p->coefficients.assign(p->size(), 0);
+
+    while (mod->size() > q.size() ||
+           ((*mod)[mod->size() - 1] / q[q.size() - 1] != 0 &&
+           mod->size() == q.size()))
+    {
+        size_t cur = mod->size() - q.size();
+
+        (*p)[cur] =
+            (*mod)[mod->size() - 1] / q[q.size() - 1];
+
+        *mod -= q * Polynomial<T>(p->begin(), p->begin() + cur + 1);
     }
 }
 

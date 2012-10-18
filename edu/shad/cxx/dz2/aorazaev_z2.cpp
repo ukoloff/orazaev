@@ -211,7 +211,7 @@ int main() {
     }
 
     {
-        int a[4] = {-42, 0, 12, 1};
+        int a[4] = {-42, 0, -12, 1};
         int b[2] = {-3, 1};
         Polynomial<int> p(a, a + 4);
         Polynomial<int> q(b, b + 2);
@@ -219,6 +219,86 @@ int main() {
 
         startTest("Operator /");
         assertEqual(p / q, Polynomial<int>(e, e + 3));
+        endTest();
+    }
+
+    {
+        int a[4] = {-42, 0, -12, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(1);
+        int e[4] = {-42, 0, -12, 1};
+
+        startTest("Operator / vol.2");
+        assertEqual(p / q, Polynomial<int>(e, e + 4));
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(2);
+        int e[4] = {0, 0, 1, 1};
+
+        startTest("Operator / vol.3");
+        assertEqual(p / q, Polynomial<int>(e, e + 4));
+        endTest();
+    }
+
+    {
+        int a[4] = {-42, 0, -12, 1};
+        int b[2] = {-3, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(b, b + 2);
+        int e[3] = {-27, -9, 1};
+
+        startTest("Operator /=");
+        assertEqual(p /= q, Polynomial<int>(e, e + 3));
+        endTest();
+    }
+
+    {
+        int a[4] = {-42, 0, -12, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(1);
+        int e[4] = {-42, 0, -12, 1};
+
+        startTest("Operator /= vol.2");
+        assertEqual(p /= q, Polynomial<int>(e, e + 4));
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(2);
+        int e[4] = {0, 0, 1, 1};
+
+        startTest("Operator /= vol.3");
+        assertEqual(p /= q, Polynomial<int>(e, e + 4));
+        endTest();
+    }
+
+    {
+        int a[4] = {-42, 0, -12, 1};
+        int b[2] = {-3, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(b, b + 2);
+        int e[3] = {-27, -9, 1};
+
+        startTest("Operator %=");
+        assertEqual(p %= q, Polynomial<int>(-123));
+        endTest();
+    }
+
+    {
+        int a[4] = {-42, 0, -12, 1};
+        int b[2] = {-3, 1};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(b, b + 2);
+        int e[3] = {-27, -9, 1};
+
+        startTest("Operator %");
+        assertEqual(p % q, Polynomial<int>(-123));
         endTest();
     }
     return 0;
