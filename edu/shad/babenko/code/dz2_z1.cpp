@@ -1,9 +1,9 @@
 /*
+ *  Copyright (c) 2012 Aman Orazaev
+ *
  *  Homework 2, Problem 1
  *
  *  Longest common sequence. (LCS)
- *
- *  Author: Orazaev Aman
  *
  */
 #include<time.h>
@@ -17,10 +17,6 @@
 
 template <typename A>
 void printElements(A begin, A end, std::string space = " ");
-
-size_t max(size_t x, size_t y) {
-    return x > y ? x : y;
-}
 
 /* Larges Common Subsequence size */
 template <typename A, typename B>
