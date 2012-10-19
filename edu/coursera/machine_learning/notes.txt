@@ -196,3 +196,313 @@ Large data rationale:
   (neural network with many hidden layers,
   low bias algorithm). Use a very large training set
   is unlikely to overfit.
+
+
+
+
+
+
+/* Clustering */
+Its our first unsupervised learning algorithm.
+
+Examples:
+* Market segmentation
+* Social network analysis
+
+In a clustering problem we are having unlabled
+dataset. We trying to find structure in this data.
+
+
+K-Means Algorithmr.
+Cluster centroids is the centrs of the 
+data area.
+We are moving cluster centroids and changing data groups
+on each iteration of algorithm.
+It's main idea.
+
+more formally:
+Input:
+    * K (number of clusters)
+    * Training set {x1, ..., xm}
+x -- row numbers.
+
+Randomly initialize K cluster centroids mu_1 ... mu_k,
+its row numbers.
+
+repeat {
+    % first move
+    for i = 1 to m
+        c^(i) := index (from 1 to k) of cluster centroids
+                 closest to x^(i)
+    % second move
+    for k = 1 to K
+        mu_k := avarage (mean) of points assigned to cluster k
+}
+
+first move -- cluster assignment step
+We can use euclidian measure to indicate closest x^(i).
+min_k ||x^(i) - mu^(k)||^2
+
+second move -- move centroid step
+
+What with cluster what have zero count of points.
+
+Example T-shirt sizing:
+We have dataset from height and weight of people 
+population. So we are searching the T-shirt size
+Small, Medium or Large.
+
+
+Optimization objective.
+All of machine learning algorithms has optimization
+objectives. What we should to minimize for K-means?
+
+c^(i) = index of cluster (1, 2, ... K) to which
+example x^(i) is currently assigned.
+mu_k = cluster centorid.
+mu_c(i) = cluster centroid of clouster to which example
+x^(i) has been assigned.
+
+Cost function:
+J(c^(1) ... c^(m), mu_1, ..., mu_k) = ...
+    1 / m * sum_{i = 1}^{m}(|| x^(i) - mu_{c(i)} ||^2)
+
+So cluster assignment step minimize J(...) cost c^(1) ...
+c^(m) <- (hold, mu_1, ... , mu_k fixed)
+
+Move centroid step is choose the values of mu that minimize
+J.
+
+
+Random initialization.
+first step was "Randomly initialize K cluster centroids"
+When running K-means we should have K < m.
+1) we are randomly pick K training examples
+2) set mu_1, ..., mu_k equal to these K examples.
+
+This is really recomended way.
+
+
+
+Local optima.
+Sometimes we have 3 cluster, but we can
+find first centroid having 2 cluster, and 
+second and fird divide last cluster.
+
+
+trying to random initialize from 50 - 1000 times
+For i = 1 to 100 {
+    Randomly initialize K-means
+    Run K-means. Get c^(1)...c^(m), mu_1...mu_k
+    Compute cost function (distortion)
+        J(c^(1) ... c^(m), mu1...muk)
+}
+
+pick clustering that gave lowest cost.
+k = 2..10
+
+
+
+Choosing the number of clusters
+How to choose K?
+
+Sometimes people choosing manually.
+
+What is the right value of K?
+We must have automatic algorithm to
+choose how much clusters we have.
+
+
+Elbow method.
+Plotting f(no.clusters K) -> Cost. function J
+We are search elbow of this curve. Distortion(J)
+value sholud be smaller with growing K.
+
+But if K-means got stuk with local optima --
+we can find growing J on plot in some points.
+
+Sometimes we are choosing the value of K using the
+methric for how it performs for the later purpose.
+
+
+
+
+
+
+/* Dimensionality reduction */
+For example we have 2 features
+x_1 -- size in cm
+x_2 -- size in inches
+This is very worse...
+f(x_1) -> x_2 will grow lineary.
+So we can reduce data from 2D to 1D.
+
+It may be not the inches and cm, it
+can be pilot skills and pilot enjoyment
+of flying, and what features growing lineary
+we should define one new features z_1 instead of
+x_1 x_2.
+
+We are projecting all f(x_1) on line what grows
+lineary like f(x_1) -- it will be z_1 values.
+
+We can reduce data from 3D to 2D.
+If all data near to some plane, we can project
+data on plane and take z_1 and z_2 as new 2
+features instead of x_1 x_2 x_3.
+
+
+Motiation II:
+Data visualization.
+For lot of probleems it helpful to visualize
+the data.
+
+How do we are visualize 50 features?
+What we have to do is to reduce the data from
+50D to 2D.
+
+
+
+/* Principal component analysis */
+Problem formulation:
+PCA does find low dimentional surfaices where
+measure to values of scaling features is minimize.
+
+In contrast we have worset surfaice to compress
+features -- normal for PCA line.
+
+For 2D -> 1D
+So we should find vector u^(1) or -u^(1) (it doesn't
+matteri), what have PCA line direction.
+
+For 3D -> 2D
+We should find vectors u^(1) and u^(2) what are
+defined PCA surfaice needed to compress features.
+
+So we should minimize projection distance to plane or
+line or k-dimensional surfaice.
+
+
+PCA is not a linear regression! For PCA we are minimizing
+shortest distances(90 degree projection),
+for linear regression some axe projection (x_projection).
+
+
+So pca try to find lower dimensional surfaice to
+project our data(features).
+
+
+
+PCA Algorithm.
+0) Data preprocessing (feature scaling/mean normalization):
+    x_i - mean(x) / sigma
+Where sigma may be diviation or squared diviation of x.
+
+compute "covariance matrix":
+    sum = 1 / m * sum (x^i)(x^i)'
+compute "eigenvectors" of matrix sum:
+    [U, S, V] = svd(Sigma)
+Singular value decomposition:
+    eig(Sigma)
+
+
+Sigma is n x n matrix, x^i - n x 1 vector
+U - n x n matrix -- columns of U matrix
+u^(1) ... u^(k) (first k columns)
+
+(Ureduse = first k columns U) 
+z = Ureduce' * x
+
+After mean normalization(ensure every feature
+has zero mean) and optionally feature scaling:
+Sigma = 1 / m sum((x^(i))(x^(i))'
+
+Sigma = (1/m) * X' * X
+[U, S, V] = svd(Sigma)
+Ureduce = U(:, 1:k);
+z = Ureduce' * x;
+
+
+
+Chosing the number of principal components.
+Choosing k.
+Avarage squared projection error:
+ASPE = 1 / m * sum_{i = 1}^{m} || x^(i) - x^(i)_approx ||^2
+Total variation in the data:
+TVID = 1 / m * sum ||x^(i)||^2
+
+Typically, choose k to be smallest value so that
+    ASPE / TVID <= 0.01
+
+"99% of variance is retained."
+You can use 0.05 and get 95 % of variance is retained.
+
+Try PCA with k = 1, 2, 3 ...
+Compute U_reduce, z1 ... zm, x1approx... xmapprox
+Check if:
+    ASPE / TVID <= 0.01
+
+
+[U, S, V] = svd(Sigma);
+% S - diagonal matrix
+% We can compute "check if" very simple
+sum_{i=1..k}(S_ii) / sum_{i=1..n}(S_ii) >= 0.99
+
+So we can compute svd just once.
+
+we can go back to original data using
+xapprox_j = Ureduce * z_j
+
+It process called reconstruction of the
+original data.
+
+
+
+Advice for applying PCA.
+Supervised learning speedup
+(x, y); x \in R^10000
+Extract inputs:
+    x -> PCA -> z
+    z \in R^1000
+    z = Ureduce' * x
+
+New training set:
+(z, y)
+Note: Mappint x -> z should be defined by
+running PCA only on the training set.
+This mapping can be applied as well to examples
+x_cv and x_test in cross validation set and
+test set.
+
+Application of PCA:
+- Compression
+    - Reduce memory/disk needed to store data
+    - Speed up learning algorithm
+
+- Visualisation (k=2 or k=3)
+
+
+
+Bad use of PCA: To prevent overfitting
+Use z instead of x to reduce the number of
+features to k < n
+(BAD)Thus, fewer features, less likely to overfit(BAD)!
+
+This might work ok, but isn't a good way to address
+overfitting. Use regularization instead!
+
+
+PCA is sometimes used where it shouldn't be:
+Design of ML system:
+    - Get training set (x, y)
+    - Run PCA x -> z
+    - Train logistic regression on (z, y)
+    - Test on test set: x_test -> z_test.
+      Run h(z_test, y_test)
+
+How about doing the whole thing without using PCA.
+
+Before implementing PCA, first try running whatever
+you want to do with the original/raw data x^(i).
+Only if that doesn't do what you want, then implement
+PCA and consider using z^(i).
