@@ -1,3 +1,11 @@
+/*
+ *  Copyright (c) 2012 Aman Orazaev
+ *
+ *  Homework 3, Problem 4
+ *
+ *  Longest common sequence. (LCS)
+ *
+ */
 #include <iostream>
 #include <list>
 #include <vector>
@@ -92,9 +100,9 @@ std::string TStatistic::toStr() const {
     std::stringstream out(std::stringstream::out);
 
     out << "{Sorted:[";
-    for (std::list<int>::const_iterator it = _sortedList.begin();
-         it != _sortedList.end(); ++it) {
-        out << (int) *it;
+    for (std::list<int>::const_iterator it = _sortedList.begin()
+        ; it != _sortedList.end(); ++it) {
+        out << *it;
 
         if (it != --_sortedList.end()) {
             out << ", ";
@@ -105,7 +113,7 @@ std::string TStatistic::toStr() const {
 
     for (std::list<std::list<int>::iterator>::const_iterator it =
          _pointerList.begin(); it != _pointerList.end(); ++it) {
-        out << (int) **it;
+        out << **it;
 
         if (it != --_pointerList.end()) {
             out << ", ";
@@ -123,8 +131,8 @@ std::string TStatistic::toStr() const {
 void TStatistic::pushElementInLists(const int & elem) {
     bool elementWasPushed = false;
 
-    for (std::list<int>::iterator it = _sortedList.begin();
-         it != _sortedList.end(); ++it) {
+    for (std::list<int>::iterator it = _sortedList.begin()
+        ; it != _sortedList.end(); ++it) {
         if (*it >= elem) {
             _sortedList.insert(it, elem);
             _pointerList.push_back(--it);
@@ -188,10 +196,8 @@ std::vector<int> solveProblem(const std::vector<int> & data
 
     queue.push(data[0]);
 
-    for (std::string::const_iterator it = commandString.begin();
-         it != commandString.end(); ++it) {
-        //std::cout << queue.toStr() << std::endl;
-
+    for (std::string::const_iterator it = commandString.begin()
+        ; it != commandString.end(); ++it) {
         if (*it == POP) {
             ++L;
             queue.pop();
@@ -226,7 +232,6 @@ double checkAndTime(A begin, A end
     , B ansBegin, B ansEnd
     , const std::string commandString
     , size_t k) {
-
     std::vector<int> inputArray(begin, end);
     std::vector<int> expect(ansBegin, ansEnd);
 
@@ -398,7 +403,6 @@ void bigTest2() {
 std::vector<int> randomVector(int maxValue
     , int minValue
     , size_t maxSize) {
-
     size_t size = rand() % maxSize + 1;
     std::vector<int> res(size, 0);
 
