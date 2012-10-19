@@ -1,0 +1,508 @@
+/* What to do next? */
+
+It's good to separete your data to 3 sets:
+J_train-- training set.
+J_CV   -- cross-validatin set.
+J_test -- its your testing set.
+
+When you get new algorithm, learned on your
+J_train, you should minimize error of lamda 
+parameter on your J_CV set, and only then get
+your algorithm error on J_test.
+
+Best practice is separete your data set like this:
+60 % -- training set.
+20 % -- CV set.
+20 % -- test set.
+
+
+List of learning algorighm problems:
+high variance -- is overfitting problem.
+high bias     -- is underfitting problem.
+
+
+There are many ways to make your learning algorithm better:
+* Collect more data                 -> fix high variance
+* Try smaller set of features       -> fix high variance
+* Try getting additional features   -> fix high bias
+* Add polynomial features           -> fix high bias
+* Try decreasing lambda             -> fix high bias
+* Try increasing lambda             -> fix high variance
+
+"Small" neural network more prone to underfitting, and
+"Large" neural network more prone to overfitting problem.
+
+
+
+
+/* Machine learning system desine */
+
+Spam classification problem:
+* spam is 1
+* non spam is 0
+
+Problems:
+* misspellings like "watches" -> "w4tches"
+
+We cah choose features set as: if letter have some
+words like "discount" and "buy", or "your_name_here",
+and learn our algorithm.
+
+
+How to spend our time to get small error?
+* Collect lots of data ("honeypot" project)
+* Develop sophisticated features based on email routing
+  from email header.
+* Develop sophisticated features for message body, e.g.
+  should "discount" and "discounts" be treated as the same word?
+  How about "deal" and "Dealer"? Features about punctuation?
+* Develop sophisticated algorithm to detect misspellings (e.g.
+  (m0rtgage, med1cine, w4tches.)
+
+
+Recommended approach
+* Start with a simple algorithm that you can implement quickly.
+  Implement it and test it on your CV data.
+* Plot leaerning curves to decide if more data, more features, etc.
+  are likely to help
+* Error analysis: Manually examine the examples (in CV set)
+  that your algorithm made errors on. See if you spot any
+  systematic trend in what type of examples it is making errors on.
+
+Error analysis.
+m_cv = 500 examples in cross validatin set
+
+Algorithm missclassifies 100 emails.
+Manyally examine th 100 errors, and categorize them base on:
+* what type of email it is (pharma, replica, steal password)
+  [ ] pharma: 12
+  [ ] replica: 4
+  [*] steal password: 53
+  [ ] other: 31
+* What cues (features) you think would have helped the algorithm
+  classify them correctly:
+  [ ] Deliberate misspellings: 5
+  [ ] unusual email routing: 16
+  [*] Unusual(spamming) punctuation: 32
+It is manually error data analys.
+
+But error analysis not the good idea sometimes. For some features or 
+ways is only good idea is try and analys. For stemming example:
+[*] With stemming: 3% error
+[ ] Without stemming: 5% error
+or Distinguish upper vs. lower cas(Mom/mom).
+[ ] With: 3.2% error(increased)
+[*] Without(only stemming): 3.0% error
+
+Strongly recommended to do error analysis on your CV set.
+
+
+Scew classes.
+Cancer classification example: Train logistic regression model.
+Find that you got 1% error on test set.
+(99% correct diagnoses)
+
+But only 0.5% of patients have cancer. And:
+"""
+function y = predict Cancer(x):
+    y = 0; % ignore x!
+return
+"""
+will have 0.5% error!
+
+So we changed our algorithm, and get:
+* 99.2% accuracy
+* 99.5% accuracy
+
+What algorithm is better?
+It's hard to choose algorithm using only accuracy for scew
+classes. It need different precision metric Precision/Recall.
+
+
+Precision/Recall metric.
+y = 1 in presence of rare class that we want to detect.
+
+           Actual class
+             1    0
+           *---------*
+Predict  1 |(1) | (2)|
+class      |---------|
+         0 |(3) | (4)|
+           *---------*
+
+(1) -- True positive
+(2) -- False positive
+(3) -- False negative
+(4) -- True negative
+
+First number we gonna compute is precision:
+(Of all patients where we predicted y = 1, what fraction
+actually has cancer?)
+Precision = True positives / #predicted positives ...
+          = True positive / (True positive + False positive)
+
+(Of all patients that actually have cancer, what fraction
+did we correctly detects as having cancer)
+Recall = True positives / #actual positives ...
+       = True positive / (True positive + False negative)
+
+If y = 0 always, it will get Recall = 0.
+
+
+Trading off precision and recall:
+"Cancer logistic regression"
+Predict 1 if h_o(x) \ge 0.5
+Predict 0 if h_o(x) < 0.5
+
+Suppose we want to predict y = 1(cancer)
+only if very confident:
+shift threshold to 0.7:
+predict 1 h_o(x) \ge 0.7
+predcit 0 h_o(x) < 0.7
+(Higher precision, lower recall)
+
+Suppose we want to avoid missing too many
+cases of cancer(avoid false negatives).
+We can shift threshold to 0.3
+(Higher recall, lower precision)
+
+More generally: Predict 1 if h_o \ge threshold.
+How to choose threshold automatically?
+
+F_1 score(F score):
+F_1 = 2 * P * R / (P + R)
+
+Real story:
+E.g. Classifiy between confusable words.
+   {to, two, too} {then, than}
+   For breakfast I ate ___ eggs.
+Algorithms:
+   - Preceptron(Logistic regression)
+   - winnow
+   - memory-based
+   - native bayes
+And all algorithms got very similar result.
+All grows then training set size is increased.
+
+So when got more date is the good idea?
+Large data rationale:
+* Assume feature x \in R^{n+1} has sufficient information 
+  to predict y accurately.
+  Useful Test: Given the input x, can human expert
+               confidently predict y?
+  Example: Confusable words.
+  Counterexample: Predict house price using only feet^2
+* Use a learning algorithm with many parameters.
+  (neural network with many hidden layers,
+  low bias algorithm). Use a very large training set
+  is unlikely to overfit.
+
+
+
+
+
+
+/* Clustering */
+Its our first unsupervised learning algorithm.
+
+Examples:
+* Market segmentation
+* Social network analysis
+
+In a clustering problem we are having unlabled
+dataset. We trying to find structure in this data.
+
+
+K-Means Algorithmr.
+Cluster centroids is the centrs of the 
+data area.
+We are moving cluster centroids and changing data groups
+on each iteration of algorithm.
+It's main idea.
+
+more formally:
+Input:
+    * K (number of clusters)
+    * Training set {x1, ..., xm}
+x -- row numbers.
+
+Randomly initialize K cluster centroids mu_1 ... mu_k,
+its row numbers.
+
+repeat {
+    % first move
+    for i = 1 to m
+        c^(i) := index (from 1 to k) of cluster centroids
+                 closest to x^(i)
+    % second move
+    for k = 1 to K
+        mu_k := avarage (mean) of points assigned to cluster k
+}
+
+first move -- cluster assignment step
+We can use euclidian measure to indicate closest x^(i).
+min_k ||x^(i) - mu^(k)||^2
+
+second move -- move centroid step
+
+What with cluster what have zero count of points.
+
+Example T-shirt sizing:
+We have dataset from height and weight of people 
+population. So we are searching the T-shirt size
+Small, Medium or Large.
+
+
+Optimization objective.
+All of machine learning algorithms has optimization
+objectives. What we should to minimize for K-means?
+
+c^(i) = index of cluster (1, 2, ... K) to which
+example x^(i) is currently assigned.
+mu_k = cluster centorid.
+mu_c(i) = cluster centroid of clouster to which example
+x^(i) has been assigned.
+
+Cost function:
+J(c^(1) ... c^(m), mu_1, ..., mu_k) = ...
+    1 / m * sum_{i = 1}^{m}(|| x^(i) - mu_{c(i)} ||^2)
+
+So cluster assignment step minimize J(...) cost c^(1) ...
+c^(m) <- (hold, mu_1, ... , mu_k fixed)
+
+Move centroid step is choose the values of mu that minimize
+J.
+
+
+Random initialization.
+first step was "Randomly initialize K cluster centroids"
+When running K-means we should have K < m.
+1) we are randomly pick K training examples
+2) set mu_1, ..., mu_k equal to these K examples.
+
+This is really recomended way.
+
+
+
+Local optima.
+Sometimes we have 3 cluster, but we can
+find first centroid having 2 cluster, and 
+second and fird divide last cluster.
+
+
+trying to random initialize from 50 - 1000 times
+For i = 1 to 100 {
+    Randomly initialize K-means
+    Run K-means. Get c^(1)...c^(m), mu_1...mu_k
+    Compute cost function (distortion)
+        J(c^(1) ... c^(m), mu1...muk)
+}
+
+pick clustering that gave lowest cost.
+k = 2..10
+
+
+
+Choosing the number of clusters
+How to choose K?
+
+Sometimes people choosing manually.
+
+What is the right value of K?
+We must have automatic algorithm to
+choose how much clusters we have.
+
+
+Elbow method.
+Plotting f(no.clusters K) -> Cost. function J
+We are search elbow of this curve. Distortion(J)
+value sholud be smaller with growing K.
+
+But if K-means got stuk with local optima --
+we can find growing J on plot in some points.
+
+Sometimes we are choosing the value of K using the
+methric for how it performs for the later purpose.
+
+
+
+
+
+
+/* Dimensionality reduction */
+For example we have 2 features
+x_1 -- size in cm
+x_2 -- size in inches
+This is very worse...
+f(x_1) -> x_2 will grow lineary.
+So we can reduce data from 2D to 1D.
+
+It may be not the inches and cm, it
+can be pilot skills and pilot enjoyment
+of flying, and what features growing lineary
+we should define one new features z_1 instead of
+x_1 x_2.
+
+We are projecting all f(x_1) on line what grows
+lineary like f(x_1) -- it will be z_1 values.
+
+We can reduce data from 3D to 2D.
+If all data near to some plane, we can project
+data on plane and take z_1 and z_2 as new 2
+features instead of x_1 x_2 x_3.
+
+
+Motiation II:
+Data visualization.
+For lot of probleems it helpful to visualize
+the data.
+
+How do we are visualize 50 features?
+What we have to do is to reduce the data from
+50D to 2D.
+
+
+
+/* Principal component analysis */
+Problem formulation:
+PCA does find low dimentional surfaices where
+measure to values of scaling features is minimize.
+
+In contrast we have worset surfaice to compress
+features -- normal for PCA line.
+
+For 2D -> 1D
+So we should find vector u^(1) or -u^(1) (it doesn't
+matteri), what have PCA line direction.
+
+For 3D -> 2D
+We should find vectors u^(1) and u^(2) what are
+defined PCA surfaice needed to compress features.
+
+So we should minimize projection distance to plane or
+line or k-dimensional surfaice.
+
+
+PCA is not a linear regression! For PCA we are minimizing
+shortest distances(90 degree projection),
+for linear regression some axe projection (x_projection).
+
+
+So pca try to find lower dimensional surfaice to
+project our data(features).
+
+
+
+PCA Algorithm.
+0) Data preprocessing (feature scaling/mean normalization):
+    x_i - mean(x) / sigma
+Where sigma may be diviation or squared diviation of x.
+
+compute "covariance matrix":
+    sum = 1 / m * sum (x^i)(x^i)'
+compute "eigenvectors" of matrix sum:
+    [U, S, V] = svd(Sigma)
+Singular value decomposition:
+    eig(Sigma)
+
+
+Sigma is n x n matrix, x^i - n x 1 vector
+U - n x n matrix -- columns of U matrix
+u^(1) ... u^(k) (first k columns)
+
+(Ureduse = first k columns U) 
+z = Ureduce' * x
+
+After mean normalization(ensure every feature
+has zero mean) and optionally feature scaling:
+Sigma = 1 / m sum((x^(i))(x^(i))'
+
+Sigma = (1/m) * X' * X
+[U, S, V] = svd(Sigma)
+Ureduce = U(:, 1:k);
+z = Ureduce' * x;
+
+
+
+Chosing the number of principal components.
+Choosing k.
+Avarage squared projection error:
+ASPE = 1 / m * sum_{i = 1}^{m} || x^(i) - x^(i)_approx ||^2
+Total variation in the data:
+TVID = 1 / m * sum ||x^(i)||^2
+
+Typically, choose k to be smallest value so that
+    ASPE / TVID <= 0.01
+
+"99% of variance is retained."
+You can use 0.05 and get 95 % of variance is retained.
+
+Try PCA with k = 1, 2, 3 ...
+Compute U_reduce, z1 ... zm, x1approx... xmapprox
+Check if:
+    ASPE / TVID <= 0.01
+
+
+[U, S, V] = svd(Sigma);
+% S - diagonal matrix
+% We can compute "check if" very simple
+sum_{i=1..k}(S_ii) / sum_{i=1..n}(S_ii) >= 0.99
+
+So we can compute svd just once.
+
+we can go back to original data using
+xapprox_j = Ureduce * z_j
+
+It process called reconstruction of the
+original data.
+
+
+
+Advice for applying PCA.
+Supervised learning speedup
+(x, y); x \in R^10000
+Extract inputs:
+    x -> PCA -> z
+    z \in R^1000
+    z = Ureduce' * x
+
+New training set:
+(z, y)
+Note: Mappint x -> z should be defined by
+running PCA only on the training set.
+This mapping can be applied as well to examples
+x_cv and x_test in cross validation set and
+test set.
+
+Application of PCA:
+- Compression
+    - Reduce memory/disk needed to store data
+    - Speed up learning algorithm
+
+- Visualisation (k=2 or k=3)
+
+
+
+Bad use of PCA: To prevent overfitting
+Use z instead of x to reduce the number of
+features to k < n
+(BAD)Thus, fewer features, less likely to overfit(BAD)!
+
+This might work ok, but isn't a good way to address
+overfitting. Use regularization instead!
+
+
+PCA is sometimes used where it shouldn't be:
+Design of ML system:
+    - Get training set (x, y)
+    - Run PCA x -> z
+    - Train logistic regression on (z, y)
+    - Test on test set: x_test -> z_test.
+      Run h(z_test, y_test)
+
+How about doing the whole thing without using PCA.
+
+Before implementing PCA, first try running whatever
+you want to do with the original/raw data x^(i).
+Only if that doesn't do what you want, then implement
+PCA and consider using z^(i).
