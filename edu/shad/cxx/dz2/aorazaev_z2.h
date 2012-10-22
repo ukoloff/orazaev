@@ -345,10 +345,9 @@ void Polynomial<T>::normalize() {
 
 
 template <typename T>
-void Polynomial<T>::division(Polynomial<T> * const p,
-    const Polynomial<T> & q,
-    Polynomial<T> * const mod)
-{
+void Polynomial<T>::division(Polynomial<T> * const p
+    , const Polynomial<T> & q
+    , Polynomial<T> * const mod) {
     if (q.size() > p->size()) {
         p->coefficients = std::vector<T>(1, 0);
         *mod = q;
@@ -367,7 +366,12 @@ void Polynomial<T>::division(Polynomial<T> * const p,
         (*p)[cur] =
             (*mod)[mod->size() - 1] / q[q.size() - 1];
 
+
         *mod -= q * Polynomial<T>(p->begin(), p->begin() + cur + 1);
+
+        if ((*p)[cur] == 0) {
+            break;
+        }
     }
 }
 
