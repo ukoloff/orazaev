@@ -58,7 +58,7 @@ class TCMServer {
     TThreadListener listener;
     bool isListening;
     std::list<TThreadOperator*> operatorList;
-    
+
     std::auto_ptr<TLogger> msgLog;
     std::auto_ptr<TLogger> mainLog;
 
@@ -67,7 +67,7 @@ class TCMServer {
 
 public:
     TCMServer(int portno);
-    
+
     void startListen();
     void stopListen();
 

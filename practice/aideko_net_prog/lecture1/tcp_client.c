@@ -1,5 +1,5 @@
 /**
-    exersize "UDP Sender" from unix network programming lectures.
+    exersize "TCP Sender" from unix network programming lectures.
 
     link: http://habrahabr.ru/company/ideco/blog/138322/
 

@@ -15,7 +15,7 @@ class TNodeList;
 template<class T>
 class TNode {
     T node_data;
-    TNodeList<T> node_edges;    
+    std::vector<TNode<T>*> node_edges;
 
 public:
     TNode() {
@@ -33,14 +33,28 @@ public:
         return node_data; 
     }
 
-    TNodeList<T>& edges() { 
+    std::vector<TNode<T>*>& edges() { 
         return node_edges; 
     }
 
-    TPtr<TNode<T> > edge(int n) {
+    TNode<T>* edge(const unsigned& n) {
         return node_edges[n];
     }
+
+    TNode<T>* operator[](const unsigned& n) {
+        return node_edges[n];
+    }
+
+    unsigned size() const {
+        return node_edges.size();
+    }
 };
+
+template<class T>
+std::vector<TNode<T>*>& operator<<(std::vector<TNode<T>*>& nvector, TPtr<TNode<T> > pn) {
+    nvector.push_back(pn.get());
+    return nvector;
+}
 
 
 // TNodeList description
@@ -51,22 +65,6 @@ class TNodeList {
 public:
     TNodeList() {
     }
-
-    /*
-    TNodeList(const TNodeList<T>& n) {
-        for(int x = 0; x < n.size(); x++)
-            node_list.push_back(n[x]);
-    }
-
-    TNodeList<T>& operator=(const TNodeList<T>& n) {
-        if (n != this) {
-            node_lsit.clear();
-                
-            for(int x = 0; x < n.size(); x++)
-                node_list.push_back(n[x]);
-        }
-    }
-    */
 
     virtual ~TNodeList() {
     }
@@ -132,7 +130,7 @@ public:
     }
     
     TPtr<TNode<T> >& operator[](const int& n) {
-        return nodes[n];
+        return node_list[n];
     }
 
     int size() {
@@ -140,7 +138,7 @@ public:
     }
 
     void erase(const int& n) {
-        node_list.erase(nodes.begin() + n);
+        node_list.erase(node_list.begin() + n);
     }
 
     TGraph& operator<<(const T& t) {
@@ -166,18 +164,23 @@ public:
     }
 };
 
-template<class T>
-void printGraphMatrix(TGraph<T> g) {
-}
 
-template<class T>
-void printGraph(TGraph<T>& g, std::ostream& os = std::cout) {
-    for(int x = 0; x < g.size(); x++){
-        os << x << " : ";
-        for(int xx = 0; xx < g[x].size(); xx++)
-            if (g.nodes().find(g[x].edge(xx)) != -1)
-                os << xx << " ";
-        os << std::endl;
+namespace NGraph {
+    template<class T>
+    void printGraphMatrix(TGraph<T> g) {
+    }
+    
+    template<class T>
+    void printGraph(TGraph<T>& g, std::ostream& os = std::cout) {
+        for(int x = 0; x < g.size(); x++){
+            os << x << " : ";
+            for(int xx = 0; xx < g[x]->size(); xx++) {
+                int pos = g.nodes().find(g[x]->edge(xx));
+                if (pos != -1)
+                    os << "(" << pos << ", " << g[pos]->data() << ") ";
+            }
+            os << std::endl;
+        }
     }
 }
 
