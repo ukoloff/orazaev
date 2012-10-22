@@ -18,31 +18,33 @@
 template <typename A>
 void printElements(A begin, A end, std::string space = " ");
 
+
+
 /* Larges Common Subsequence size */
 template <typename A, typename B>
-size_t sizeOfLCS(A begin0, A end0, B begin1, B end1) {
-    size_t seqSize0 = end0 - begin0;
-    size_t seqSize1 = end1 - begin1;
+size_t sizeOfLCS(A beginFirst, A endFirst, B beginSecond, B endSecond) {
+    size_t firstSeqSize = endFirst - beginFirst;
+    size_t secondSeqSize = endSecond - beginSecond;
 
     std::vector<size_t> newL[2] = {
-        std::vector<size_t>(seqSize1 + 1, 0),
-        std::vector<size_t>(seqSize1 + 1, 0)
+        std::vector<size_t>(secondSeqSize + 1, 0),
+        std::vector<size_t>(secondSeqSize + 1, 0)
     };
     int line = 0;
 
-    for (size_t i0 = 0; i0 < seqSize0; ++i0) {
-        for (size_t i1 = 0; i1 < seqSize1; ++i1) {
-            if (*(begin0 + i0) == *(begin1 + i1)) {
-                newL[line][i1 + 1] = newL[(line + 1) % 2][i1] + 1;
+    for (size_t i = 0; i < firstSeqSize; ++i) {
+        for (size_t j = 0; j < secondSeqSize; ++j) {
+            if (*(beginFirst + i) == *(beginSecond + j)) {
+                newL[line][j + 1] = newL[(line + 1) % 2][j] + 1;
             } else {
-                newL[line][i1 + 1] =
-                    std::max(newL[(line + 1) % 2][i1 + 1], newL[line][i1]);
+                newL[line][j + 1] =
+                    std::max(newL[(line + 1) % 2][j + 1], newL[line][j]);
             }
         }
         line = (line + 1) % 2;
     }
 
-    return newL[(line + 1) % 2][seqSize1];
+    return newL[(line + 1) % 2][secondSeqSize];
 }
 
 
@@ -58,18 +60,21 @@ void printElements(A begin, A end, std::string space = " ") {
     std::cout << std::endl;
 }
 
+
+
 template <typename A, typename B>
-double sizeOfLcsIs(A begin0, A end0, B begin1, B end1, size_t size) {
+double sizeOfLcsIs(A beginFirst, A endFirst
+    , B beginSecond, B endSecond, size_t size) {
     clock_t start = clock();
-    size_t result = sizeOfLCS(begin0, end0, begin1, end1);
+    size_t result = sizeOfLCS(beginFirst, endFirst, beginSecond, endSecond);
     clock_t end = clock();
     if (result != size) {
         std::cout << std::endl << "=============================="
             << std::endl;
         std::cout << "Sequence0: ";
-        printElements(begin0, end0);
+        printElements(beginFirst, endFirst);
         std::cout << "Sequence1: ";
-        printElements(begin1, end1);
+        printElements(beginSecond, endSecond);
 
         std:: cout << "Result of sizeOfLCS() = "
             << result << std::endl;
@@ -83,47 +88,59 @@ double sizeOfLcsIs(A begin0, A end0, B begin1, B end1, size_t size) {
 
 
 void simpleTest() {
-    int seq0[5] = {1, 2, 3, 4, 5};
-    int seq1[5] = {1, 3, 5, 7, 9};
+    int firstSeq[5] = {1, 2, 3, 4, 5};
+    int secondSeq[5] = {1, 3, 5, 7, 9};
 
     std::cout << "Simple test... ";
     double time =
-        sizeOfLcsIs(seq0, seq0 + 5, seq1, seq1 + 5, 3);
+        sizeOfLcsIs(firstSeq, firstSeq + 5, secondSeq, secondSeq + 5, 3);
     std::cout << " " << time << " secondes" << std::endl;
 }
 
+
+
 void emptyTest() {
-    std::vector<int> seq0;
-    std::vector<int> seq1;
+    std::vector<int> firstSeq;
+    std::vector<int> secondSeq;
 
     std::cout << "Empty test...";
     double time =
-        sizeOfLcsIs(seq0.begin(), seq0.end(), seq1.begin(), seq1.end(), 0);
+        sizeOfLcsIs(firstSeq.begin(), firstSeq.end()
+            , secondSeq.begin(), secondSeq.end(), 0);
     std::cout << " " << time << " secondes" << std::endl;
 }
 
-void trivialTest(int a, int b, size_t r, int n) {
-    std::vector<int> seq0(1, a);
-    std::vector<int> seq1(1, b);
 
-    std::cout << "Trivial test" << n << "...";
+
+void trivialTest(int firstSeqElem, int secondSeqElem
+    , size_t expect, int testNo) {
+    std::vector<int> firstSeq(1, firstSeqElem);
+    std::vector<int> secondSeq(1, secondSeqElem);
+
+    std::cout << "Trivial test" << testNo << "...";
     double time =
-        sizeOfLcsIs(seq0.begin(), seq0.end(), seq1.begin(), seq1.end(), r);
+        sizeOfLcsIs(firstSeq.begin(), firstSeq.end()
+            , secondSeq.begin(), secondSeq.end(), expect);
     std::cout << " " << time << " secondes" << std::endl;
 }
+
+
 
 void bigTest() {
-    std::vector<int> seq0(2000, 0);
-    std::vector<int> seq1(2000, 0);
+    std::vector<int> firstSeq(2000, 0);
+    std::vector<int> secondSeq(2000, 0);
     for (size_t i = 0; i < 2000; ++i) {
-        seq0[i] = i;
-        seq1[i] = i;
+        firstSeq[i] = i;
+        secondSeq[i] = i;
     }
     std::cout << "Big test...";
     double time =
-        sizeOfLcsIs(seq0.begin(), seq0.end(), seq1.begin(), seq1.end(), 2000);
+        sizeOfLcsIs(firstSeq.begin(), firstSeq.end()
+            , secondSeq.begin(), secondSeq.end(), 2000);
     std::cout << " " << time << " secondes" << std::endl;
 }
+
+
 
 std::vector<int> randomVector(int maxValue,
     int minValue, size_t maxSize) {
@@ -138,29 +155,33 @@ std::vector<int> randomVector(int maxValue,
     return res;
 }
 
-bool isCS(const std::vector<int> & seq0,
-    const std::vector<int> & seq1,
+
+
+bool isCS(const std::vector<int> & firstSeq,
+    const std::vector<int> & secondSeq,
     const std::vector<size_t> & indx) {
 
-    size_t i = 0;
-    for (std::vector<int>::const_iterator it = seq1.begin();
-        it != seq1.end() && i < indx.size(); ++it) {
-        if (*it == seq0[indx[i]]) {
-            ++i;
+    size_t size = 0;
+    for (std::vector<int>::const_iterator it = secondSeq.begin();
+        it != secondSeq.end() && size < indx.size(); ++it) {
+        if (*it == firstSeq[indx[size]]) {
+            ++size;
         }
     }
 
-    if (i == indx.size())
+    if (size == indx.size())
         return true;
     return false;
 }
 
+
+
 std::vector<size_t> getLcsIndex(
-    const std::vector<int> & seq0,
-    const std::vector<int> & seq1,
+    const std::vector<int> & firstSeq,
+    const std::vector<int> & secondSeq,
     const std::vector<size_t> & indx) {
 
-    if (isCS(seq0, seq1, indx)) {
+    if (isCS(firstSeq, secondSeq, indx)) {
         return indx;
     }
 
@@ -170,7 +191,7 @@ std::vector<size_t> getLcsIndex(
         std::vector<size_t> tindx(indx);
         tindx.erase(tindx.begin() + i - 1);
 
-        std::vector<size_t> ans = getLcsIndex(seq0, seq1, tindx);
+        std::vector<size_t> ans = getLcsIndex(firstSeq, secondSeq, tindx);
         if (ans.size() > LCSindx.size()) {
             LCSindx = ans;
         }
@@ -179,31 +200,38 @@ std::vector<size_t> getLcsIndex(
     return LCSindx;
 }
 
+
+
 // Very slow implementation
-size_t trivialSizeOfLCS(const std::vector<int> seq0,
-    const std::vector<int> seq1) {
+size_t trivialSizeOfLCS(const std::vector<int> firstSeq,
+    const std::vector<int> secondSeq) {
 
-    std::vector<size_t> indx(seq0.size(), 0);
+    std::vector<size_t> indx(firstSeq.size(), 0);
 
-    for (size_t i = 1; i < indx.size(); ++i)
+    for (size_t i = 1; i < indx.size(); ++i) {
         indx[i] = i;
+    }
 
-    return getLcsIndex(seq0, seq1, indx).size();
+    return getLcsIndex(firstSeq, secondSeq, indx).size();
 }
 
-void stressTest(size_t N) {
-    for (size_t i = 0; i < N; ++i) {
-        std::vector<int> seq0(randomVector(7, 0, 10));
-        std::vector<int> seq1(randomVector(7, 0, 10));
+
+
+void stressTest(size_t count) {
+    for (size_t i = 0; i < count; ++i) {
+        std::vector<int> firstSeq(randomVector(7, 0, 10));
+        std::vector<int> secondSeq(randomVector(7, 0, 10));
 
         std::cout << "Stress test" << i << "...";
-        size_t expected = trivialSizeOfLCS(seq0, seq1);
+        size_t expected = trivialSizeOfLCS(firstSeq, secondSeq);
         double time =
-            sizeOfLcsIs(seq0.begin(), seq0.end(),
-                        seq1.begin(), seq1.end(), expected);
+            sizeOfLcsIs(firstSeq.begin(), firstSeq.end(),
+                        secondSeq.begin(), secondSeq.end(), expected);
         std::cout << " " << time << " secondes" << std::endl;
     }
 }
+
+
 
 void testSuite() {
     std::srand(360);
@@ -215,8 +243,38 @@ void testSuite() {
     stressTest(100);
 }
 
+
+std::vector<int> readSequenceFromInput() {
+    size_t size;
+    std::cin >> size;
+
+    std::vector<int> seq;
+    for (int i = 0; i < size; ++i) {
+        int elem;
+        std::cin >> elem;
+        seq.push_back(elem);
+    }
+
+    return seq;
+}
+
+
+static void solveProblem() {
+    std::vector<int> firstSeq =
+        readSequenceFromInput();
+    std::vector<int> secondSeq =
+        readSequenceFromInput();
+
+    std::cout <<
+        sizeOfLCS(firstSeq.begin(), firstSeq.end()
+            , secondSeq.begin(), secondSeq.end());
+}
+
+
+
 int main() {
-    testSuite();
+    // testSuite();
+    solveProblem();
 
     return 0;
 }
