@@ -279,6 +279,32 @@ int main() {
     }
 
     {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        int b[4] = {0, 0, 4, 5};
+        Polynomial<int> q(b, b + 4);
+        int c[1] = {2};
+        Polynomial<int> expect(c, c + 1);
+
+        startTest("Operator /= vol.4");
+        assertEqual(q /= p, expect);
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 0, 1};
+        Polynomial<int> p(a, a + 4);
+        int b[3] = {0, 0, 2};
+        Polynomial<int> q(b, b + 3);
+        int c[1] = {2};
+        Polynomial<int> expect(c, c + 1);
+
+        startTest("Operator /= vol.5");
+        assertEqual(p /= q, expect);
+        endTest();
+    }
+
+    {
         int a[4] = {-42, 0, -12, 1};
         int b[2] = {-3, 1};
         Polynomial<int> p(a, a + 4);
@@ -299,6 +325,43 @@ int main() {
 
         startTest("Operator %");
         assertEqual(p % q, Polynomial<int>(-123));
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        Polynomial<int> q(2);
+        int e[1] = {0};
+
+        startTest("Operator %= vol.2");
+        assertEqual(p %= q, Polynomial<int>(e, e + 1));
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        int b[4] = {0, 0, 4, 4};
+        Polynomial<int> q(b, b + 4);
+        int c[4] = {0, 0, 2, 2};
+        Polynomial<int> expect(c, c + 4);
+
+        startTest("Operator , vol.0");
+        assertEqual((p, q), expect);
+        endTest();
+    }
+
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        int b[4] = {0, 0, 4, 5};
+        Polynomial<int> q(b, b + 4);
+        int c[1] = {1};
+        Polynomial<int> expect(c, c + 1);
+
+        startTest("Operator , vol.1");
+        assertEqual((p, q), expect);
         endTest();
     }
     return 0;

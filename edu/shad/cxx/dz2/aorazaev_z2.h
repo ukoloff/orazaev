@@ -41,6 +41,8 @@ class Polynomial {
     Polynomial<T> operator / (const Polynomial<T> &) const;
     Polynomial<T> operator % (const Polynomial<T> &) const;
 
+    Polynomial<T> operator , (const Polynomial<T> &) const;
+
     T operator() (const T &) const;
 
     typedef typename std::vector<T>::const_iterator const_iterator;
@@ -72,6 +74,8 @@ class Polynomial {
         Polynomial<T> * const mod);
 
     size_t size() const;
+
+    Polynomial<T> * gcd(Polynomial<T> *, Polynomial<T> *) const;
 };
 
 
@@ -223,6 +227,17 @@ Polynomial<T> Polynomial<T>::operator % (const Polynomial<T> & q) const {
 
 
 template <typename T>
+Polynomial<T> Polynomial<T>::operator , (const Polynomial<T> & q) const {
+    Polynomial<T> p(*this);
+    Polynomial<T> t(q);
+
+    gcd(&p, &t);
+    return p == Polynomial<T>(0) ? t : p;
+}
+
+
+
+template <typename T>
 T Polynomial<T>::operator() (const T & x) const {
     T res = coefficients[0];
     T pow = x;
@@ -361,6 +376,22 @@ void Polynomial<T>::division(Polynomial<T> * const p,
 template <typename T>
 size_t Polynomial<T>::size() const {
     return coefficients.size();
+}
+
+
+
+template <typename T>
+Polynomial<T> * Polynomial<T>::gcd(Polynomial<T> * p, Polynomial<T> * q) const {
+    if (*p == Polynomial<T>(0)) {
+        return q;
+    }
+    std::cout << "DEBUG:: " << *q << std::endl;
+    std::cout << "DEBUG:: " << *p << std::endl;
+    std::cout << "DEBUG:: " << *q / *p << std::endl;
+
+    *q %= *p;
+
+    return gcd(q, p);
 }
 
 #endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
