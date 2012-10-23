@@ -25,6 +25,8 @@ void endTest() {
 
 int main() {
     {
+    polynomialDemo();
+
     int a[5] = {0, 1, 2, 3, 4};
     Polynomial<int> p(1);
     Polynomial<int> q(a, a + 5);

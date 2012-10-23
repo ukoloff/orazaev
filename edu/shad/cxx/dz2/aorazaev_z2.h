@@ -8,9 +8,12 @@
 #ifndef EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
 #define EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
 
-#include<vector>
-#include<cmath>
-#include<ostream>
+#include <vector>
+#include <cmath>
+#include <ostream>
+
+// need for demonstration
+#include <iostream>
 
 const double EPSILON = 0.000000001;
 
@@ -419,6 +422,7 @@ Polynomial<T> * Polynomial<T>::gcd(Polynomial<T> * p, Polynomial<T> * q) const {
     }
 
     // Fix infinity recursion for T == int
+    // Example: gcd([0, 0, 2], [0, 0, 0, 1])
     if (*p / *q == Polynomial<T>(0) && *p != Polynomial<T>(0)) {
         if (*q / *p == Polynomial<T>(0)) {
             p->normalizeElements();
@@ -447,6 +451,34 @@ T Polynomial<T>::gcd(T x, T y) const {
 
 
 
+void polynomialDemo() {
+    int a[5] = {
+        0, 1, 2, 3, 4
+    };
 
+    Polynomial<int> p(a, a + 5); // [0, 1, 2, 3, 4]
+
+    Polynomial<int> b(1); // [1]
+
+    std::cout << p + b << std::endl;
+    // 1 * x^0 + 1 * x^1 + 2 * x^2 + 3 * x^3 + 4 * x^4
+
+    Polynomial<int> t(p / b);
+
+    if (t == p) {
+        std::cout << p / t << std::endl;
+        // 1 * x^0
+    }
+
+    Polynomial<int> c(2); // [2]
+
+    std::cout << p * c << std::endl;
+    // 0 * x^0 + 2 * x^1 + 4 * x^2 + 6 * x^3 + 8 * x^4
+
+    Polynomial<int> x(a, a + 2); // [0, 1]
+
+    std::cout << (p, x) << std::endl;
+    // 0 * x^0 + 1 * x^1
+}
 
 #endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
