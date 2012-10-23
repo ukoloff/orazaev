@@ -1,3 +1,10 @@
+/*
+ *      C++ homework. Problem 2.
+ *
+ *      Due date: 25.09.12
+ *
+ *      Author: Aman Orazaev
+ */
 #ifndef EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
 #define EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
 
@@ -347,6 +354,8 @@ void Polynomial<T>::normalize() {
     }
 }
 
+
+
 template <typename T>
 void Polynomial<T>::normalizeElements() {
     T cd = 0;
@@ -360,6 +369,7 @@ void Polynomial<T>::normalizeElements() {
         }
     }
 }
+
 
 
 template <typename T>
@@ -421,6 +431,8 @@ Polynomial<T> * Polynomial<T>::gcd(Polynomial<T> * p, Polynomial<T> * q) const {
     return gcd(q, p);
 }
 
+
+
 template <typename T>
 T Polynomial<T>::gcd(T x, T y) const {
     if (y == static_cast<T> (0)) {
@@ -429,5 +441,12 @@ T Polynomial<T>::gcd(T x, T y) const {
 
     return gcd(y, x % y);
 }
+
+
+
+
+
+
+
 
 #endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
