@@ -69,6 +69,7 @@ class Polynomial {
     std::vector<T> coefficients;
 
     void normalize();
+    void normalizeElements();
     void division(Polynomial<T> * const p,
         const Polynomial<T> & q,
         Polynomial<T> * const mod);
@@ -76,6 +77,7 @@ class Polynomial {
     size_t size() const;
 
     Polynomial<T> * gcd(Polynomial<T> *, Polynomial<T> *) const;
+    T gcd(T, T) const;
 };
 
 
@@ -192,6 +194,7 @@ Polynomial<T> & Polynomial<T>::operator /= (const Polynomial<T> & q) {
     Polynomial<T> mod(*this);
 
     division(this, q, &mod);
+    normalize();
 
     return *this;
 }
@@ -211,6 +214,7 @@ Polynomial<T> & Polynomial<T>::operator %= (const Polynomial<T> & q) {
     Polynomial<T> num(*this);
 
     division(&num, q, this);
+    normalize();
 
     return *this;
 }
@@ -343,14 +347,28 @@ void Polynomial<T>::normalize() {
     }
 }
 
+template <typename T>
+void Polynomial<T>::normalizeElements() {
+    T cd = 0;
+    for (size_t i = 0; i < size(); ++i) {
+        cd = gcd(coefficients[i], cd);
+    }
+
+    if (cd != 1) {
+        for (size_t i = 0; i < size(); ++i) {
+            coefficients[i] /= cd;
+        }
+    }
+}
+
 
 template <typename T>
 void Polynomial<T>::division(Polynomial<T> * const p
     , const Polynomial<T> & q
     , Polynomial<T> * const mod) {
     if (q.size() > p->size()) {
+        *mod = *p;
         p->coefficients = std::vector<T>(1, 0);
-        *mod = q;
         return;
     }
 
@@ -386,16 +404,30 @@ size_t Polynomial<T>::size() const {
 
 template <typename T>
 Polynomial<T> * Polynomial<T>::gcd(Polynomial<T> * p, Polynomial<T> * q) const {
-    if (*p == Polynomial<T>(0)) {
-        return q;
+    if (*q == Polynomial<T>(0)) {
+        return p;
     }
-    std::cout << "DEBUG:: " << *q << std::endl;
-    std::cout << "DEBUG:: " << *p << std::endl;
-    std::cout << "DEBUG:: " << *q / *p << std::endl;
 
-    *q %= *p;
+    // Fix infinity recursion for T == int
+    if (*p / *q == Polynomial<T>(0) && *p != Polynomial<T>(0)) {
+        if (*q / *p == Polynomial<T>(0)) {
+            p->normalizeElements();
+            q->normalizeElements();
+        }
+    }
+
+    *p %= *q;
 
     return gcd(q, p);
+}
+
+template <typename T>
+T Polynomial<T>::gcd(T x, T y) const {
+    if (y == static_cast<T> (0)) {
+        return x;
+    }
+
+    return gcd(y, x % y);
 }
 
 #endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_

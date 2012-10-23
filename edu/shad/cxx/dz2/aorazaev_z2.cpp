@@ -383,8 +383,20 @@ int main() {
         Polynomial<int> p(a, a + 4);
         int b[4] = {0, 0, 4, 5};
         Polynomial<int> q(b, b + 4);
-        int c[4] = {0, 0, 0, 1};
-        Polynomial<int> expect(c, c + 4);
+        int c[4] = {0, 0, 1};
+        Polynomial<int> expect(c, c + 3);
+
+        startTest("Operator , vol.1");
+        assertEqual((p, q), expect);
+        endTest();
+    }
+    {
+        int a[4] = {0, 0, 2, 2};
+        Polynomial<int> p(a, a + 4);
+        int b[4] = {0, 0, 4, 5};
+        Polynomial<int> q(b, b + 4);
+        int c[4] = {0, 0, 1};
+        Polynomial<int> expect(c, c + 3);
 
         startTest("Operator , vol.1");
         assertEqual((p, q), expect);
@@ -396,10 +408,10 @@ int main() {
         Polynomial<int> p(a, a + 3);
         int b[4] = {0, 0, 4, 5};
         Polynomial<int> q(b, b + 4);
-        int c[4] = {0, 0, 1};
-        Polynomial<int> expect(c, c + 3);
+        int c[2] = {0, 1};
+        Polynomial<int> expect(c, c + 2);
 
-        startTest("Operator , vol.1");
+        startTest("Operator , vol.2");
         assertEqual((p, q), expect);
         endTest();
     }
