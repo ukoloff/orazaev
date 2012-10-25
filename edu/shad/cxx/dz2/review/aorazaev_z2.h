@@ -449,6 +449,46 @@ T Polynomial<T>::gcd(T x, T y) const {
 
 
 
+template <typename T>
+struct PolynomialConstructHelper {
+    T coefficient;
+
+    PolynomialConstructHelper()
+            : coefficient(1) {
+    }
+
+
+
+    PolynomialConstructHelper(const T & c)
+            : coefficient(c) {
+    }
+
+
+
+    Polynomial<T> operator ^ (size_t degree) const {
+        std::vector<T> temp(degree + 1, 0);
+        temp.back() = coefficient;
+
+        return Polynomial<T>(temp.begin(), temp.end());
+    }
+};
+
+
+
+// Help for: (1 * y^3) + (2 * y^19) + ...
+template <typename T>
+PolynomialConstructHelper<T> operator * (const T & coeff
+        , const PolynomialConstructHelper<T> & x) {
+    return PolynomialConstructHelper<T>(coeff);
+}
+
+
+// Help for: 1 * (y^3) + 2 * (y^19) + ...
+template <typename T>
+Polynomial<T> operator * (const T & lhs, const Polynomial<T> & rhs) {
+    return rhs * lhs;
+}
+
 
 
 void polynomialDemo() {
@@ -479,6 +519,18 @@ void polynomialDemo() {
 
     std::cout << (p, x) << std::endl;
     // 0 * x^0 + 1 * x^1
+
+
+    PolynomialConstructHelper<int> y;
+
+    Polynomial<int> constructDemonstration =
+            1 * (y^0) +  4 * (y^5) + 10 * (y^3);
+
+    std::cout << constructDemonstration << std::endl;
+
+    Polynomial<int> constructDemonstration2 = 199 * y^19;
+
+    std::cout << constructDemonstration2 << std::endl;
 }
 
 #endif  // EDU_SHAD_CXX_DZ2_AORAZAEV_Z2_H_
