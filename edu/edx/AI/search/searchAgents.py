@@ -495,27 +495,6 @@ def foodHeuristic(state, problem):
             missNodes.append((i, j))
             factor += 1
 
-    edges = []
-    forest = {}
-    k = 0
-    for n in missNodes:
-        out = ""
-        for nn in missNodes:
-            if n != nn:
-                dist = mDst(n, nn) # abs(n[0] - nn[0]) + abs(n[1] - nn[1])
-                edges.append((dist, (n, nn)))
-        forest[n] = k
-        k += 1
-
-    edges.sort()
-    MST = 0
-    for e in edges:
-        if forest[e[1][0]] != forest[e[1][1]]:
-            MST += e[0]
-            for k, v in forest.items():
-                if v == forest[e[1][1]]:
-                    forest[k] = forest[e[1][0]]
-
 
     return manhatRes + len(foodList) - factor
 
@@ -545,6 +524,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
+        
         util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
@@ -581,7 +561,38 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         x,y = state
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.food[x][y]
+
+    def getStartState(self):
+        return self.startState
+
+    def getSuccessors(self, state):
+        "Returns successor states, the actions they require, and a cost of 1."
+        successors = []
+        self._expanded += 1
+        for direction in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(direction)
+            nextx, nexty = int(x + dx), int(y + dy)
+            if not self.walls[nextx][nexty]:
+                nextFood = state[1].copy()
+                nextFood[nextx][nexty] = False
+                successors.append( ( ((nextx, nexty), nextFood), direction, 1) )
+        return successors
+
+    def getCostOfActions(self, actions):
+        """Returns the cost of a particular sequence of actions.  If those actions
+        include an illegal move, return 999999"""
+        x,y= self.getStartState()[0]
+        cost = 0
+        for action in actions:
+            # figure out the next state and see whether it's legal
+            dx, dy = Actions.directionToVector(action)
+            x, y = int(x + dx), int(y + dy)
+            if self.walls[x][y]:
+                return 999999
+            cost += 1
+        return cost
 
 ##################
 # Mini-contest 1 #
