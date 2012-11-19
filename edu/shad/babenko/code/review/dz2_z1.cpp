@@ -34,13 +34,13 @@ size_t sizeOfLCS(A beginFirst, A endFirst, B beginSecond, B endSecond) {
     int current = 0;
     int next = 1;
 
-    for (size_t subSeq0len = 0; subSeq0len < firstSeqSize; ++subSeq0len) {
-        for (size_t subSeq1len = 0; subSeq1len < secondSeqSize; ++subSeq1len) {
-            if (*(beginFirst + subSeq0len) == *(beginSecond + subSeq1len)) {
-                LCSSizes[current][subSeq1len + 1] = LCSSizes[next][subSeq1len] + 1;
+    for (size_t firstLength = 0; firstLength < firstSeqSize; ++firstLength) {
+        for (size_t secondLength = 0; secondLength < secondSeqSize; ++secondLength) {
+            if (*(beginFirst + firstLength) == *(beginSecond + secondLength)) {
+                LCSSizes[current][secondLength + 1] = LCSSizes[next][secondLength] + 1;
             } else {
-                LCSSizes[current][subSeq1len + 1] =
-                    std::max(LCSSizes[next][subSeq1len + 1], LCSSizes[current][subSeq1len]);
+                LCSSizes[current][secondLength + 1] =
+                    std::max(LCSSizes[next][secondLength + 1], LCSSizes[current][secondLength]);
             }
         }
 
