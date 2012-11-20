@@ -45,7 +45,7 @@ template <typename T>
 class THashElement {
     size_t dataSize;
     T* data;
-    
+
     void append(const T& elem);
 
     public:
@@ -129,7 +129,7 @@ void THashElement<T>::append(const T& elem) {
         newData[i] = data[i];
     }
     newData[dataSize] = elem;
-    
+
     delete [] data;
     data = newData;
 
@@ -193,7 +193,7 @@ class THashTable {
     size_t tableSize;
     F hash;
     unsigned long squaredSizes;
-    
+
     THashTable(const THashTable&);
     THashTable& operator = (const THashTable&);
 
@@ -267,7 +267,7 @@ struct TTriangle {
         if (b == 0) {
             return a;
         }
-    
+
         return gcd(b, a % b);
     }
 };
@@ -376,7 +376,7 @@ void readData() {
     size_t size;
     std::cin >> size;
     TIndex::data.reserve(size);
-    
+
     std::vector<size_t> triangle(3, 0);
 
     for (size_t i = 0; i < size; ++i) {
@@ -399,7 +399,7 @@ size_t numberOfClasses() {
 
         typedef THashTable<TTriangle, TIndex, TTriangleHashFunction> TTriangleHashTable;
         TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
- 
+
 
         for (size_t i = 0; i < TIndex::data.size(); ++i) {
             if (hashTable.insert(TIndex::data[i], TIndex(i))) {
@@ -511,12 +511,12 @@ void test_TIndex() {
 
 int main() {
     std::srand(360);
-//    test_THashElement();
-//    test_THashTable();
-//    test_TIndex();
-    readData();
-    std::cout << numberOfClasses();
-    
+    test_THashElement();
+    test_THashTable();
+    test_TIndex();
+//    readData();
+//    std::cout << numberOfClasses();
+
 
     return 0;
 }
