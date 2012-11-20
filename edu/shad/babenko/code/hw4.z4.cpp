@@ -6,8 +6,7 @@
  *  Number of similar triangle classes.
  *
  *
- *  TODO: time testing
- *  TODO: stress testing
+ *  TODO: code style fixes
  *
  */
 #include <iostream>
@@ -17,6 +16,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <time.h>
 
 
 
@@ -254,9 +254,13 @@ THashTable<K, T, F>::~THashTable() {
 struct TTriangle {
     size_t side[3];
 
+    TTriangle() {
+        side[0] = side[1] = side[2] = 0;
+    }
+
     TTriangle(std::vector<size_t> t) {
         std::sort(t.begin(), t.end());
-        size_t divisior = gcd(t[2], gcd(t[1], t[2]));
+        size_t divisior = gcd(t[2], gcd(t[0], t[1]));
 
         for (size_t i = 0; i < 3; ++i) {
             side[i] = t[i] / divisior;
@@ -292,6 +296,20 @@ std::ostream& operator << (std::ostream& out, const TTriangle & triangle) {
         << triangle.side[1] << ", "
         << triangle.side[2] << "]";
     return out;
+}
+
+bool operator < (const TTriangle& left, const TTriangle& right) {
+    for (size_t i = 0; i < 3; ++i) {
+        if (left.side[i] == right.side[i])
+            continue;
+
+        if (left.side[i] < right.side[i])
+            return true;
+        else
+            return false;
+    }
+
+    return false;
 }
 
 
@@ -505,7 +523,68 @@ void test_TIndex() {
 }
 
 
+// corrupt TIndex::data
+size_t trivialNumberOfClasses() {
+    std::sort(TIndex::data.begin(), TIndex::data.end());
+    std::vector<TTriangle>::iterator it =
+        std::unique(TIndex::data.begin(), TIndex::data.end());
 
+    return it - TIndex::data.begin();
+}
+
+
+void assertEqual(size_t first, size_t second) {
+    if (first != second) {
+        std::cerr << "assertion failed:" << std::endl
+                  << "first:  " << first << std::endl
+                  << "second: " << second << std::endl;
+
+        abort();
+    }
+}
+
+
+TTriangle randomTriangle(size_t maxSideLength) {
+    std::vector<size_t> sideVector(3, 0);
+    for (size_t i = 0; i < 3; ++i) {
+        sideVector[i] = (rand() % maxSideLength) + 1;
+    }
+
+    return TTriangle(sideVector);
+}
+
+
+void createRandomData(size_t maxDataSize, size_t maxSideLength) {
+    size_t dataSize = rand() % maxDataSize + 1;
+    TIndex::data.resize(dataSize);
+
+    for (size_t i = 0; i < dataSize; ++i) {
+        TIndex::data[i] = randomTriangle(maxSideLength);
+    }
+}
+
+
+void stressTesting(size_t N) {
+    size_t testNo = 0;
+    while (testNo++ < N) {
+        std::cout << "Test No: " << testNo << std::endl;
+        createRandomData(1000000, 130);
+        std::cout << "Data size: " << TIndex::data.size() << std::endl;
+
+        clock_t start = clock();
+        size_t ans = numberOfClasses();
+        clock_t end = clock();
+
+        double time = static_cast<double> (end - start) / CLOCKS_PER_SEC;
+        std::cout << "TIME: " << time << std::endl;
+        assert(time < 1.0);
+
+        size_t trivialAns = trivialNumberOfClasses();
+        assertEqual(ans, trivialAns);
+
+        std::cout << "Answer: " << ans << std::endl;
+    }
+}
 
 
 
@@ -514,9 +593,9 @@ int main() {
     test_THashElement();
     test_THashTable();
     test_TIndex();
+    stressTesting(200);
 //    readData();
 //    std::cout << numberOfClasses();
-
 
     return 0;
 }
