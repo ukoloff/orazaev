@@ -251,29 +251,34 @@ THashTable<K, T, F>::~THashTable() {
 struct TTriangle {
     unsigned side[3];
 
-    TTriangle() {
-        side[0] = side[1] = side[2] = 0;
-    }
+    TTriangle();
+    explicit TTriangle(std::vector<unsigned> t);
 
-    explicit TTriangle(std::vector<unsigned> t) {
-        std::sort(t.begin(), t.end());
-        unsigned divisior = gcd(t[2], gcd(t[0], t[1]));
-
-        for (size_t i = 0; i < 3; ++i) {
-            side[i] = t[i] / divisior;
-        }
-    }
-
-    unsigned gcd(unsigned a, unsigned b) {
-        if (b == 0) {
-            return a;
-        }
-
-        return gcd(b, a % b);
-    }
+    unsigned gcd(unsigned a, unsigned b);
 };
 
-bool operator== (TTriangle left, TTriangle right) {
+TTriangle::TTriangle() {
+    side[0] = side[1] = side[2] = 0;
+}
+
+TTriangle::TTriangle(std::vector<unsigned> t) {
+    std::sort(t.begin(), t.end());
+    unsigned divisior = gcd(t[2], gcd(t[0], t[1]));
+
+    for (size_t i = 0; i < 3; ++i) {
+        side[i] = t[i] / divisior;
+    }
+}
+
+unsigned TTriangle::gcd(unsigned a, unsigned b) {
+    if (b == 0) {
+        return a;
+    }
+
+    return gcd(b, a % b);
+}
+
+bool operator == (TTriangle left, TTriangle right) {
     for (size_t i = 0; i < 3; ++i) {
         if (left.side[i] != right.side[i]) {
             return false;
@@ -406,6 +411,7 @@ void readData() {
     // printElements(TIndex::data.begin(), TIndex::data.end());
 }
 
+
 size_t numberOfClasses() {
     size_t ans;
 
@@ -451,19 +457,25 @@ void test_THashElement_memory() {
     baz = bar;
 }
 
+
 void test_THashElement() {
     test_THashElement_memory();
 }
 
+
 static const size_t testHashSize = 20;
 static const size_t testHashPrime = 23;
+
 
 struct TTestFunctor {
     TTestFunctor() {}
     size_t operator() (int x) {
-        return int(((long(x) * 12 + 14) % testHashPrime) % testHashSize);
+        return static_cast<int>(
+            ((static_cast<long>(x) * 12 + 14) % testHashPrime) %
+            testHashSize);
     }
 };
+
 
 void test_THashTable_constuction() {
     THashTable<int, char, TTestFunctor> foo(20, TTestFunctor());
@@ -473,6 +485,7 @@ void test_THashTable_constuction() {
     assert(foo.insert(3, 'c') == true);
 }
 
+
 void test_THashTable_insertion() {
     THashTable<int, char, TTestFunctor> foo(20, TTestFunctor());
     assert(foo.insert(0, 'a') == true);
@@ -480,6 +493,7 @@ void test_THashTable_insertion() {
     foo.insert(2, 'c');
     assert(foo.insert(3, 'c') == true);
 }
+
 
 void test_THashTable() {
     test_THashTable_constuction();
@@ -514,10 +528,36 @@ void test_TIndex_equal() {
     assert(bar != baz);
 }
 
+
 void test_TIndex() {
     assert(sizeof(TIndex) == 4);
 
     test_TIndex_equal();
+}
+
+
+void test_TTriangle_equal() {
+    std::vector<size_t> foo;
+    foo.push_back(30);
+    foo.push_back(20);
+    foo.push_back(40);
+
+    std::vector<size_t> bar;
+    bar.push_back(20);
+    bar.push_back(20);
+    bar.push_back(666);
+
+    std::vector<size_t> qux;
+    qux.push_back(4);
+    qux.push_back(2);
+    qux.push_back(3);
+
+    TTriangle Foo(foo);
+    TTriangle Bar(bar);
+    TTriangle Qux(qux);
+
+    assert(Foo == Qux);
+    assert(Bar != Foo);
 }
 
 
@@ -593,8 +633,9 @@ int main() {
     test_THashTable();
     test_TIndex();
     stressTesting(100);
-//    readData();
-//    std::cout << numberOfClasses();
+    test_TTriangle_equal();
+    //readData();
+    //std::cout << numberOfClasses();
 
     return 0;
 }
