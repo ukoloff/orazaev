@@ -44,7 +44,7 @@ void printElements(Iter begin, Iter end) {
 
 template <typename T>
 class THashElement {
-    size_t dataSize;
+    unsigned dataSize;
     T* data;
 
     void append(const T& elem);
@@ -56,11 +56,10 @@ class THashElement {
 
     THashElement& operator = (const THashElement& he);
 
-
     bool has(const T& elem) const;
     bool insert(const T& elem);
 
-    size_t capacity() const;
+    unsigned capacity() const;
 
     const T& operator[] (size_t i) const;
     T& operator[] (size_t i);
@@ -109,6 +108,8 @@ THashElement<T>& THashElement<T>::operator = (const THashElement<T>& he) {
         // FIXME: Not safe for complecated operator = exception
         this->data[i] = he.data[i];
     }
+
+    return *this;
 }
 
 template <typename T>
@@ -138,9 +139,6 @@ void THashElement<T>::append(const T& elem) {
 
 template <typename T>
 bool THashElement<T>::insert(const T& elem) {
-//    std::cout << "THashElement: ";
-//    printElements(data, data + dataSize);
-
     if (has(elem)) {
         return false;
     }
@@ -151,7 +149,7 @@ bool THashElement<T>::insert(const T& elem) {
 }
 
 template <typename T>
-size_t THashElement<T>::capacity() const {
+unsigned THashElement<T>::capacity() const {
     return dataSize;
 }
 
@@ -251,22 +249,22 @@ THashTable<K, T, F>::~THashTable() {
 /////////////////////////////// struct TTriangle ///////////////////////////////
 
 struct TTriangle {
-    size_t side[3];
+    unsigned side[3];
 
     TTriangle() {
         side[0] = side[1] = side[2] = 0;
     }
 
-    explicit TTriangle(std::vector<size_t> t) {
+    explicit TTriangle(std::vector<unsigned> t) {
         std::sort(t.begin(), t.end());
-        size_t divisior = gcd(t[2], gcd(t[0], t[1]));
+        unsigned divisior = gcd(t[2], gcd(t[0], t[1]));
 
         for (size_t i = 0; i < 3; ++i) {
             side[i] = t[i] / divisior;
         }
     }
 
-    size_t gcd(size_t a, size_t b) {
+    unsigned gcd(unsigned a, unsigned b) {
         if (b == 0) {
             return a;
         }
@@ -322,15 +320,15 @@ bool operator< (const TTriangle& left, const TTriangle& right) {
 struct TIndex {
     static std::vector<TTriangle> data;
 
-    size_t index;
+    unsigned index;
 
     TIndex() {}
-    explicit TIndex(size_t Index);
+    explicit TIndex(unsigned Index);
 };
 
 std::vector<TTriangle> TIndex::data;
 
-TIndex::TIndex(size_t Index)
+TIndex::TIndex(unsigned Index)
     : index(Index) {
 }
 
@@ -395,7 +393,7 @@ void readData() {
     std::cin >> size;
     TIndex::data.reserve(size);
 
-    std::vector<size_t> triangle(3, 0);
+    std::vector<unsigned> triangle(3, 0);
 
     for (size_t i = 0; i < size; ++i) {
         std::cin >> triangle[0] >> triangle[1] >> triangle[2];
@@ -545,7 +543,7 @@ void assertEqual(size_t first, size_t second) {
 
 
 TTriangle randomTriangle(size_t maxSideLength) {
-    std::vector<size_t> sideVector(3, 0);
+    std::vector<unsigned> sideVector(3, 0);
     for (size_t i = 0; i < 3; ++i) {
         sideVector[i] = (rand() % maxSideLength) + 1;
     }
@@ -594,7 +592,7 @@ int main() {
     test_THashElement();
     test_THashTable();
     test_TIndex();
-    stressTesting(200);
+    stressTesting(100);
 //    readData();
 //    std::cout << numberOfClasses();
 
