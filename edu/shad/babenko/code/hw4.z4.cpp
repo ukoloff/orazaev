@@ -58,11 +58,10 @@ class THashElement {
 
     bool has(const T& elem) const;
     bool insert(const T& elem);
-
     unsigned capacity() const;
 
-    const T& operator[] (size_t i) const;
-    T& operator[] (size_t i);
+    const T& operator[] (size_t index) const;
+    T& operator[] (size_t index);
 
     ~THashElement();
 };
@@ -154,21 +153,21 @@ unsigned THashElement<T>::capacity() const {
 }
 
 template <typename T>
-const T& THashElement<T>::operator[] (size_t i) const {
-    if (i >= dataSize) {
+const T& THashElement<T>::operator[] (size_t index) const {
+    if (index >= dataSize) {
         throw std::out_of_range("THashElement: index is out of range.");
     }
 
-    return data[i];
+    return data[index];
 }
 
 template <typename T>
-T& THashElement<T>::operator[] (size_t i) {
-    if (i >= dataSize) {
+T& THashElement<T>::operator[] (size_t index) {
+    if (index >= dataSize) {
         throw std::out_of_range("THashElement: index is out of range.");
     }
 
-    return data[i];
+    return data[index];
 }
 
 template <typename T>
@@ -252,7 +251,7 @@ struct TTriangle {
     unsigned side[3];
 
     TTriangle();
-    explicit TTriangle(std::vector<unsigned> t);
+    explicit TTriangle(std::vector<unsigned> sides);
 
     unsigned gcd(unsigned a, unsigned b);
 };
@@ -261,12 +260,12 @@ TTriangle::TTriangle() {
     side[0] = side[1] = side[2] = 0;
 }
 
-TTriangle::TTriangle(std::vector<unsigned> t) {
-    std::sort(t.begin(), t.end());
-    unsigned divisior = gcd(t[2], gcd(t[0], t[1]));
+TTriangle::TTriangle(std::vector<unsigned> sides) {
+    std::sort(sides.begin(), sides.end());
+    unsigned divisior = gcd(sides[2], gcd(sides[0], sides[1]));
 
     for (size_t i = 0; i < 3; ++i) {
-        side[i] = t[i] / divisior;
+        side[i] = sides[i] / divisior;
     }
 }
 
@@ -359,7 +358,8 @@ std::ostream& operator << (std::ostream& out, const TIndex& index) {
 
 /////////////////////////////// struct TTriangleHashFunction ///////////////////
 
-static const size_t PRIME = 1000003;
+// static const size_t PRIME = 1000003;
+static const size_t PRIME = 3000017;
 
 
 struct TTriangleHashFunction {
@@ -414,6 +414,7 @@ void readData() {
 
 size_t numberOfClasses() {
     size_t ans;
+    bool tableWasCreated = true;
 
     do {
         ans = 0;
@@ -427,13 +428,12 @@ size_t numberOfClasses() {
             if (hashTable.insert(TIndex::data[i], TIndex(i))) {
                 ++ans;
                 if (hashTable.getSquaredSizes() > 3 * PRIME) {
-                    continue;
+                    tableWasCreated = false;
+                    break;
                 }
             }
         }
-
-        break;
-    } while (true);
+    } while (!tableWasCreated);
 
     return ans;
 }
@@ -469,9 +469,9 @@ static const size_t testHashPrime = 23;
 
 struct TTestFunctor {
     TTestFunctor() {}
-    size_t operator() (int x) {
+    size_t operator() (int key) {
         return static_cast<int>(
-            ((static_cast<long>(x) * 12 + 14) % testHashPrime) %
+            ((static_cast<long>(key) * 12 + 14) % testHashPrime) %
             testHashSize);
     }
 };
@@ -502,12 +502,12 @@ void test_THashTable() {
 
 
 void test_TIndex_equal() {
-    std::vector<size_t> foo;
+    std::vector<unsigned> foo;
     foo.push_back(1);
     foo.push_back(2);
     foo.push_back(3);
 
-    std::vector<size_t> qux;
+    std::vector<unsigned> qux;
     qux.push_back(1);
     qux.push_back(3);
     qux.push_back(3);
@@ -537,17 +537,17 @@ void test_TIndex() {
 
 
 void test_TTriangle_equal() {
-    std::vector<size_t> foo;
+    std::vector<unsigned> foo;
     foo.push_back(30);
     foo.push_back(20);
     foo.push_back(40);
 
-    std::vector<size_t> bar;
+    std::vector<unsigned> bar;
     bar.push_back(20);
     bar.push_back(20);
     bar.push_back(666);
 
-    std::vector<size_t> qux;
+    std::vector<unsigned> qux;
     qux.push_back(4);
     qux.push_back(2);
     qux.push_back(3);
@@ -594,6 +594,7 @@ TTriangle randomTriangle(size_t maxSideLength) {
 
 void createRandomData(size_t maxDataSize, size_t maxSideLength) {
     size_t dataSize = rand() % maxDataSize + 1;
+    dataSize = maxDataSize;
     TIndex::data.resize(dataSize);
 
     for (size_t i = 0; i < dataSize; ++i) {
@@ -602,23 +603,34 @@ void createRandomData(size_t maxDataSize, size_t maxSideLength) {
 }
 
 
-void stressTesting(size_t N) {
+void stressTesting(size_t numberOfTests) {
     size_t testNo = 0;
-    while (testNo++ < N) {
+    while (testNo++ < numberOfTests) {
         std::cout << "Test No: " << testNo << std::endl;
-        createRandomData(1000000, 130);
+        createRandomData(1000000, 200);
         std::cout << "Data size: " << TIndex::data.size() << std::endl;
+
 
         clock_t start = clock();
         size_t ans = numberOfClasses();
         clock_t end = clock();
 
-        double time = static_cast<double> (end - start) / CLOCKS_PER_SEC;
+
+        double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
         std::cout << "TIME: " << time << std::endl;
         assert(time < 1.0);
 
+
+        start = clock();
         size_t trivialAns = trivialNumberOfClasses();
+        end = clock();
+        std::cout << "STL_TIME: "
+                  << static_cast<double>(end - start) / CLOCKS_PER_SEC
+                  << std::endl;
+
+
         assertEqual(ans, trivialAns);
+
 
         std::cout << "Answer: " << ans << std::endl
                   << "-----------------------------" << std::endl;
@@ -629,13 +641,13 @@ void stressTesting(size_t N) {
 
 int main() {
     std::srand(360);
-    test_THashElement();
-    test_THashTable();
-    test_TIndex();
-    stressTesting(100);
-    test_TTriangle_equal();
-    //readData();
-    //std::cout << numberOfClasses();
+    // test_THashElement();
+    // test_THashTable();
+    // test_TIndex();
+    // test_TTriangle_equal();
+    // stressTesting(100);
+    readData();
+    std::cout << numberOfClasses();
 
     return 0;
 }
