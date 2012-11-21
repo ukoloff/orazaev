@@ -9,14 +9,15 @@
  *  TODO: code style fixes
  *
  */
+#include <time.h>
+#include <cassert>
+#include <cstdlib>
+
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 #include <algorithm>
 
-#include <cassert>
-#include <cstdlib>
-#include <time.h>
 
 
 
@@ -37,7 +38,7 @@ void printElements(Iter begin, Iter end) {
 
 
 
-/////////////////////////////// class THashElement<T> ////////////////////////////////
+/////////////////////////////// class THashElement<T> //////////////////////////
 
 
 
@@ -50,7 +51,7 @@ class THashElement {
 
     public:
     THashElement();
-    THashElement(const T& elem);
+    explicit THashElement(const T& elem);
     THashElement(const THashElement& he);
 
     THashElement& operator = (const THashElement& he);
@@ -61,8 +62,8 @@ class THashElement {
 
     size_t capacity() const;
 
-    const T& operator [] (size_t i) const;
-    T& operator [] (size_t i);
+    const T& operator[] (size_t i) const;
+    T& operator[] (size_t i);
 
     ~THashElement();
 };
@@ -108,7 +109,6 @@ THashElement<T>& THashElement<T>::operator = (const THashElement<T>& he) {
         // FIXME: Not safe for complecated operator = exception
         this->data[i] = he.data[i];
     }
-
 }
 
 template <typename T>
@@ -156,7 +156,7 @@ size_t THashElement<T>::capacity() const {
 }
 
 template <typename T>
-const T& THashElement<T>::operator [] (size_t i) const {
+const T& THashElement<T>::operator[] (size_t i) const {
     if (i >= dataSize) {
         throw std::out_of_range("THashElement: index is out of range.");
     }
@@ -165,7 +165,7 @@ const T& THashElement<T>::operator [] (size_t i) const {
 }
 
 template <typename T>
-T& THashElement<T>::operator [] (size_t i) {
+T& THashElement<T>::operator[] (size_t i) {
     if (i >= dataSize) {
         throw std::out_of_range("THashElement: index is out of range.");
     }
@@ -184,7 +184,7 @@ THashElement<T>::~THashElement() {
 
 
 
-/////////////////////////////// class THashTable<K, T, F> ////////////////////////////////
+/////////////////////////////// class THashTable<K, T, F> //////////////////////
 
 
 template <typename K, typename T, typename F>
@@ -221,14 +221,13 @@ bool THashTable<K, T, F>::insert(const K& key, const T& value) {
     size_t index = hash(key);
     if (index >= tableSize) {
         throw std::out_of_range(
-            "THashTable::insert: hash function generated an index out of range."
-        );
+          "THashTable::insert: hash function generated an index out of range.");
     }
 
-    squaredSizes -=
-        static_cast<unsigned long>(table[index].capacity()) * table[index].capacity();
-    squaredSizes +=
-        static_cast<unsigned long>(table[index].capacity() + 1) * (table[index].capacity() + 1);
+    squaredSizes -= static_cast<unsigned long>(
+        table[index].capacity()) * table[index].capacity();
+    squaredSizes += static_cast<unsigned long>(
+        table[index].capacity() + 1) * (table[index].capacity() + 1);
 
     return table[index].insert(value);
 }
@@ -249,7 +248,7 @@ THashTable<K, T, F>::~THashTable() {
 
 
 
-/////////////////////////////// struct TTriangle ////////////////////////////////
+/////////////////////////////// struct TTriangle ///////////////////////////////
 
 struct TTriangle {
     size_t side[3];
@@ -258,7 +257,7 @@ struct TTriangle {
         side[0] = side[1] = side[2] = 0;
     }
 
-    TTriangle(std::vector<size_t> t) {
+    explicit TTriangle(std::vector<size_t> t) {
         std::sort(t.begin(), t.end());
         size_t divisior = gcd(t[2], gcd(t[0], t[1]));
 
@@ -276,7 +275,7 @@ struct TTriangle {
     }
 };
 
-bool operator == (TTriangle left, TTriangle right) {
+bool operator== (TTriangle left, TTriangle right) {
     for (size_t i = 0; i < 3; ++i) {
         if (left.side[i] != right.side[i]) {
             return false;
@@ -290,7 +289,7 @@ bool operator != (TTriangle left, TTriangle right) {
     return !(left == right);
 }
 
-std::ostream& operator << (std::ostream& out, const TTriangle & triangle) {
+std::ostream& operator<< (std::ostream& out, const TTriangle & triangle) {
     out << "["
         << triangle.side[0] << ", "
         << triangle.side[1] << ", "
@@ -298,7 +297,7 @@ std::ostream& operator << (std::ostream& out, const TTriangle & triangle) {
     return out;
 }
 
-bool operator < (const TTriangle& left, const TTriangle& right) {
+bool operator< (const TTriangle& left, const TTriangle& right) {
     for (size_t i = 0; i < 3; ++i) {
         if (left.side[i] == right.side[i])
             continue;
@@ -326,7 +325,7 @@ struct TIndex {
     size_t index;
 
     TIndex() {}
-    TIndex(size_t Index);
+    explicit TIndex(size_t Index);
 };
 
 std::vector<TTriangle> TIndex::data;
@@ -355,7 +354,7 @@ std::ostream& operator << (std::ostream& out, const TIndex& index) {
 
 
 
-/////////////////////////////// struct TTriangleHashFunction ////////////////////////////////
+/////////////////////////////// struct TTriangleHashFunction ///////////////////
 
 static const size_t PRIME = 1000003;
 
@@ -369,13 +368,14 @@ struct TTriangleHashFunction {
         }
     }
 
-    size_t operator () (const TTriangle& triangle) {
+    size_t operator() (const TTriangle& triangle) {
         size_t result = 0;
 
         for (size_t i = 0; i < 3; ++i) {
             result += static_cast<size_t>(
-                static_cast<unsigned long>(triangle.side[i]) * coefficient[i] % PRIME
-            );
+                static_cast<unsigned long>(
+                    triangle.side[i]) *
+                coefficient[i] % PRIME);
         }
 
         return result % PRIME;
@@ -388,7 +388,7 @@ struct TTriangleHashFunction {
 
 
 
-/////////////////////////////// void numberOfClasses  ////////////////////////////////
+/////////////////////////////// void numberOfClasses  //////////////////////////
 
 void readData() {
     size_t size;
@@ -409,13 +409,13 @@ void readData() {
 }
 
 size_t numberOfClasses() {
-
     size_t ans;
 
     do {
         ans = 0;
 
-        typedef THashTable<TTriangle, TIndex, TTriangleHashFunction> TTriangleHashTable;
+        typedef THashTable<TTriangle, TIndex, TTriangleHashFunction>
+            TTriangleHashTable;
         TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
 
 
@@ -440,7 +440,7 @@ size_t numberOfClasses() {
 
 
 
-////////////////////////////////// Testing //////////////////////////////////////
+////////////////////////////////// Testing /////////////////////////////////////
 
 
 void test_THashElement_memory() {
@@ -500,12 +500,12 @@ void test_TIndex_equal() {
     qux.push_back(3);
     qux.push_back(3);
 
-    TIndex::data.push_back(foo);
+    TIndex::data.push_back(TTriangle(foo));
     foo[0] *= 4;
     foo[1] *= 4;
     foo[2] *= 4;
-    TIndex::data.push_back(foo);
-    TIndex::data.push_back(qux);
+    TIndex::data.push_back(TTriangle(foo));
+    TIndex::data.push_back(TTriangle(qux));
 
     TIndex bar(0);
     TIndex baz(1);
@@ -582,7 +582,8 @@ void stressTesting(size_t N) {
         size_t trivialAns = trivialNumberOfClasses();
         assertEqual(ans, trivialAns);
 
-        std::cout << "Answer: " << ans << std::endl;
+        std::cout << "Answer: " << ans << std::endl
+                  << "-----------------------------" << std::endl;
     }
 }
 
