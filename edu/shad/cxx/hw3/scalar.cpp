@@ -1,11 +1,14 @@
 #include <iostream>
 #include <cassert>
+#include <time.h>
+#include <cstdlib>
+#include <unistd.h>
 
 // template <typename T, T* A, T* B, size_t N>
 // struct metaScalar {
 //     static T result = A[N - 1] * B[N - 1] + metaScalar<T, A, B, N - 1>::result;
 // };
-// 
+//
 // template <typename T, T* A, T* B>
 // struct metaScalar<T, A, B, 1> {
 //     static T result = A[0] * B[0];
@@ -19,18 +22,19 @@ template <>
 struct static_assert<false>;
 
 template <size_t N>
-struct scalar_product {
+struct TScalar_product {
     template <typename T>
-    inline T operator () (T* a, T* b) {
-        return a[N - 1] * b[N - 1] + scalar_product<N - 1>()(a, b);
+    inline T operator () (T* first, T* second) {
+        return first[N - 1] * second[N - 1] +
+            TScalar_product<N - 1>()(first, second);
     }
 };
 
 template <>
-struct scalar_product<1> {
+struct TScalar_product<1> {
     template <typename T>
-    inline T operator () (T* a, T* b) {
-        return a[0] * b[0];
+    inline T operator () (T* first, T* second) {
+        return first[0] * second[0];
     }
 };
 
@@ -38,19 +42,44 @@ template <typename T>
 void Dummy(T x);
 
 
+
+static const size_t TESTSIZE = 1000;
+
 int main() {
-    int * const a = new int[3];
-    int * const b = new int[3];
-    a[0] = 1;
-    a[1] = 2;
-    a[2] = 3;
-    b[0] = 2;
-    b[1] = 1;
-    b[2] = 0;
+    int foo[TESTSIZE] = {1};
+    int bar[TESTSIZE] = {1};
 
-    Dummy(scalar_product<3>()(a, b));
-    
+    TScalar_product<TESTSIZE> scalar_product;
 
-    delete [] a;
-    delete [] b;
+    clock_t start;
+    clock_t end;
+
+    start = clock();
+    std::cout << start << std::endl;
+    std::cout << scalar_product(foo, bar) << std::endl;
+    for (int i = 0; i >= 0; ++i) {
+
+    }
+    end = clock();
+    std::cout << end << std::endl;
+
+    double time = static_cast<double>(end - start) / CLOCKS_PER_SEC;
+
+    std::cout << "template scalar_product speed: "
+              << time
+              << std::endl;
+
+    int cycle_scalar_product = 0;
+    start = clock();
+    for (size_t i = 0; i < TESTSIZE; ++i) {
+        cycle_scalar_product += foo[i] * bar[i];
+    }
+    end = clock();
+
+    std::cout << cycle_scalar_product << std::endl;
+    std::cout << "cycle scalar_product speed: "
+              << static_cast<double>(end - start)
+              << std::endl;
+
+    return 0;
 }
