@@ -1,18 +1,12 @@
-#include <iostream>
-#include <cassert>
 #include <time.h>
 #include <cstdlib>
 #include <unistd.h>
 
-// template <typename T, T* A, T* B, size_t N>
-// struct metaScalar {
-//     static T result = A[N - 1] * B[N - 1] + metaScalar<T, A, B, N - 1>::result;
-// };
-//
-// template <typename T, T* A, T* B>
-// struct metaScalar<T, A, B, 1> {
-//     static T result = A[0] * B[0];
-// };
+#include <iostream>
+
+
+
+////////////////////////////// TScalar_product ////////////////////////////////
 
 template <size_t N>
 struct TScalar_product {
@@ -22,6 +16,8 @@ struct TScalar_product {
             TScalar_product<N - 1>()(first, second);
     }
 };
+
+
 
 template <>
 struct TScalar_product<1> {
@@ -33,39 +29,107 @@ struct TScalar_product<1> {
 
 
 
-static const size_t TESTSIZE = 100000;
+///////////////////////////////// TTimer //////////////////////////////////////
+
+class TTimer {
+    clock_t startClocks;
+    clock_t endClocks;
+    public:
+    TTimer()
+        : startClocks(0)
+        , endClocks(0) {
+    }
+
+    void start() {
+        startClocks = clock();
+    }
+
+    void stop() {
+        endClocks = clock();
+    }
+
+    double getSeconds() const {
+        return static_cast<double>(
+            endClocks - startClocks
+        ) / CLOCKS_PER_SEC;
+    }
+
+    clock_t getClocks() const {
+        return endClocks - startClocks;
+    }
+};
+
+
+
+static const size_t vectorSize = 20;
+static const size_t numberOfStarts = 10000000;
+
+
 
 int main() {
-    int foo[TESTSIZE] = {1};
-    int bar[TESTSIZE] = {1};
+    TScalar_product<vectorSize> scalar_product;
+    TTimer timer;
 
-    TScalar_product<TESTSIZE> scalar_product;
 
-    clock_t start;
-    clock_t end;
-
-    start = clock();
-    std::cout << scalar_product(foo, bar) << std::endl;
-    end = clock();
-
-    double time = static_cast<double>(end - start);
-
-    std::cout << "template scalar_product speed: "
-              << time
-              << std::endl;
-
-    int cycle_scalar_product = 0;
-
-    start = clock();
-    for (size_t i = 0; i < TESTSIZE; ++i) {
-        cycle_scalar_product += foo[i] * bar[i];
+    int foo[vectorSize];
+    int bar[vectorSize];
+    for (size_t i = 0; i < vectorSize; ++i) {
+        foo[i] = bar[i] = 1;
     }
-    end = clock();
 
-    std::cout << cycle_scalar_product << std::endl;
+
+
+
+    timer.start();
+    for (size_t runNo = 0; runNo < numberOfStarts; ++runNo) {
+        foo[0] * bar[0] + foo[1] * bar[1] +
+        foo[2] * bar[2] + foo[3] * bar[3] +
+        foo[4] * bar[4] + foo[5] * bar[5] +
+        foo[6] * bar[6] + foo[7] * bar[7] +
+        foo[8] * bar[8] + foo[9] * bar[9] +
+        foo[10] * bar[10] + foo[11] * bar[11] +
+        foo[12] * bar[12] + foo[13] * bar[13] +
+        foo[14] * bar[14] + foo[15] * bar[15] +
+        foo[16] * bar[16] + foo[17] * bar[17] +
+        foo[18] * bar[18] + foo[19] * bar[19];
+    }
+    timer.stop();
+
+    std::cout << "Native scalar product speed: "
+              << timer.getSeconds() << std::endl;
+
+
+
+
+
+    timer.start();
+    for (size_t runNo = 0; runNo < numberOfStarts; ++runNo) {
+        scalar_product(foo, bar);
+    }
+    timer.stop();
+
+    std::cout << "Template scalar product speed: "
+              << timer.getSeconds() << std::endl;
+
+
+
+
+
+    timer.start();
+    int cycle_scalar_product;
+    for (size_t runNo = 0; runNo < numberOfStarts; ++runNo) {
+        cycle_scalar_product = 0;
+        for (size_t index = 0; index < vectorSize; ++index) {
+            cycle_scalar_product += foo[index] * bar[index];
+        }
+    }
+    timer.stop();
+
     std::cout << "cycle scalar_product speed: "
-              << static_cast<double>(end - start)
-              << std::endl;
+              << timer.getSeconds() << std::endl;
+
+
+
 
     return 0;
 }
