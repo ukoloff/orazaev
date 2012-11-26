@@ -114,7 +114,7 @@ class TFastScalarProduct<6> {
         foo[2] * bar[2] + foo[3] * bar[3] +
         foo[4] * bar[4] + foo[5] * bar[5];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<5> {
@@ -126,7 +126,7 @@ class TFastScalarProduct<5> {
         foo[2] * bar[2] + foo[3] * bar[3] +
         foo[4] * bar[4];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<4> {
@@ -137,7 +137,7 @@ class TFastScalarProduct<4> {
         foo[0] * bar[0] + foo[1] * bar[1] +
         foo[2] * bar[2] + foo[3] * bar[3];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<3> {
@@ -148,7 +148,7 @@ class TFastScalarProduct<3> {
         foo[0] * bar[0] + foo[1] * bar[1] +
         foo[2] * bar[2];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<2> {
@@ -157,7 +157,7 @@ class TFastScalarProduct<2> {
     inline T product(T* foo, T* bar) const {
         return foo[0] * bar[0] + foo[1] * bar[1];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<1> {
@@ -166,7 +166,7 @@ class TFastScalarProduct<1> {
     inline T product(T* foo, T* bar) const {
         return foo[0] * bar[0];
     }
-}; 
+};
 
 template <>
 class TFastScalarProduct<0> {
@@ -175,7 +175,7 @@ class TFastScalarProduct<0> {
     inline T product(T* foo, T* bar) const {
         return 0;
     }
-}; 
+};
 
 
 
