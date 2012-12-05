@@ -69,21 +69,27 @@ void TCommonNode<T>::SetData(const T& newData) {
 
 template <typename T>
 TCommonNode<T>* TCommonNode<T>::GetLeftSon() const {
+    assert(false);
+    return 0;
 }
 
 
 template <typename T>
 TCommonNode<T>* TCommonNode<T>::GetRightSon() const {
+    assert(false);
+    return 0;
 }
 
 
 template <typename T>
 void TCommonNode<T>::SetLeftSon(TCommonNode<T>* const) {
+    assert(false);
 }
 
 
 template <typename T>
 void TCommonNode<T>::SetRightSon(TCommonNode<T>* const) {
+    assert(false);
 }
 
 
@@ -323,6 +329,7 @@ TCommonNode<TPlaceNumber>* TParking::ConstructNode(
         return &places[rangeStart - 1];
     }
 
+    assert(rangeSize % 2 == 0);
 
     TCommonNode<TPlaceNumber>* result = new TNode<TPlaceNumber>(rangeStart);
     result->SetAncestor(ancestor);
@@ -422,7 +429,8 @@ void test_Nodes() {
 
 
 void test_TParking_construction() {
-    TParking parking(1);
+    TParking parking0(0);
+    TParking parking1(1);
     TParking parking2(1023);
 }
 
@@ -430,6 +438,14 @@ void test_TParking_construction() {
 void test_TParking() {
     test_TParking_construction();
 }
+
+
+
+
+
+
+
+
 
 int main() {
     test_Nodes();
