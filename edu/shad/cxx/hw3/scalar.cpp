@@ -1,3 +1,10 @@
+/*
+ *      C++ homework. Problem 2.
+ *
+ *      Due date: 07.12.12
+ *
+ *      Author: Aman Orazaev
+ */
 #include <time.h>
 #include <cstdlib>
 #include <unistd.h>

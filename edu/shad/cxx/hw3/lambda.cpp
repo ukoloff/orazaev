@@ -1,3 +1,10 @@
+/*
+ *      C++ homework. Problem 3.
+ *
+ *      Due date: 07.12.12
+ *
+ *      Author: Aman Orazaev
+ */
 #include <iostream>
 #include <sstream>
 #include <algorithm>
