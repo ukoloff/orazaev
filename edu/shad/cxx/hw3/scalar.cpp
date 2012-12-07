@@ -4,6 +4,20 @@
  *      Due date: 07.12.12
  *
  *      Author: Aman Orazaev
+ *
+ *
+ *
+ *      My timing results for 10000000 scalar products for
+ *      vector of 20 elements. (copy paste from stdout):
+ *      --------------------------------------------------
+ *      function scalar_product<N> speed: 0.44
+ *      class TFastScalarProduct<N> speed: 0.4
+ *      struct TNativeScalarProduct<N> speed: 0.87
+ *      Cycle scalar product speed: 0.7
+ *      Native sum of 20 elements speed: 0.02
+ *      --------------------------------------------------
+ *
+ *      Without any additional options for g++ (4.6.1).
  */
 #include <time.h>
 #include <cstdlib>
