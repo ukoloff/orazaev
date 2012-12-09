@@ -1,3 +1,11 @@
+/*
+ *  Copyright (c) 2012 Aman Orazaev
+ *
+ *  Homework 5, Problem 2
+ *
+ *  Parking problem.
+ *
+ */
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -21,9 +29,9 @@ class TCommonNode {
     bool IsNeedToUpdateAncestor() const;
 
     public:
-    TCommonNode(const T& data);
+    explicit TCommonNode(const T& data);
 
-    void SetAncestor(TCommonNode<T>* const );
+    void SetAncestor(TCommonNode<T>* const);
     TCommonNode* GetAncestor() const;
 
     TCommonNode* GetBrother() const;
@@ -200,7 +208,7 @@ TCommonNode<T>::~TCommonNode() {
 template <typename T>
 class TLeafNode: public TCommonNode<T> {
     public:
-    TLeafNode(const T& Data);
+    explicit TLeafNode(const T& Data);
 
     bool IsLeaf() const;
 };
@@ -229,12 +237,12 @@ class TNode: public TCommonNode<T> {
     TCommonNode<T>* leftSon;
     TCommonNode<T>* rightSon;
 
-    TNode& operator=(const TNode& );
-    TNode(const TNode& );
+    TNode& operator=(const TNode&);
+    TNode(const TNode&);
 
 
     public:
-    TNode(const T& Data);
+    explicit TNode(const T& Data);
 
     void SetLeftSon(TCommonNode<T>* const newLeftSon);
     void SetRightSon(TCommonNode<T>* const newRightSon);
@@ -298,7 +306,7 @@ const TPlaceNumber NOT_FREE = static_cast<TPlaceNumber>(-1);
 
 class TParkingPlace: public TLeafNode<TPlaceNumber> {
     public:
-    TParkingPlace(const TPlaceNumber& Data);
+    explicit TParkingPlace(const TPlaceNumber& Data);
 
     bool IsFree() const;
 
@@ -365,18 +373,19 @@ class TParking {
     TCommonNode<TPlaceNumber>* ConstructNode(
         TCommonNode<TPlaceNumber>* const ancestor,
         size_t rangeStart,
-        size_t rangeSize
-    );
+        size_t rangeSize);
     void DeleteNode(TCommonNode<TPlaceNumber>* const node);
 
-    TCommonNode<TPlaceNumber>* const GetNearestPlaceNode(TCommonNode<TPlaceNumber>* const) const;
-    TParkingPlace* GetNextFreePlace(const TCommonNode<TPlaceNumber>* const node);
+    TCommonNode<TPlaceNumber>* const GetNearestPlaceNode(
+        TCommonNode<TPlaceNumber>* const) const;
+    TParkingPlace* GetNextFreePlace(
+        const TCommonNode<TPlaceNumber>* const node);
 
-    TParking(const TParking& );
-    TParking& operator= (const TParking& );
+    TParking(const TParking&);
+    TParking& operator= (const TParking&);
+
     public:
-
-    TParking(size_t NumberOfPlaces);
+    explicit TParking(size_t NumberOfPlaces);
 
     int takePlace(const TPlaceNumber& placeNumber);
     int leavePlace(const TPlaceNumber& placeNumber);
@@ -391,8 +400,7 @@ class TParking {
 
 TParking::TParking(size_t NumberOfPlaces)
     : places(NumberOfPlaces, TParkingPlace(0))
-    , root(0)
-{
+    , root(0) {
     for (size_t i = 0; i < places.size(); ++i) {
         places.at(i).SetData(i + 1);
     }
@@ -414,8 +422,7 @@ void TParking::ConstructTree() {
     root = ConstructNode(
         0,
         1,
-        rangeSize
-    );
+        rangeSize);
 }
 
 
@@ -442,12 +449,10 @@ TCommonNode<TPlaceNumber>* TParking::ConstructNode(
     rangeSize /= 2;
 
     result->SetLeftSon(
-        ConstructNode(result, rangeStart, rangeSize)
-    );
+        ConstructNode(result, rangeStart, rangeSize));
 
     result->SetRightSon(
-        ConstructNode(result, rangeStart + rangeSize, rangeSize)
-    );
+        ConstructNode(result, rangeStart + rangeSize, rangeSize));
 
     return result;
 }
@@ -468,12 +473,11 @@ void TParking::DeleteNode(TCommonNode<TPlaceNumber>* const node) {
 
 
 TCommonNode<TPlaceNumber>* const TParking::GetNearestPlaceNode(
-    TCommonNode<TPlaceNumber>* const node
-) const {
+    TCommonNode<TPlaceNumber>* const node) const {
     if (node->GetData() != NOT_FREE) {
         return node;
     }
-    
+
     if (node->GetAncestor() == 0) {
         return 0;
     }
@@ -508,7 +512,7 @@ int TParking::takePlace(const TPlaceNumber& placeNumber) {
     }
 
     TParkingPlace* placeLeaf = &places.at(placeNumber - 1);
-    
+
     if (placeLeaf->IsFree()) {
         placeLeaf->Take();
         return placeNumber;
@@ -551,16 +555,17 @@ TParking::~TParking() {
 class TEvent {
     protected:
     TPlaceNumber place;
+
     public:
-    TEvent(const TPlaceNumber&);
-    
-    virtual int Process(TParking&) const = 0;
+    explicit TEvent(const TPlaceNumber&);
+
+    virtual int Process(TParking* parking) const = 0;
 
     /* For stress testing */
     virtual bool IsTakePlaceEvent() const = 0;
     virtual std::string Str() const = 0;
     TPlaceNumber GetPlace() const;
-    
+
     virtual ~TEvent();
 };
 
@@ -582,9 +587,9 @@ TEvent::~TEvent() {
 
 class TLeavePlaceEvent: public TEvent {
     public:
-    TLeavePlaceEvent(const TPlaceNumber&);
-    
-    virtual int Process(TParking&) const;
+    explicit TLeavePlaceEvent(const TPlaceNumber&);
+
+    virtual int Process(TParking* parking) const;
 
     bool IsTakePlaceEvent() const;
     std::string Str() const;
@@ -609,8 +614,8 @@ std::string TLeavePlaceEvent::Str() const {
 }
 
 
-int TLeavePlaceEvent::Process(TParking& parking) const {
-    return parking.leavePlace(place);
+int TLeavePlaceEvent::Process(TParking* parking) const {
+    return parking->leavePlace(place);
 }
 
 
@@ -618,9 +623,9 @@ int TLeavePlaceEvent::Process(TParking& parking) const {
 
 class TTakePlaceEvent: public TEvent {
     public:
-    TTakePlaceEvent(const TPlaceNumber&);
+    explicit TTakePlaceEvent(const TPlaceNumber&);
 
-    virtual int Process(TParking&) const;
+    virtual int Process(TParking* parking) const;
 
     bool IsTakePlaceEvent() const;
     std::string Str() const;
@@ -644,8 +649,8 @@ std::string TTakePlaceEvent::Str() const {
 }
 
 
-int TTakePlaceEvent::Process(TParking& parking) const {
-    return parking.takePlace(place);
+int TTakePlaceEvent::Process(TParking* parking) const {
+    return parking->takePlace(place);
 }
 
 
@@ -678,7 +683,7 @@ std::vector<int> ProcessEvents(
          event != events.end();
          ++event
     ) {
-        result.push_back((*event)->Process(parking));
+        result.push_back((*event)->Process(&parking));
     }
 
     return result;
@@ -695,7 +700,7 @@ std::vector<int> ReadAndProcessEvents(std::istream& in) {
 
     std::vector<TEvent*> events;
     events.reserve(eventsSize);
-    
+
     char eventType = 0;
     size_t eventPlaceNo = 0;
     for (size_t event = 0; event < eventsSize; ++event) {
@@ -742,8 +747,7 @@ std::vector<int> NativeTestProcesEvents(
             std::vector<bool>::iterator place = std::find(
                     parking.begin() + (*event)->GetPlace() - 1,
                     parking.end(),
-                    true
-            );
+                    true);
 
             if (place == parking.end()) {
                 place = std::find(parking.begin(), parking.end(), true);
@@ -849,7 +853,8 @@ std::vector<TEvent*> createRandomEventVector(
     size_t maxEventsNumber,
     size_t minEventsNumber = 10
 ) {
-    size_t size = minEventsNumber + (rand() % (maxEventsNumber - minEventsNumber));
+    size_t size =
+        minEventsNumber + (rand() % (maxEventsNumber - minEventsNumber));
 
     std::vector<TEvent*> result;
 
@@ -893,7 +898,7 @@ void assertEqual(
             printElements(firstStarts, firstEnd);
             std::cerr << "vector 2: ";
             printElements(secondStarts, secondEnd);
-            
+
             std::cout << "NOT EQUAL ELEMENTS: " << *firstBegin
                       << " " << *secondBegin << std::endl;
             abort();
@@ -909,7 +914,7 @@ void assertEqual(
         printElements(firstStarts, firstEnd);
         std::cerr << "vector 2: ";
         printElements(secondStarts, secondEnd);
-        
+
         abort();
     }
 }
@@ -918,6 +923,7 @@ void assertEqual(
 class TTimer {
     clock_t startClocks;
     clock_t endClocks;
+
     public:
     TTimer()
         : startClocks(0)
@@ -934,8 +940,7 @@ class TTimer {
 
     double GetSeconds() const {
         return static_cast<double>(
-            endClocks - startClocks
-        ) / CLOCKS_PER_SEC;
+            endClocks - startClocks) / CLOCKS_PER_SEC;
     }
 
     clock_t GetClocks() const {
@@ -955,20 +960,18 @@ void test_ProcessEvents_stress(
 
         size_t parkingSize = 1 + rand() % maxParkingSize;
         std::cout << "    parking size: " << parkingSize << std::endl;
-        
+
         std::vector<TEvent*> events = createRandomEventVector(
             parkingSize,
             maxEvets,
-            1
-        );
+            1);
 
         // std::cout << "    Event vector: ";
         // printElements(events.begin(), events.end());
 
         std::vector<int> nativeResult = NativeTestProcesEvents(
             parkingSize,
-            events
-        );
+            events);
 
         timer.Start();
         TParking parking(parkingSize);
@@ -976,8 +979,7 @@ void test_ProcessEvents_stress(
         // parking.PrintTree();
         std::vector<int> result = ProcessEvents(
             parking,
-            events
-        );
+            events);
         timer.Stop();
         std::cout << "Time: " << timer.GetSeconds() << std::endl;
 
@@ -985,8 +987,7 @@ void test_ProcessEvents_stress(
             result.begin(),
             result.end(),
             nativeResult.begin(),
-            nativeResult.end()
-        );
+            nativeResult.end());
 
         for (std::vector<TEvent*>::iterator it = events.begin();
              it != events.end();
@@ -994,7 +995,8 @@ void test_ProcessEvents_stress(
         ) {
             delete *it;
         }
-        std::cout << "---------------------------------------------" << std::endl;
+        std::cout << "---------------------------------------------"
+                  << std::endl;
     }
 }
 
