@@ -209,7 +209,6 @@ class TLeafNode: public TCommonNode<T> {
 template <typename T>
 TLeafNode<T>::TLeafNode(const T& Data)
     : TCommonNode<T>(Data) {
-
 }
 
 
@@ -395,7 +394,7 @@ TParking::TParking(size_t NumberOfPlaces)
     , root(0)
 {
     for (size_t i = 0; i < places.size(); ++i) {
-        places[i].SetData(i + 1);
+        places.at(i).SetData(i + 1);
     }
 
     ConstructTree();
@@ -430,8 +429,8 @@ TCommonNode<TPlaceNumber>* TParking::ConstructNode(
     }
 
     if (rangeSize == 1) {
-        places[rangeStart -1].SetAncestor(ancestor);
-        return &places[rangeStart - 1];
+        places.at(rangeStart -1).SetAncestor(ancestor);
+        return &places.at(rangeStart - 1);
     }
 
     assert(rangeSize % 2 == 0);
@@ -488,7 +487,7 @@ TParkingPlace* TParking::GetNextFreePlace(
     if (!node->IsLeftSon()) {
         if (node->GetAncestor() == 0) {
             assert(node->GetData() != NOT_FREE);
-            return &places[node->GetData() - 1];
+            return &places.at(node->GetData() - 1);
         }
 
         return GetNextFreePlace(node->GetAncestor());
@@ -500,7 +499,7 @@ TParkingPlace* TParking::GetNextFreePlace(
         return GetNextFreePlace(node->GetAncestor());
     }
 
-    return &places[rightBrother->GetData() - 1];
+    return &places.at(rightBrother->GetData() - 1);
 }
 
 int TParking::takePlace(const TPlaceNumber& placeNumber) {
@@ -508,7 +507,7 @@ int TParking::takePlace(const TPlaceNumber& placeNumber) {
         return NO_PLACE_TO_BE_TAKEN_ERROR;
     }
 
-    TParkingPlace* placeLeaf = &places[placeNumber - 1];
+    TParkingPlace* placeLeaf = &places.at(placeNumber - 1);
     
     if (placeLeaf->IsFree()) {
         placeLeaf->Take();
@@ -520,7 +519,7 @@ int TParking::takePlace(const TPlaceNumber& placeNumber) {
 
 
 int TParking::leavePlace(const TPlaceNumber& placeNumber) {
-    TParkingPlace* placeLeaf = &places[placeNumber - 1];
+    TParkingPlace* placeLeaf = &places.at(placeNumber - 1);
 
     if (placeLeaf->IsFree()) {
         return PLACE_WAS_FREE_ERROR;
@@ -685,6 +684,38 @@ std::vector<int> ProcessEvents(
     return result;
 }
 
+
+
+
+std::vector<int> ReadAndProcessEvents(std::istream& in) {
+    size_t parkingSize;
+    size_t eventsSize;
+
+    in >> parkingSize >> eventsSize;
+
+    std::vector<TEvent*> events;
+    events.reserve(eventsSize);
+    
+    char eventType = 0;
+    size_t eventPlaceNo = 0;
+    for (size_t event = 0; event < eventsSize; ++event) {
+        in >> eventType >> eventPlaceNo;
+
+        switch (eventType) {
+            case '+':
+                events.push_back(new TTakePlaceEvent(eventPlaceNo));
+                break;
+            case '-':
+                events.push_back(new TLeavePlaceEvent(eventPlaceNo));
+                break;
+            default:
+                assert(false);
+        }
+    }
+
+    TParking parking(parkingSize);
+    return ProcessEvents(parking, events);
+}
 
 
 
@@ -971,10 +1002,19 @@ void test_ProcessEvents_stress(
 
 
 int main() {
-    std::srand(360);
-    test_Nodes();
-    test_TParking();
-    test_ProcessEvents_stress(30, 100000, 100000);
+    // std::srand(360);
+    // test_Nodes();
+    // test_TParking();
+    // test_ProcessEvents_stress(30, 100000, 100000);
+
+    std::vector<int> result(ReadAndProcessEvents(std::cin));
+
+    for (std::vector<int>::const_iterator cit = result.begin();
+         cit != result.end();
+         ++cit
+    ) {
+        std::cout << *cit << std::endl;
+    }
 
     return 0;
 }
