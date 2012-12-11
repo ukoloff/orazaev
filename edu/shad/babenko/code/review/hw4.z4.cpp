@@ -43,74 +43,35 @@ void printElements(Iter begin, Iter end) {
 
 template <typename T>
 class THashElement {
-    unsigned dataSize;
-    T* data;
+    std::vector<T> data;
 
     void append(const T& elem);
 
     public:
     THashElement();
     explicit THashElement(const T& elem);
-    THashElement(const THashElement& he);
-
-    THashElement& operator = (const THashElement& he);
 
     bool has(const T& elem) const;
     bool insert(const T& elem);
     unsigned capacity() const;
 
     const T& operator[] (size_t index) const;
-    T& operator[] (size_t index);
-
-    ~THashElement();
 };
 
 template <typename T>
 THashElement<T>::THashElement()
-    : dataSize(0)
-    , data(0) {
+    : data() {
 }
 
 template <typename T>
-THashElement<T>::THashElement(const T& elem) {
-    data = new T[1];
-    data[0] = elem;
-
-    dataSize = 1;
-}
-
-template <typename T>
-THashElement<T>::THashElement(const THashElement<T>& he) {
-    this->data = new T[he.dataSize];
-
-    this->dataSize = he.dataSize;
-
-    for (size_t i = 0; i < he.dataSize; ++i) {
-        this->data[i] = he.data[i];
-    }
-}
-
-template <typename T>
-THashElement<T>& THashElement<T>::operator = (const THashElement<T>& he) {
-    if (&he == this) {
-        return *this;
-    }
-
-    delete [] data;
-    this->data = new T[he.dataSize];
-
-    this->dataSize = he.dataSize;
-
-    for (size_t i = 0; i < he.dataSize; ++i) {
-        this->data[i] = he.data[i];
-    }
-
-    return *this;
+THashElement<T>::THashElement(const T& elem)
+    : data() {
+    data.push_back(elem);
 }
 
 template <typename T>
 bool THashElement<T>::has(const T& elem) const {
-    for (size_t i = 0; i < dataSize; ++i) {
+    for (size_t i = 0; i < data.size(); ++i) {
         if (data[i] == elem) {
             return true;
         }
@@ -121,16 +82,7 @@ bool THashElement<T>::has(const T& elem) const {
 
 template <typename T>
 void THashElement<T>::append(const T& elem) {
-    T * newData = new T[dataSize + 1];
-    for (size_t i = 0; i < dataSize; ++i) {
-        newData[i] = data[i];
-    }
-    newData[dataSize] = elem;
-
-    delete [] data;
-    data = newData;
-
-    ++dataSize;
+    data.push_back(elem);
 }
 
 template <typename T>
@@ -146,31 +98,14 @@ bool THashElement<T>::insert(const T& elem) {
 
 template <typename T>
 unsigned THashElement<T>::capacity() const {
-    return dataSize;
+    return data.size();
 }
 
 template <typename T>
 const T& THashElement<T>::operator[] (size_t index) const {
-    if (index >= dataSize) {
-        throw std::out_of_range("THashElement: index is out of range.");
-    }
-
-    return data[index];
+    return data.at(index);
 }
 
-template <typename T>
-T& THashElement<T>::operator[] (size_t index) {
-    if (index >= dataSize) {
-        throw std::out_of_range("THashElement: index is out of range.");
-    }
-
-    return data[index];
-}
-
-template <typename T>
-THashElement<T>::~THashElement() {
-    delete [] data;
-}
 
 
 
@@ -244,13 +179,21 @@ THashTable<K, T, F>::~THashTable() {
 
 /////////////////////////////// struct TTriangle ///////////////////////////////
 
+
+unsigned gcd(unsigned a, unsigned b) {
+    if (b == 0) {
+        return a;
+    }
+
+    return gcd(b, a % b);
+}
+
+
 struct TTriangle {
     unsigned side[3];
 
     TTriangle();
     explicit TTriangle(std::vector<unsigned> sides);
-
-    unsigned gcd(unsigned a, unsigned b);
 };
 
 TTriangle::TTriangle() {
@@ -266,15 +209,7 @@ TTriangle::TTriangle(std::vector<unsigned> sides) {
     }
 }
 
-unsigned TTriangle::gcd(unsigned a, unsigned b) {
-    if (b == 0) {
-        return a;
-    }
-
-    return gcd(b, a % b);
-}
-
-bool operator == (TTriangle left, TTriangle right) {
+bool operator == (const TTriangle& left, const TTriangle& right) {
     for (size_t i = 0; i < 3; ++i) {
         if (left.side[i] != right.side[i]) {
             return false;
@@ -355,16 +290,19 @@ std::ostream& operator << (std::ostream& out, const TIndex& index) {
 
 /////////////////////////////// struct TTriangleHashFunction ///////////////////
 
-// static const size_t PRIME = 1000003;
 static const size_t PRIME = 3000017;
 
 
 struct TTriangleHashFunction {
-    size_t coefficient[3];
+    std::vector<size_t> coefficient;
 
-    TTriangleHashFunction() {
+    TTriangleHashFunction()
+        : coefficient(3, 0) {
         for (size_t i = 0; i < 3; ++i) {
-            coefficient[i] = (rand() % (PRIME - 1)) + 1;
+            coefficient[i] = rand() % PRIME;
+            if (coefficient[i] == 0) {
+                --i;
+            }
         }
     }
 
@@ -409,26 +347,19 @@ void readData() {
 
 size_t numberOfClasses() {
     size_t ans;
-    bool tableWasCreated = true;
 
-    do {
-        ans = 0;
+    ans = 0;
 
-        typedef THashTable<TTriangle, TIndex, TTriangleHashFunction>
-            TTriangleHashTable;
-        TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
+    typedef THashTable<TTriangle, TIndex, TTriangleHashFunction>
+        TTriangleHashTable;
+    TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
 
 
-        for (size_t i = 0; i < TIndex::data.size(); ++i) {
-            if (hashTable.insert(TIndex::data[i], TIndex(i))) {
-                ++ans;
-                if (hashTable.getSquaredSizes() > 3 * PRIME) {
-                    tableWasCreated = false;
-                    break;
-                }
-            }
+    for (size_t i = 0; i < TIndex::data.size(); ++i) {
+        if (hashTable.insert(TIndex::data[i], TIndex(i))) {
+            ++ans;
         }
-    } while (!tableWasCreated);
+    }
 
     return ans;
 }
