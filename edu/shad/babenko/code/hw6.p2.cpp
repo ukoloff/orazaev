@@ -1,11 +1,19 @@
-#include <iostream>
-#include <queue>
-#include <vector>
-
+/*
+ *  Copyright (c) 2012 Aman Orazaev
+ *
+ *  Homework 6, Problem 2
+ *
+ *  Agents radio.
+ *
+ */
 #include <math.h>
 #include <cassert>
 #include <cstdlib>
 #include <cstdio>
+
+#include <iostream>
+#include <queue>
+#include <vector>
 
 
 
@@ -64,7 +72,7 @@ class TEdge {
         , secondAgent(0) {
     }
 
-    TEdge(TAgentsVector* const agents, size_t firstAgent, size_t secondAgent)
+    TEdge(TAgentsVector* agents, size_t firstAgent, size_t secondAgent)
         : agents(agents)
         , firstAgent(firstAgent)
         , secondAgent(secondAgent) {
@@ -209,7 +217,7 @@ class TAgentsDSU {
 
 
 
-TEdgeHeap CreateEdgeHeap(TAgentsVector* const agents) {
+TEdgeHeap CreateEdgeHeap(TAgentsVector* agents) {
     TEdgeHeap resultHeap;
 
     for (size_t firstAgent = 0;
@@ -232,8 +240,7 @@ TEdgeHeap CreateEdgeHeap(TAgentsVector* const agents) {
 
 
 
-
-double FindRange(TAgentsVector* const agents) {
+double FindRange(TAgentsVector* agents) {
     if (agents->size() < 2) {
         return 0.0;
     }
@@ -255,6 +262,34 @@ double FindRange(TAgentsVector* const agents) {
 };
 
 
+
+
+
+
+
+TAgentsVector ReadAgents(std::istream& in) {
+    size_t size;
+    in >> size;
+
+    TAgentsVector result;
+    result.reserve(size);
+
+    for (int i = 0; i < size; ++i) {
+        size_t x, y;
+        in >> x >> y;
+        result.push_back(TAgent(x, y));
+    }
+
+    return result;
+}
+
+
+
+
+
+
+
+/////////////////////////// Testing here //////////////////////////////
 
 
 
@@ -607,10 +642,14 @@ void test_Stress(size_t numberOfTests) {
 
 
 int main() {
-    std::srand(360);
-    test_TEdge();
-    test_TAgentsDSU();
-    test_Stress(100);
+    // std::srand(360);
+    // test_TEdge();
+    // test_TAgentsDSU();
+    // test_Stress(100);
+
+
+    TAgentsVector agents = ReadAgents(std::cin);
+    printf("%.10f", FindRange(&agents));
 
     return 0;
 }
