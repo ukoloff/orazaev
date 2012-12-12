@@ -21,25 +21,25 @@
 
 
 class TAgent {
-    int x;
-    int y;
+    int xCoordinate;
+    int yCoordinate;
 
     public:
-    TAgent(int x, int y)
-        : x(x)
-        , y(y) {
+    TAgent(int xCoordinate, int yCoordinate)
+        : xCoordinate(xCoordinate)
+        , yCoordinate(yCoordinate) {
     }
 
-    int X() const {
-        return x;
+    int GetX() const {
+        return xCoordinate;
     }
 
-    int Y() const {
-        return y;
+    int GetY() const {
+        return yCoordinate;
     }
 
     bool operator== (const TAgent& rhs) const {
-        return X() == rhs.X() && Y() == rhs.Y();
+        return GetX() == rhs.GetX() && GetY() == rhs.GetY();
     }
 };
 
@@ -51,7 +51,7 @@ typedef std::vector<TAgent> TAgentsVector;
 
 
 std::ostream& operator<< (std::ostream& out, const TAgent& agent) {
-    out << "[" << agent.X() << ", " << agent.Y() << "]";
+    out << "[" << agent.GetX() << ", " << agent.GetY() << "]";
 }
 
 
@@ -96,8 +96,8 @@ class TEdge {
 
     double GetWeight() const {
         return sqrt(static_cast<double>(
-            pow(GetFirstAgent().X() - GetSecondAgent().X(), 2) +
-            pow(GetFirstAgent().Y() - GetSecondAgent().Y(), 2)));
+            pow(GetFirstAgent().GetX() - GetSecondAgent().GetX(), 2) +
+            pow(GetFirstAgent().GetY() - GetSecondAgent().GetY(), 2)));
     }
 
     bool operator< (const TEdge& rhs) const {
@@ -275,9 +275,9 @@ TAgentsVector ReadAgents(std::istream& in) {
     result.reserve(size);
 
     for (int i = 0; i < size; ++i) {
-        size_t x, y;
-        in >> x >> y;
-        result.push_back(TAgent(x, y));
+        size_t xCoordinate, yCoordinate;
+        in >> xCoordinate >> yCoordinate;
+        result.push_back(TAgent(xCoordinate, yCoordinate));
     }
 
     return result;
@@ -383,8 +383,8 @@ class TAgentNode : public TAgent {
     bool wasHere;
 
     public:
-    TAgentNode(int x, int y)
-        : TAgent(x, y)
+    TAgentNode(int xCoordinate, int yCoordinate)
+        : TAgent(xCoordinate, yCoordinate)
         , agentsInRange()
         , wasHere(false) {
     }
@@ -433,8 +433,8 @@ class TAgentNode : public TAgent {
 
 double CalculateRange(const TAgentNode& first, const TAgentNode& second) {
     return sqrt(static_cast<double>(
-        pow(first.X() - second.X(), 2) +
-        pow(first.Y() - second.Y(), 2)));
+        pow(first.GetX() - second.GetX(), 2) +
+        pow(first.GetY() - second.GetY(), 2)));
 }
 
 
@@ -452,7 +452,7 @@ TAgentNodeVector CreateAgentNodeVector(
     for (TAgentsVector::const_iterator cit = agents.begin();
          cit != agents.end();
          ++cit) {
-        result.push_back(TAgentNode(cit->X(), cit->Y()));
+        result.push_back(TAgentNode(cit->GetX(), cit->GetY()));
     }
 
 
@@ -480,12 +480,12 @@ TAgentNodeVector CreateAgentNodeVector(
 
 
 std::ostream& operator<< (std::ostream& out, const TAgentNode& agent) {
-    out << "[(" << agent.X() << ", " << agent.Y() << "), (";
+    out << "[(" << agent.GetX() << ", " << agent.GetY() << "), (";
 
     for (TAgentNode::const_iterator cit = agent.begin();
          cit != agent.end();
          ++cit) {
-        std::cout << "<" << (*cit)->X() << ", " << (*cit)->Y() << ">";
+        std::cout << "<" << (*cit)->GetX() << ", " << (*cit)->GetY() << ">";
         if (cit + 1 != agent.end()) {
             std::cout << " ";
         }
@@ -538,9 +538,9 @@ bool IsAssociatedGraph(TAgentNodeVector& graph) {
 
 
 TAgent CreateRandomAgent() {
-    int x = (rand() % 1000000) * pow(-1, rand() % 2);
-    int y = (rand() % 1000000) * pow(-1, rand() % 2);
-    return TAgent(x, y);
+    int xCoordinate = (rand() % 1000000) * pow(-1, rand() % 2);
+    int yCoordinate = (rand() % 1000000) * pow(-1, rand() % 2);
+    return TAgent(xCoordinate, yCoordinate);
 }
 
 
@@ -604,8 +604,8 @@ const double accuracy = 0.00000001;
 
 void test_Stress(size_t numberOfTests) {
     TTimer timer;
-    for (size_t n = 0; n < numberOfTests; ++n) {
-        std::cout << "Test #" << n + 1 << std::endl;
+    for (size_t test = 0; test < numberOfTests; ++test) {
+        std::cout << "Test #" << test + 1 << std::endl;
 
         timer.Start();
         TAgentsVector agents = CreateRandomAgentsVector(1001, 1000);
