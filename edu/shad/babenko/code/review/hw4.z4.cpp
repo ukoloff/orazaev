@@ -219,11 +219,11 @@ bool operator == (const TTriangle& left, const TTriangle& right) {
     return true;
 }
 
-bool operator != (TTriangle left, TTriangle right) {
+bool operator != (const TTriangle& left, const TTriangle& right) {
     return !(left == right);
 }
 
-std::ostream& operator<< (std::ostream& out, const TTriangle & triangle) {
+std::ostream& operator<< (std::ostream& out, const TTriangle& triangle) {
     out << "["
         << triangle.side[0] << ", "
         << triangle.side[1] << ", "
@@ -254,25 +254,25 @@ bool operator< (const TTriangle& left, const TTriangle& right) {
 /////////////////////////////// struct TIndex ////////////////////////////////
 
 struct TIndex {
-    static std::vector<TTriangle> data;
+    std::vector<TTriangle>* pData;
 
     unsigned index;
 
     TIndex() {}
-    explicit TIndex(unsigned Index);
+    explicit TIndex(std::vector<TTriangle>* pData, unsigned Index);
 };
 
-std::vector<TTriangle> TIndex::data;
-
-TIndex::TIndex(unsigned Index)
-    : index(Index) {
+TIndex::TIndex(std::vector<TTriangle>* pData, unsigned index)
+    : pData(pData)
+    , index(index) {
 }
 
-bool operator == (TIndex left, TIndex right) {
-    return TIndex::data[left.index] == TIndex::data[right.index];
+bool operator == (const TIndex& left, const TIndex& right) {
+    return left.pData == right.pData &&
+           (*left.pData)[left.index] == (*right.pData)[right.index];
 }
 
-bool operator != (TIndex left, TIndex right) {
+bool operator != (const TIndex& left, const TIndex& right) {
     return !(left == right);
 }
 
@@ -280,6 +280,7 @@ std::ostream& operator << (std::ostream& out, const TIndex& index) {
     out << "i" << index.index;
     return out;
 }
+
 
 
 
@@ -328,24 +329,27 @@ struct TTriangleHashFunction {
 
 /////////////////////////////// size_t numberOfClasses  ////////////////////////
 
-void readData() {
+std::vector<TTriangle> readData() {
+    std::vector<TTriangle> result;
     size_t size;
     std::cin >> size;
-    TIndex::data.reserve(size);
+    result.reserve(size);
 
     std::vector<unsigned> triangle(3, 0);
 
     for (size_t i = 0; i < size; ++i) {
         std::cin >> triangle[0] >> triangle[1] >> triangle[2];
 
-        TIndex::data.push_back(TTriangle(triangle));
+        result.push_back(TTriangle(triangle));
     }
 
-    assert(TIndex::data.size() == size);
+    assert(result.size() == size);
+
+    return result;
 }
 
 
-size_t numberOfClasses() {
+size_t numberOfClasses(std::vector<TTriangle>* pData) {
     size_t ans;
 
     ans = 0;
@@ -355,8 +359,8 @@ size_t numberOfClasses() {
     TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
 
 
-    for (size_t i = 0; i < TIndex::data.size(); ++i) {
-        if (hashTable.insert(TIndex::data[i], TIndex(i))) {
+    for (size_t i = 0; i < pData->size(); ++i) {
+        if (hashTable.insert((*pData)[i], TIndex(pData, i))) {
             ++ans;
         }
     }
@@ -370,8 +374,8 @@ size_t numberOfClasses() {
 
 int main() {
     std::srand(360);
-    readData();
-    std::cout << numberOfClasses();
+    std::vector<TTriangle> data = readData();
+    std::cout << numberOfClasses(&data);
 
     return 0;
 }
