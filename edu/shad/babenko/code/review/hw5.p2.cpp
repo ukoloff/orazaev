@@ -22,172 +22,145 @@
 
 
 template <typename T>
-class TCommonNode {
-    TCommonNode* ancestor;
+class TNode {
+    TNode* parent;
     T data;
+    bool isLeaf;
 
-    bool IsNeedToUpdateAncestor() const;
+    TNode<T>* leftSon;
+    TNode<T>* rightSon;
 
     public:
-    explicit TCommonNode(const T& data);
+    TNode(const T& data, bool isLeaf);
 
-    void SetAncestor(TCommonNode<T>* const);
-    TCommonNode* GetAncestor() const;
+    void SetParent(TNode<T>* const);
+    TNode* GetParent() const;
 
-    TCommonNode* GetBrother() const;
+    TNode* GetBrother() const;
 
     T GetData() const;
     void SetData(const T& newData);
 
-    virtual bool IsLeaf() const = 0;
+    bool IsLeaf() const;
 
     bool IsLeftSon() const;
     bool IsRightSon() const;
 
-    virtual TCommonNode<T>* GetLeftSon() const;
-    virtual TCommonNode<T>* GetRightSon() const;
+    TNode<T>* GetLeftSon() const;
+    TNode<T>* GetRightSon() const;
 
-    virtual void SetLeftSon(TCommonNode<T>* const);
-    virtual void SetRightSon(TCommonNode<T>* const);
-
-    void Update() const;
+    void SetLeftSon(TNode<T>* const);
+    void SetRightSon(TNode<T>* const);
 
     void Print() const;
 
-    virtual ~TCommonNode();
+    virtual ~TNode();
 };
 
 
 template <typename T>
-TCommonNode<T>::TCommonNode(const T& Data)
-    : ancestor(0)
-    , data(Data) {
+TNode<T>::TNode(const T& Data, bool isLeaf = false)
+    : parent(NULL)
+    , data(Data)
+    , isLeaf(isLeaf)
+    , leftSon(NULL)
+    , rightSon(NULL) {
 }
 
 
 template <typename T>
-void TCommonNode<T>::SetAncestor(TCommonNode<T>* const newAncestor) {
-    ancestor = newAncestor;
+void TNode<T>::SetParent(TNode<T>* const newAncestor) {
+    parent = newAncestor;
 }
 
 
 template <typename T>
-TCommonNode<T>* TCommonNode<T>::GetAncestor() const {
-    return ancestor;
+TNode<T>* TNode<T>::GetParent() const {
+    return parent;
 }
 
 template <typename T>
-TCommonNode<T>* TCommonNode<T>::GetBrother() const {
-    if (GetAncestor() == 0) {
-        return 0;
+TNode<T>* TNode<T>::GetBrother() const {
+    if (GetParent() == NULL) {
+        return NULL;
     }
 
     if (IsRightSon()) {
-        return GetAncestor()->GetLeftSon();
+        return GetParent()->GetLeftSon();
     }
 
-    return GetAncestor()->GetRightSon();
+    return GetParent()->GetRightSon();
 }
 
-
 template <typename T>
-T TCommonNode<T>::GetData() const {
+T TNode<T>::GetData() const {
     return data;
 }
 
-
 template <typename T>
-void TCommonNode<T>::SetData(const T& newData) {
+void TNode<T>::SetData(const T& newData) {
     data = newData;
 }
 
+template <typename T>
+bool TNode<T>::IsLeaf() const {
+    return isLeaf;
+}
 
 template <typename T>
-bool TCommonNode<T>::IsLeftSon() const {
-    if (GetAncestor() == 0) {
+bool TNode<T>::IsLeftSon() const {
+    if (GetParent() == NULL) {
         return false;
     }
 
-    return GetAncestor()->GetLeftSon() == this ? true : false;
+    return GetParent()->GetLeftSon() == this ? true : false;
 }
 
 template <typename T>
-bool TCommonNode<T>::IsRightSon() const {
-    if (GetAncestor() == 0) {
+bool TNode<T>::IsRightSon() const {
+    if (GetParent() == NULL) {
         return false;
     }
 
-    return GetAncestor()->GetRightSon() == this ? true : false;
+    return GetParent()->GetRightSon() == this ? true : false;
 }
 
 template <typename T>
-TCommonNode<T>* TCommonNode<T>::GetLeftSon() const {
-    assert(false);
-    return 0;
-}
-
-
-template <typename T>
-TCommonNode<T>* TCommonNode<T>::GetRightSon() const {
-    assert(false);
-    return 0;
+TNode<T>* TNode<T>::GetLeftSon() const {
+    return leftSon;
 }
 
 
 template <typename T>
-void TCommonNode<T>::SetLeftSon(TCommonNode<T>* const) {
-    assert(false);
+TNode<T>* TNode<T>::GetRightSon() const {
+    return rightSon;
 }
 
 
 template <typename T>
-void TCommonNode<T>::SetRightSon(TCommonNode<T>* const) {
-    assert(false);
-}
-
-template <typename T>
-bool TCommonNode<T>::IsNeedToUpdateAncestor() const {
-    if (GetAncestor() == 0) {
-        return false;
-    }
-
-    if (GetData() != GetAncestor()->GetData()) {
-        if (GetBrother() == 0 ||
-            (GetData() < GetBrother()->GetData() ||
-            GetBrother()->GetData() != GetAncestor()->GetData())
-        ) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-template <typename T>
-void TCommonNode<T>::Update() const {
-    if (IsNeedToUpdateAncestor()) {
-        if (GetBrother() == 0 || GetBrother()->GetData() > GetData()) {
-            GetAncestor()->SetData(GetData());
-            GetAncestor()->Update();
-        } else {
-            GetAncestor()->SetData(GetBrother()->GetData());
-            GetAncestor()->Update();
-        }
-    }
+void TNode<T>::SetLeftSon(TNode<T>* const node) {
+    leftSon = node;
 }
 
 
 template <typename T>
-void TCommonNode<T>::Print() const {
+void TNode<T>::SetRightSon(TNode<T>* const node) {
+    rightSon = node;
+}
+
+
+
+template <typename T>
+void TNode<T>::Print() const {
     std::cout << "(" << GetData() << ", "
-              << GetAncestor() << ") ";
+              << GetParent() << ") ";
     if (!IsLeaf()) {
-        if (GetLeftSon() != 0) {
+        if (GetLeftSon() != NULL) {
             GetLeftSon()->Print();
         } else {
             std::cout << "(NULL) ";
         }
-        if (GetRightSon() != 0) {
+        if (GetRightSon() != NULL) {
             GetRightSon()->Print();
         } else {
             std::cout << "(NULL) ";
@@ -196,100 +169,9 @@ void TCommonNode<T>::Print() const {
 }
 
 template <typename T>
-TCommonNode<T>::~TCommonNode() {
+TNode<T>::~TNode() {
 }
 
-
-
-
-
-
-
-template <typename T>
-class TLeafNode: public TCommonNode<T> {
-    public:
-    explicit TLeafNode(const T& Data);
-
-    bool IsLeaf() const;
-};
-
-
-template <typename T>
-TLeafNode<T>::TLeafNode(const T& Data)
-    : TCommonNode<T>(Data) {
-}
-
-
-template <typename T>
-bool TLeafNode<T>::IsLeaf() const {
-    return true;
-}
-
-
-
-
-
-
-
-
-template <typename T>
-class TNode: public TCommonNode<T> {
-    TCommonNode<T>* leftSon;
-    TCommonNode<T>* rightSon;
-
-    TNode& operator=(const TNode&);
-    TNode(const TNode&);
-
-
-    public:
-    explicit TNode(const T& Data);
-
-    void SetLeftSon(TCommonNode<T>* const newLeftSon);
-    void SetRightSon(TCommonNode<T>* const newRightSon);
-
-    TCommonNode<T>* GetLeftSon() const;
-    TCommonNode<T>* GetRightSon() const;
-
-    bool IsLeaf() const;
-};
-
-
-template <typename T>
-TNode<T>::TNode(const T& Data)
-    : TCommonNode<T>(Data)
-    , leftSon(0)
-    , rightSon(0) {
-}
-
-
-template <typename T>
-bool TNode<T>::IsLeaf() const {
-    return false;
-}
-
-
-template <typename T>
-void TNode<T>::SetLeftSon(TCommonNode<T>* const newLeftSon) {
-    leftSon = newLeftSon;
-}
-
-
-template <typename T>
-void TNode<T>::SetRightSon(TCommonNode<T>* const newRightSon) {
-    rightSon = newRightSon;
-}
-
-
-template <typename T>
-TCommonNode<T>* TNode<T>::GetRightSon() const {
-    return rightSon;
-}
-
-
-template <typename T>
-TCommonNode<T>* TNode<T>::GetLeftSon() const {
-    return leftSon;
-}
 
 
 
@@ -304,7 +186,7 @@ const TPlaceNumber NOT_FREE = static_cast<TPlaceNumber>(-1);
 
 
 
-class TParkingPlace: public TLeafNode<TPlaceNumber> {
+class TParkingPlace: public TNode<TPlaceNumber> {
     public:
     explicit TParkingPlace(const TPlaceNumber& Data);
 
@@ -316,7 +198,7 @@ class TParkingPlace: public TLeafNode<TPlaceNumber> {
 
 
 TParkingPlace::TParkingPlace(const TPlaceNumber& Data)
-    : TLeafNode<TPlaceNumber>(Data) {
+    : TNode<TPlaceNumber>(Data, true) {
 }
 
 bool TParkingPlace::IsFree() const {
@@ -328,7 +210,6 @@ void TParkingPlace::Leave(const TPlaceNumber& placeNumber) {
     assert(!IsFree());
 
     SetData(placeNumber);
-    Update();
 }
 
 
@@ -337,7 +218,6 @@ TPlaceNumber TParkingPlace::Take() {
 
     TPlaceNumber takenPlaceNumber = GetData();
     SetData(NOT_FREE);
-    Update();
 
     return takenPlaceNumber;
 }
@@ -355,56 +235,93 @@ TPlaceNumber TParkingPlace::Take() {
 
 
 
-
-
 ////////////////////////////////// TParking ////////////////////////////////
 
 
-const int NO_PLACE_TO_BE_TAKEN_ERROR = -1;
-const int PLACE_WAS_FREE_ERROR = -2;
-
-
-class TParking {
-    std::vector<TParkingPlace> places;
-    TCommonNode<TPlaceNumber>* root;
-
-
-    void ConstructTree();
-    TCommonNode<TPlaceNumber>* ConstructNode(
-        TCommonNode<TPlaceNumber>* const ancestor,
-        size_t rangeStart,
-        size_t rangeSize);
-    void DeleteNode(TCommonNode<TPlaceNumber>* const node);
-
-    TCommonNode<TPlaceNumber>* const GetNearestPlaceNode(
-        TCommonNode<TPlaceNumber>* const) const;
-    TParkingPlace* GetNextFreePlace(
-        const TCommonNode<TPlaceNumber>* const node);
-
-    TParking(const TParking&);
-    TParking& operator= (const TParking&);
+class TParkingAnswer {
+    TPlaceNumber answer;
+    int errorCode;
 
     public:
-    explicit TParking(size_t NumberOfPlaces);
+    TParkingAnswer()
+        : answer(0)
+        , errorCode(0) {
+    }
 
-    int takePlace(const TPlaceNumber& placeNumber);
-    int leavePlace(const TPlaceNumber& placeNumber);
+    TParkingAnswer(TPlaceNumber answer, int errorCode = 0)
+        : answer(answer)
+        , errorCode(errorCode) {
+    }
 
-    void PrintTree() const;
+    bool IsOk() const {
+        return GetErrorCode() == 0;
+    }
 
-    ~TParking();
+    int GetErrorCode() const {
+        return errorCode;
+    }
+
+    TPlaceNumber GetAnswer() const {
+        return answer;
+    }
 };
 
 
 
 
+class TParking {
+    std::vector<TParkingPlace> places;
+    std::vector<TNode<TPlaceNumber> > rangeTreeNodes;
+    TNode<TPlaceNumber>* root;
+
+
+    void ConstructTree();
+    TNode<TPlaceNumber>* ConstructNode(
+        TNode<TPlaceNumber>* const parent,
+        size_t rangeStart,
+        size_t rangeSize);
+
+    TParkingPlace* GetNextFreePlace(
+        const TNode<TPlaceNumber>* const node);
+
+    bool IsNeedToUpdate(TNode<TPlaceNumber>* const parent) const;
+    void Update(TNode<TPlaceNumber>* const node);
+
+    TParking(const TParking&);
+    TParking& operator= (const TParking&);
+    public:
+    explicit TParking(size_t NumberOfPlaces);
+    void Init();
+
+    TParkingAnswer TakePlace(const TPlaceNumber& placeNumber);
+    TParkingAnswer LeavePlace(const TPlaceNumber& placeNumber);
+
+    void PrintTree() const;
+
+    static const int NO_PLACE_TO_BE_TAKEN_ERROR = -1;
+    static const int PLACE_WAS_FREE_ERROR = -2;
+};
+
+
 TParking::TParking(size_t NumberOfPlaces)
     : places(NumberOfPlaces, TParkingPlace(0))
-    , root(0) {
+    , rangeTreeNodes()
+    , root(NULL) {
     for (size_t i = 0; i < places.size(); ++i) {
-        places.at(i).SetData(i + 1);
+        places.at(i).SetData(i);
     }
 
+    size_t rangeTreeNodesSize =
+        pow(2, ceil(log(NumberOfPlaces) / log(2)));
+
+    if (rangeTreeNodesSize != 0) {
+        rangeTreeNodes.reserve(rangeTreeNodesSize);
+    }
+}
+
+
+
+void TParking::Init() {
     ConstructTree();
 }
 
@@ -420,30 +337,33 @@ void TParking::ConstructTree() {
     size_t rangeSize = pow(2, ceil(log(size) / log(2)));
 
     root = ConstructNode(
+        NULL,
         0,
-        1,
         rangeSize);
 }
 
 
-TCommonNode<TPlaceNumber>* TParking::ConstructNode(
-    TCommonNode<TPlaceNumber>* const ancestor,
+
+TNode<TPlaceNumber>* TParking::ConstructNode(
+    TNode<TPlaceNumber>* const parent,
     size_t rangeStart,
     size_t rangeSize
 ) {
-    if (rangeStart > places.size()) {
-        return 0;
+    if (rangeStart >= places.size()) {
+        return NULL;
     }
 
     if (rangeSize == 1) {
-        places.at(rangeStart -1).SetAncestor(ancestor);
-        return &places.at(rangeStart - 1);
+        places.at(rangeStart).SetParent(parent);
+        return &places.at(rangeStart);
     }
 
     assert(rangeSize % 2 == 0);
 
-    TCommonNode<TPlaceNumber>* result = new TNode<TPlaceNumber>(rangeStart);
-    result->SetAncestor(ancestor);
+    rangeTreeNodes.push_back(TNode<TPlaceNumber>(rangeStart));
+
+    TNode<TPlaceNumber>* result = &rangeTreeNodes.back();
+    result->SetParent(parent);
 
 
     rangeSize /= 2;
@@ -458,80 +378,99 @@ TCommonNode<TPlaceNumber>* TParking::ConstructNode(
 }
 
 
-void TParking::DeleteNode(TCommonNode<TPlaceNumber>* const node) {
-    if (node == 0) {
-        return;
-    }
-
-    if (!node->IsLeaf()) {
-        DeleteNode(node->GetLeftSon());
-        DeleteNode(node->GetRightSon());
-
-        delete node;
-    }
-}
-
-
-TCommonNode<TPlaceNumber>* const TParking::GetNearestPlaceNode(
-    TCommonNode<TPlaceNumber>* const node) const {
-    if (node->GetData() != NOT_FREE) {
-        return node;
-    }
-
-    if (node->GetAncestor() == 0) {
-        return 0;
-    }
-
-    return GetNearestPlaceNode(node->GetAncestor());
-}
 
 TParkingPlace* TParking::GetNextFreePlace(
-    const TCommonNode<TPlaceNumber>* const node
+    const TNode<TPlaceNumber>* const node
 ) {
     if (!node->IsLeftSon()) {
-        if (node->GetAncestor() == 0) {
+        if (node->GetParent() == NULL) {
             assert(node->GetData() != NOT_FREE);
-            return &places.at(node->GetData() - 1);
+            return &places.at(node->GetData());
         }
 
-        return GetNextFreePlace(node->GetAncestor());
+        return GetNextFreePlace(node->GetParent());
     }
 
-    TCommonNode<TPlaceNumber>* rightBrother =
+    TNode<TPlaceNumber>* rightBrother =
             node->GetBrother();
-    if (rightBrother == 0 || rightBrother->GetData() == NOT_FREE) {
-        return GetNextFreePlace(node->GetAncestor());
+    if (rightBrother == NULL || rightBrother->GetData() == NOT_FREE) {
+        return GetNextFreePlace(node->GetParent());
     }
 
-    return &places.at(rightBrother->GetData() - 1);
+    return &places.at(rightBrother->GetData());
 }
 
-int TParking::takePlace(const TPlaceNumber& placeNumber) {
-    if (root->GetData() == NOT_FREE) {
-        return NO_PLACE_TO_BE_TAKEN_ERROR;
+
+
+bool TParking::IsNeedToUpdate(TNode<TPlaceNumber>* const parent) const {
+    if (parent == NULL) {
+        return false;
     }
 
-    TParkingPlace* placeLeaf = &places.at(placeNumber - 1);
+    TPlaceNumber leftSonData = parent->GetLeftSon() == NULL ?
+        static_cast<size_t>(-1) :
+        parent->GetLeftSon()->GetData();
+    TPlaceNumber rightSonData = parent->GetRightSon() == NULL ?
+        static_cast<size_t>(-1) :
+        parent->GetRightSon()->GetData();
+
+    if (parent->GetData() != std::min(leftSonData, rightSonData)) {
+        return true;
+    }
+
+    return false;
+}
+
+
+
+void TParking::Update(TNode<TPlaceNumber>* const node) {
+    TNode<TPlaceNumber>* brother = node->GetBrother();
+    TNode<TPlaceNumber>* parent = node->GetParent();
+
+    if (IsNeedToUpdate(parent)) {
+        if (brother == NULL || brother->GetData() > node->GetData()) {
+            parent->SetData(node->GetData());
+        } else {
+            parent->SetData(brother->GetData());
+        }
+        Update(parent);
+    }
+}
+
+
+
+TParkingAnswer TParking::TakePlace(const TPlaceNumber& placeNumber) {
+    if (root->GetData() == NOT_FREE) {
+        return TParkingAnswer(placeNumber, NO_PLACE_TO_BE_TAKEN_ERROR);
+    }
+
+    TParkingPlace* placeLeaf = &places.at(placeNumber);
 
     if (placeLeaf->IsFree()) {
         placeLeaf->Take();
-        return placeNumber;
+        Update(placeLeaf);
+        return TParkingAnswer(placeNumber);
     }
 
-    return static_cast<int>(GetNextFreePlace(placeLeaf)->Take());
+    TParkingPlace* nextFreeLeaf = GetNextFreePlace(placeLeaf);
+    TParkingAnswer ans = nextFreeLeaf->Take();
+    Update(nextFreeLeaf);
+
+    return ans;
 }
 
 
-int TParking::leavePlace(const TPlaceNumber& placeNumber) {
-    TParkingPlace* placeLeaf = &places.at(placeNumber - 1);
+TParkingAnswer TParking::LeavePlace(const TPlaceNumber& placeNumber) {
+    TParkingPlace* placeLeaf = &places.at(placeNumber);
 
     if (placeLeaf->IsFree()) {
-        return PLACE_WAS_FREE_ERROR;
+        return TParkingAnswer(placeNumber, PLACE_WAS_FREE_ERROR);
     }
 
     placeLeaf->Leave(placeNumber);
+    Update(placeLeaf);
 
-    return 0;
+    return TParkingAnswer(-1);
 }
 
 
@@ -541,9 +480,6 @@ void TParking::PrintTree() const {
 }
 
 
-TParking::~TParking() {
-    DeleteNode(root);
-}
 
 
 
@@ -553,24 +489,44 @@ TParking::~TParking() {
 ////////////////////////////////// TEvent //////////////////////////////////
 
 class TEvent {
+    bool isTakePlaceEvent;
     protected:
     TPlaceNumber place;
 
     public:
-    explicit TEvent(const TPlaceNumber&);
+    explicit TEvent(const TPlaceNumber&, bool isTakePlaceEvent);
 
-    virtual int Process(TParking* parking) const = 0;
+    bool IsTakePlaceEvent() const;
 
     /* For stress testing */
-    virtual bool IsTakePlaceEvent() const = 0;
-    virtual std::string Str() const = 0;
+    std::string Str() const;
     TPlaceNumber GetPlace() const;
 
     virtual ~TEvent();
 };
 
-TEvent::TEvent(const TPlaceNumber& Place)
-    : place(Place) {
+
+TEvent::TEvent(const TPlaceNumber& place, bool isTakePlaceEvent)
+    : isTakePlaceEvent(isTakePlaceEvent)
+    , place(place) {
+}
+
+
+bool TEvent::IsTakePlaceEvent() const {
+    return isTakePlaceEvent;
+}
+
+
+std::string TEvent::Str() const {
+    char eventString[20];
+
+    if (IsTakePlaceEvent()) {
+        sprintf(eventString, "(+ %d)", GetPlace());
+    } else {
+        sprintf(eventString, "(- %d)", GetPlace());
+    }
+
+    return std::string(eventString);
 }
 
 
@@ -585,79 +541,8 @@ TEvent::~TEvent() {
 
 
 
-class TLeavePlaceEvent: public TEvent {
-    public:
-    explicit TLeavePlaceEvent(const TPlaceNumber&);
-
-    virtual int Process(TParking* parking) const;
-
-    bool IsTakePlaceEvent() const;
-    std::string Str() const;
-};
-
-
-TLeavePlaceEvent::TLeavePlaceEvent(const TPlaceNumber& Place)
-    : TEvent(Place) {
-}
-
-
-bool TLeavePlaceEvent::IsTakePlaceEvent() const {
-    return false;
-}
-
-
-std::string TLeavePlaceEvent::Str() const {
-    char eventString[20];
-    sprintf(eventString, "(- %d)", place);
-
-    return std::string(eventString);
-}
-
-
-int TLeavePlaceEvent::Process(TParking* parking) const {
-    return parking->leavePlace(place);
-}
-
-
-
-
-class TTakePlaceEvent: public TEvent {
-    public:
-    explicit TTakePlaceEvent(const TPlaceNumber&);
-
-    virtual int Process(TParking* parking) const;
-
-    bool IsTakePlaceEvent() const;
-    std::string Str() const;
-};
-
-
-TTakePlaceEvent::TTakePlaceEvent(const TPlaceNumber& Place)
-    : TEvent(Place) {
-}
-
-bool TTakePlaceEvent::IsTakePlaceEvent() const {
-    return true;
-}
-
-
-std::string TTakePlaceEvent::Str() const {
-    char eventString[20];
-    sprintf(eventString, "(+ %d)", place);
-
-    return std::string(eventString);
-}
-
-
-int TTakePlaceEvent::Process(TParking* parking) const {
-    return parking->takePlace(place);
-}
-
-
-
-
-std::ostream& operator<< (std::ostream& out, const TEvent* const pEvent) {
-    out << pEvent->Str();
+std::ostream& operator<< (std::ostream& out, const TEvent event) {
+    out << event.Str();
 
     return out;
 }
@@ -668,22 +553,65 @@ std::ostream& operator<< (std::ostream& out, const TEvent* const pEvent) {
 
 
 
+/////////////////////////////// ParkingManager //////////////////////////////
+
+
+class TParkingManager {
+    TParking* pParking;
+
+    public:
+    explicit TParkingManager(TParking* const pParking)
+        : pParking(pParking) {
+    }
+
+    TParkingAnswer Process(const TEvent& event) {
+        TParkingAnswer ans;
+
+        if (event.IsTakePlaceEvent()) {
+            return pParking->TakePlace(event.GetPlace());
+        }
+
+        return pParking->LeavePlace(event.GetPlace());
+    }
+
+    std::vector<TParkingAnswer> Process(const std::vector<TEvent>& events) {
+        std::vector<TParkingAnswer> result;
+        result.reserve(events.size());
+
+        for (std::vector<TEvent>::const_iterator event = events.begin();
+             event != events.end();
+             ++event
+        ) {
+            result.push_back(Process(*event));
+        }
+
+        return result;
+    }
+};
+
+
+
+
+
+
 
 /////////////////////////////// ProcessEvents ///////////////////////////////
 
 
-std::vector<int> ProcessEvents(
-    TParking& parking,
-    const std::vector<TEvent*>& events
+
+
+std::vector<TParkingAnswer> ProcessEvents(
+    TParkingManager& parkingManager,
+    const std::vector<TEvent>& events
 ) {
-    std::vector<int> result;
+    std::vector<TParkingAnswer> result;
     result.reserve(events.size());
 
-    for (std::vector<TEvent*>::const_iterator event = events.begin();
+    for (std::vector<TEvent>::const_iterator event = events.begin();
          event != events.end();
          ++event
     ) {
-        result.push_back((*event)->Process(&parking));
+        result.push_back(parkingManager.Process(*event));
     }
 
     return result;
@@ -692,13 +620,13 @@ std::vector<int> ProcessEvents(
 
 
 
-std::vector<int> ReadAndProcessEvents(std::istream& in) {
+std::vector<TParkingAnswer> ReadAndProcessEvents(std::istream& in) {
     size_t parkingSize;
     size_t eventsSize;
 
     in >> parkingSize >> eventsSize;
 
-    std::vector<TEvent*> events;
+    std::vector<TEvent> events;
     events.reserve(eventsSize);
 
     char eventType = 0;
@@ -708,10 +636,12 @@ std::vector<int> ReadAndProcessEvents(std::istream& in) {
 
         switch (eventType) {
             case '+':
-                events.push_back(new TTakePlaceEvent(eventPlaceNo));
+                events.push_back(
+                    TEvent(eventPlaceNo - 1, /*IsTakePlaceEevnt*/ true));
                 break;
             case '-':
-                events.push_back(new TLeavePlaceEvent(eventPlaceNo));
+                events.push_back(
+                    TEvent(eventPlaceNo - 1, /*IsTakePlaceEvent*/ false));
                 break;
             default:
                 assert(false);
@@ -719,58 +649,17 @@ std::vector<int> ReadAndProcessEvents(std::istream& in) {
     }
 
     TParking parking(parkingSize);
-    return ProcessEvents(parking, events);
+    parking.Init();
+
+    TParkingManager manager(&parking);
+
+    return manager.Process(events);
 }
 
 
 
 
 
-
-/////////////////////////// NativeTestProcesEvents /////////////////////////
-
-
-std::vector<int> NativeTestProcesEvents(
-    size_t parkingSize,
-    const std::vector<TEvent*>& events
-) {
-    std::vector<bool> parking(parkingSize, true);
-
-    std::vector<int> result;
-    result.reserve(events.size());
-
-    for (std::vector<TEvent*>::const_iterator event = events.begin();
-         event != events.end();
-         ++event
-    ) {
-        if ((*event)->IsTakePlaceEvent()) {
-            std::vector<bool>::iterator place = std::find(
-                    parking.begin() + (*event)->GetPlace() - 1,
-                    parking.end(),
-                    true);
-
-            if (place == parking.end()) {
-                place = std::find(parking.begin(), parking.end(), true);
-            }
-
-            if (place == parking.end()) {
-                result.push_back(-1);
-            } else {
-                result.push_back(place - parking.begin() + 1);
-                *place = false;
-            }
-        } else {
-            if (parking[(*event)->GetPlace() - 1]) {
-                result.push_back(-2);
-            } else {
-                parking[(*event)->GetPlace() - 1] = true;
-                result.push_back(0);
-            }
-        }
-    }
-
-    return result;
-}
 
 
 
@@ -778,18 +667,16 @@ std::vector<int> NativeTestProcesEvents(
 
 
 int main() {
-    // std::srand(360);
-    // test_Nodes();
-    // test_TParking();
-    // test_ProcessEvents_stress(30, 100000, 100000);
+    std::vector<TParkingAnswer> result(ReadAndProcessEvents(std::cin));
 
-    std::vector<int> result(ReadAndProcessEvents(std::cin));
-
-    for (std::vector<int>::const_iterator cit = result.begin();
+    for (std::vector<TParkingAnswer>::const_iterator cit = result.begin();
          cit != result.end();
-         ++cit
-    ) {
-        std::cout << *cit << std::endl;
+         ++cit) {
+        if (cit->IsOk()) {
+            std::cout << cit->GetAnswer() + 1 << std::endl;
+        } else {
+            std::cout << cit->GetErrorCode() << std::endl;
+        }
     }
 
     return 0;
