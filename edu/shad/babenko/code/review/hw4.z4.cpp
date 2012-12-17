@@ -113,61 +113,47 @@ const T& THashElement<T>::operator[] (size_t index) const {
 
 
 
-/////////////////////////////// class THashTable<K, T, F> //////////////////////
+/////////////////////////////// class THashSet<K, T, F> //////////////////////
 
 
-template <typename K, typename T, typename F>
-class THashTable {
-    THashElement<T> * table;
+template <typename K, typename F>
+class THashSet {
+    THashElement<K> * table;
     size_t tableSize;
     F hash;
-    unsigned long squaredSizes;
 
-    THashTable(const THashTable&);
-    THashTable& operator = (const THashTable&);
+    THashSet(const THashSet&);
+    THashSet& operator = (const THashSet&);
 
     public:
-    THashTable(size_t size, F Hash);
+    THashSet(size_t size, F Hash);
 
-    bool insert(const K& key, const T& value);
+    bool insert(const K& key);
 
-    unsigned long getSquaredSizes() const;
-
-    ~THashTable();
+    ~THashSet();
 };
 
-template <typename K, typename T, typename F>
-THashTable<K, T, F>::THashTable(size_t size, F Hash)
+template <typename K, typename F>
+THashSet<K, F>::THashSet(size_t size, F Hash)
     : table(0)
     , tableSize(size)
-    , hash(Hash)
-    , squaredSizes(0) {
-    table = new THashElement<T>[tableSize];
+    , hash(Hash) {
+    table = new THashElement<K>[tableSize];
 }
 
-template <typename K, typename T, typename F>
-bool THashTable<K, T, F>::insert(const K& key, const T& value) {
+template <typename K, typename F>
+bool THashSet<K, F>::insert(const K& key) {
     size_t index = hash(key);
     if (index >= tableSize) {
         throw std::out_of_range(
-          "THashTable::insert: hash function generated an index out of range.");
+          "THashSet::insert: hash function generated an index out of range.");
     }
 
-    squaredSizes -= static_cast<unsigned long>(
-        table[index].capacity()) * table[index].capacity();
-    squaredSizes += static_cast<unsigned long>(
-        table[index].capacity() + 1) * (table[index].capacity() + 1);
-
-    return table[index].insert(value);
+    return table[index].insert(key);
 }
 
-template <typename K, typename T, typename F>
-unsigned long THashTable<K, T, F>::getSquaredSizes() const {
-    return squaredSizes;
-}
-
-template <typename K, typename T, typename F>
-THashTable<K, T, F>::~THashTable() {
+template <typename K, typename F>
+THashSet<K, F>::~THashSet() {
     delete [] table;
 }
 
@@ -251,47 +237,17 @@ bool operator< (const TTriangle& left, const TTriangle& right) {
 
 
 
-/////////////////////////////// struct TIndex ////////////////////////////////
-
-struct TIndex {
-    std::vector<TTriangle>* pData;
-
-    unsigned index;
-
-    TIndex() {}
-    explicit TIndex(std::vector<TTriangle>* pData, unsigned Index);
-};
-
-TIndex::TIndex(std::vector<TTriangle>* pData, unsigned index)
-    : pData(pData)
-    , index(index) {
-}
-
-bool operator == (const TIndex& left, const TIndex& right) {
-    return left.pData == right.pData &&
-           (*left.pData)[left.index] == (*right.pData)[right.index];
-}
-
-bool operator != (const TIndex& left, const TIndex& right) {
-    return !(left == right);
-}
-
-std::ostream& operator << (std::ostream& out, const TIndex& index) {
-    out << "i" << index.index;
-    return out;
-}
-
-
-
-
-
-
-
-
 
 /////////////////////////////// struct TTriangleHashFunction ///////////////////
 
 static const size_t PRIME = 3000017;
+
+
+
+size_t generateRandom(size_t from, size_t to) {
+    return rand() % ((to + 1) - from) + from;
+}
+
 
 
 struct TTriangleHashFunction {
@@ -300,10 +256,7 @@ struct TTriangleHashFunction {
     TTriangleHashFunction()
         : coefficient(3, 0) {
         for (size_t i = 0; i < 3; ++i) {
-            coefficient[i] = rand() % PRIME;
-            if (coefficient[i] == 0) {
-                --i;
-            }
+            coefficient[i] = generateRandom(1, PRIME - 1);
         }
     }
 
@@ -354,13 +307,13 @@ size_t numberOfClasses(std::vector<TTriangle>* pData) {
 
     ans = 0;
 
-    typedef THashTable<TTriangle, TIndex, TTriangleHashFunction>
-        TTriangleHashTable;
-    TTriangleHashTable hashTable(PRIME, TTriangleHashFunction());
+    typedef THashSet<TTriangle, TTriangleHashFunction>
+        TTriangleHashSet;
+    TTriangleHashSet hashSet(PRIME, TTriangleHashFunction());
 
 
     for (size_t i = 0; i < pData->size(); ++i) {
-        if (hashTable.insert((*pData)[i], TIndex(pData, i))) {
+        if (hashSet.insert((*pData)[i])) {
             ++ans;
         }
     }
