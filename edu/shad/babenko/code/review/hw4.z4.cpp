@@ -121,9 +121,6 @@ class THashSet {
     typename std::vector<THashElement<K> > table;
     F hash;
 
-    THashSet(const THashSet&);
-    THashSet& operator = (const THashSet&);
-
     public:
     THashSet(size_t size, F Hash);
 
