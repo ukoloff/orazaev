@@ -118,8 +118,7 @@ const T& THashElement<T>::operator[] (size_t index) const {
 
 template <typename K, typename F>
 class THashSet {
-    THashElement<K> * table;
-    size_t tableSize;
+    typename std::vector<THashElement<K> > table;
     F hash;
 
     THashSet(const THashSet&);
@@ -129,32 +128,23 @@ class THashSet {
     THashSet(size_t size, F Hash);
 
     bool insert(const K& key);
-
-    ~THashSet();
 };
 
 template <typename K, typename F>
 THashSet<K, F>::THashSet(size_t size, F Hash)
-    : table(0)
-    , tableSize(size)
+    : table(size, THashElement<K>())
     , hash(Hash) {
-    table = new THashElement<K>[tableSize];
 }
 
 template <typename K, typename F>
 bool THashSet<K, F>::insert(const K& key) {
     size_t index = hash(key);
-    if (index >= tableSize) {
+    if (index >= table.size()) {
         throw std::out_of_range(
           "THashSet::insert: hash function generated an index out of range.");
     }
 
     return table[index].insert(key);
-}
-
-template <typename K, typename F>
-THashSet<K, F>::~THashSet() {
-    delete [] table;
 }
 
 
