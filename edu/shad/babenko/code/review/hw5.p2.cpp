@@ -20,69 +20,129 @@
 
 ////////////////////////////// Nodes description ///////////////////////////
 
+typedef size_t TPlaceNumber;
+const TPlaceNumber NOT_FREE = static_cast<TPlaceNumber>(-1);
 
-template <typename T>
-class TNode {
-    TNode* parent;
-    T data;
-    bool isLeaf;
 
-    TNode<T>* leftSon;
-    TNode<T>* rightSon;
+class TNode;
+
+
+
+class TNodePointer {
+    std::vector<TNode>* pNodeVector;
+    size_t index;
+
+    static const size_t NULL_INDEX = static_cast<size_t>(-1);
 
     public:
-    TNode(const T& data, bool isLeaf);
+    TNodePointer()
+        : pNodeVector(NULL)
+        , index(NULL_INDEX) {
+    }
 
-    void SetParent(TNode<T>* const);
-    TNode* GetParent() const;
+    TNodePointer(size_t index, std::vector<TNode>* pNodeVector)
+        : pNodeVector(pNodeVector)
+        , index(index) {
+    }
 
-    TNode* GetBrother() const;
+    TNode* operator->() const {
+        return &pNodeVector->at(GetIndex());
+    }
 
-    T GetData() const;
-    void SetData(const T& newData);
+    TNode* Ptr() const {
+        if (GetIndex() == NULL_INDEX) {
+            return NULL;
+        }
+
+        return &pNodeVector->at(GetIndex());
+    }
+
+    size_t GetIndex() const {
+        return index;
+    }
+
+    bool operator== (const TNode* const pNode) const {
+        if (pNode == NULL) {
+            return index == NULL_INDEX;
+        }
+
+        if (pNodeVector == NULL) {
+            return false;
+        }
+
+        return &pNodeVector->at(index) == pNode;
+    }
+
+    bool operator!= (const TNode* const pNode) const {
+        return !this->operator==(pNode);
+    }
+};
+
+
+
+
+
+
+class TNode {
+    public:
+    TNode(const TPlaceNumber& data, bool isLeaf);
+
+    void SetParent(const TNodePointer&);
+    TNodePointer GetParent() const;
+
+    TNodePointer GetBrother() const;
+
+    TPlaceNumber GetData() const;
+    void SetData(const TPlaceNumber& newData);
 
     bool IsLeaf() const;
 
     bool IsLeftSon() const;
     bool IsRightSon() const;
 
-    TNode<T>* GetLeftSon() const;
-    TNode<T>* GetRightSon() const;
+    TNodePointer GetLeftSon() const;
+    TNodePointer GetRightSon() const;
 
-    void SetLeftSon(TNode<T>* const);
-    void SetRightSon(TNode<T>* const);
+    void SetLeftSon(const TNodePointer&);
+    void SetRightSon(const TNodePointer&);
 
     void Print() const;
 
-    virtual ~TNode();
+    bool IsFree() const;
+    void Leave(const TPlaceNumber& placeNumber);
+    TPlaceNumber Take();
+
+    private:
+    TNodePointer parent;
+    TPlaceNumber data;
+    bool isLeaf;
+
+    TNodePointer leftSon;
+    TNodePointer rightSon;
 };
 
 
-template <typename T>
-TNode<T>::TNode(const T& Data, bool isLeaf = false)
-    : parent(NULL)
+TNode::TNode(const TPlaceNumber& Data, bool isLeaf = false)
+    : parent()
     , data(Data)
     , isLeaf(isLeaf)
-    , leftSon(NULL)
-    , rightSon(NULL) {
+    , leftSon()
+    , rightSon() {
 }
 
 
-template <typename T>
-void TNode<T>::SetParent(TNode<T>* const newAncestor) {
+void TNode::SetParent(const TNodePointer& newAncestor) {
     parent = newAncestor;
 }
 
 
-template <typename T>
-TNode<T>* TNode<T>::GetParent() const {
+TNodePointer TNode::GetParent() const {
     return parent;
 }
 
-template <typename T>
-TNode<T>* TNode<T>::GetBrother() const {
+TNodePointer TNode::GetBrother() const {
     if (GetParent() == NULL) {
-        return NULL;
+        return /* NULL by default */ TNodePointer();
     }
 
     if (IsRightSon()) {
@@ -92,128 +152,85 @@ TNode<T>* TNode<T>::GetBrother() const {
     return GetParent()->GetRightSon();
 }
 
-template <typename T>
-T TNode<T>::GetData() const {
+TPlaceNumber TNode::GetData() const {
     return data;
 }
 
-template <typename T>
-void TNode<T>::SetData(const T& newData) {
+void TNode::SetData(const TPlaceNumber& newData) {
     data = newData;
 }
 
-template <typename T>
-bool TNode<T>::IsLeaf() const {
+bool TNode::IsLeaf() const {
     return isLeaf;
 }
 
-template <typename T>
-bool TNode<T>::IsLeftSon() const {
+bool TNode::IsLeftSon() const {
     if (GetParent() == NULL) {
         return false;
     }
 
-    return GetParent()->GetLeftSon() == this ? true : false;
+    return GetParent()->GetLeftSon().Ptr() == this ? true : false;
 }
 
-template <typename T>
-bool TNode<T>::IsRightSon() const {
+bool TNode::IsRightSon() const {
     if (GetParent() == NULL) {
         return false;
     }
 
-    return GetParent()->GetRightSon() == this ? true : false;
+    return GetParent()->GetRightSon().Ptr() == this ? true : false;
 }
 
-template <typename T>
-TNode<T>* TNode<T>::GetLeftSon() const {
+TNodePointer TNode::GetLeftSon() const {
     return leftSon;
 }
 
 
-template <typename T>
-TNode<T>* TNode<T>::GetRightSon() const {
+TNodePointer TNode::GetRightSon() const {
     return rightSon;
 }
 
 
-template <typename T>
-void TNode<T>::SetLeftSon(TNode<T>* const node) {
+void TNode::SetLeftSon(const TNodePointer& node) {
     leftSon = node;
 }
 
 
-template <typename T>
-void TNode<T>::SetRightSon(TNode<T>* const node) {
+void TNode::SetRightSon(const TNodePointer& node) {
     rightSon = node;
 }
 
 
 
-template <typename T>
-void TNode<T>::Print() const {
-    std::cout << "(" << GetData() << ", "
-              << GetParent() << ") ";
+void TNode::Print() const {
+    std::cout << "(" << GetData() << ")";
     if (!IsLeaf()) {
         if (GetLeftSon() != NULL) {
             GetLeftSon()->Print();
         } else {
-            std::cout << "(NULL) ";
+            std::cout << "(null) ";
         }
         if (GetRightSon() != NULL) {
             GetRightSon()->Print();
         } else {
-            std::cout << "(NULL) ";
+            std::cout << "(null) ";
         }
     }
 }
 
-template <typename T>
-TNode<T>::~TNode() {
-}
 
-
-
-
-
-
-
-
-///////////////////////////// struct TParkingPlace  ////////////////////////
-
-typedef size_t TPlaceNumber;
-const TPlaceNumber NOT_FREE = static_cast<TPlaceNumber>(-1);
-
-
-
-class TParkingPlace: public TNode<TPlaceNumber> {
-    public:
-    explicit TParkingPlace(const TPlaceNumber& Data);
-
-    bool IsFree() const;
-
-    void Leave(const TPlaceNumber& placeNumber);
-    TPlaceNumber Take();
-};
-
-
-TParkingPlace::TParkingPlace(const TPlaceNumber& Data)
-    : TNode<TPlaceNumber>(Data, true) {
-}
-
-bool TParkingPlace::IsFree() const {
+bool TNode::IsFree() const {
     return GetData() != NOT_FREE;
 }
 
 
-void TParkingPlace::Leave(const TPlaceNumber& placeNumber) {
+void TNode::Leave(const TPlaceNumber& placeNumber) {
     assert(!IsFree());
 
     SetData(placeNumber);
 }
 
 
-TPlaceNumber TParkingPlace::Take() {
+TPlaceNumber TNode::Take() {
     assert(IsFree());
 
     TPlaceNumber takenPlaceNumber = GetData();
@@ -229,17 +246,12 @@ TPlaceNumber TParkingPlace::Take() {
 
 
 
-
-
-
-
-
-
 ////////////////////////////////// TParking ////////////////////////////////
 
 
 class TParkingAnswer {
     TPlaceNumber answer;
+    bool itWasTakeEvent;
     int errorCode;
 
     public:
@@ -248,13 +260,18 @@ class TParkingAnswer {
         , errorCode(0) {
     }
 
-    TParkingAnswer(TPlaceNumber answer, int errorCode = 0)
+    TParkingAnswer(TPlaceNumber answer, bool itWasTakeEvent, int errorCode = 0)
         : answer(answer)
+        , itWasTakeEvent(itWasTakeEvent)
         , errorCode(errorCode) {
     }
 
     bool IsOk() const {
         return GetErrorCode() == 0;
+    }
+
+    bool ItWasTakeEvent() const {
+        return itWasTakeEvent;
     }
 
     int GetErrorCode() const {
@@ -270,27 +287,27 @@ class TParkingAnswer {
 
 
 class TParking {
-    std::vector<TParkingPlace> places;
-    std::vector<TNode<TPlaceNumber> > rangeTreeNodes;
-    TNode<TPlaceNumber>* root;
+    std::vector<TNode> rangeTreeNodes;
+    size_t parkingSize;
+    size_t lastInRangeTree;
+    TNodePointer root;
 
 
     void ConstructTree();
-    TNode<TPlaceNumber>* ConstructNode(
-        TNode<TPlaceNumber>* const parent,
+    TNodePointer ConstructNode(
+        const TNodePointer& parent,
         size_t rangeStart,
         size_t rangeSize);
 
-    TParkingPlace* GetNextFreePlace(
-        const TNode<TPlaceNumber>* const node);
+    TNodePointer GetNextFreePlace(
+        const TNodePointer& node);
 
-    bool IsNeedToUpdate(TNode<TPlaceNumber>* const parent) const;
-    void Update(TNode<TPlaceNumber>* const node);
+    void Update(TNodePointer node);
 
     TParking(const TParking&);
     TParking& operator= (const TParking&);
     public:
-    explicit TParking(size_t NumberOfPlaces);
+    explicit TParking(size_t numberOfPlaces);
     void Init();
 
     TParkingAnswer TakePlace(const TPlaceNumber& placeNumber);
@@ -300,22 +317,19 @@ class TParking {
 
     static const int NO_PLACE_TO_BE_TAKEN_ERROR = -1;
     static const int PLACE_WAS_FREE_ERROR = -2;
+    static const int LEAVE_PLACE_OK = 0;
 };
 
 
-TParking::TParking(size_t NumberOfPlaces)
-    : places(NumberOfPlaces, TParkingPlace(0))
-    , rangeTreeNodes()
-    , root(NULL) {
-    for (size_t i = 0; i < places.size(); ++i) {
-        places.at(i).SetData(i);
-    }
-
+TParking::TParking(size_t numberOfPlaces)
+    : rangeTreeNodes()
+    , parkingSize(numberOfPlaces)
+    , root() {
     size_t rangeTreeNodesSize =
-        pow(2, ceil(log(NumberOfPlaces) / log(2)));
+        pow(2, ceil(log(numberOfPlaces) / log(2)));
 
     if (rangeTreeNodesSize != 0) {
-        rangeTreeNodes.reserve(rangeTreeNodesSize);
+        rangeTreeNodes.reserve(parkingSize + rangeTreeNodesSize);
     }
 }
 
@@ -328,41 +342,43 @@ void TParking::Init() {
 
 
 void TParking::ConstructTree() {
-    size_t size = places.size();
-
-    if (size == 0) {
+    if (parkingSize == 0) {
         return;
     }
 
-    size_t rangeSize = pow(2, ceil(log(size) / log(2)));
+    for (size_t i = 0; i < parkingSize; ++i) {
+        rangeTreeNodes.push_back(TNode(i, /* IsLeaf */ true));
+    }
+
+    size_t rangeSize = pow(2, ceil(log(parkingSize) / log(2)));
 
     root = ConstructNode(
-        NULL,
+        /* by default NULL */ TNodePointer(),
         0,
         rangeSize);
 }
 
 
 
-TNode<TPlaceNumber>* TParking::ConstructNode(
-    TNode<TPlaceNumber>* const parent,
+TNodePointer TParking::ConstructNode(
+    const TNodePointer& parent,
     size_t rangeStart,
     size_t rangeSize
 ) {
-    if (rangeStart >= places.size()) {
-        return NULL;
+    if (rangeStart >= parkingSize) {
+        return /* by default NULL */ TNodePointer();
     }
 
     if (rangeSize == 1) {
-        places.at(rangeStart).SetParent(parent);
-        return &places.at(rangeStart);
+        rangeTreeNodes.at(rangeStart).SetParent(parent);
+        return TNodePointer(rangeStart, &rangeTreeNodes);
     }
 
     assert(rangeSize % 2 == 0);
 
-    rangeTreeNodes.push_back(TNode<TPlaceNumber>(rangeStart));
+    rangeTreeNodes.push_back(TNode(rangeStart));
 
-    TNode<TPlaceNumber>* result = &rangeTreeNodes.back();
+    TNodePointer result(rangeTreeNodes.size() - 1, &rangeTreeNodes);
     result->SetParent(parent);
 
 
@@ -379,61 +395,43 @@ TNode<TPlaceNumber>* TParking::ConstructNode(
 
 
 
-TParkingPlace* TParking::GetNextFreePlace(
-    const TNode<TPlaceNumber>* const node
+TNodePointer TParking::GetNextFreePlace(
+    const TNodePointer& node
 ) {
     if (!node->IsLeftSon()) {
         if (node->GetParent() == NULL) {
             assert(node->GetData() != NOT_FREE);
-            return &places.at(node->GetData());
+            return TNodePointer(node->GetData(), &rangeTreeNodes);
         }
 
         return GetNextFreePlace(node->GetParent());
     }
 
-    TNode<TPlaceNumber>* rightBrother =
+    TNodePointer rightBrother =
             node->GetBrother();
-    if (rightBrother == NULL || rightBrother->GetData() == NOT_FREE) {
+    if (rightBrother == NULL ||
+        rightBrother->GetData() == NOT_FREE) {
         return GetNextFreePlace(node->GetParent());
     }
 
-    return &places.at(rightBrother->GetData());
+    return TNodePointer(rightBrother->GetData(), &rangeTreeNodes);
 }
 
 
 
-bool TParking::IsNeedToUpdate(TNode<TPlaceNumber>* const parent) const {
-    if (parent == NULL) {
-        return false;
-    }
+void TParking::Update(TNodePointer node) {
+    while (node->GetParent() != NULL) {
+        TNodePointer brother = node->GetBrother();
+        TNodePointer parent = node->GetParent();
 
-    TPlaceNumber leftSonData = parent->GetLeftSon() == NULL ?
-        static_cast<size_t>(-1) :
-        parent->GetLeftSon()->GetData();
-    TPlaceNumber rightSonData = parent->GetRightSon() == NULL ?
-        static_cast<size_t>(-1) :
-        parent->GetRightSon()->GetData();
-
-    if (parent->GetData() != std::min(leftSonData, rightSonData)) {
-        return true;
-    }
-
-    return false;
-}
-
-
-
-void TParking::Update(TNode<TPlaceNumber>* const node) {
-    TNode<TPlaceNumber>* brother = node->GetBrother();
-    TNode<TPlaceNumber>* parent = node->GetParent();
-
-    if (IsNeedToUpdate(parent)) {
-        if (brother == NULL || brother->GetData() > node->GetData()) {
+        if (brother == NULL ||
+            brother->GetData() > node->GetData()) {
             parent->SetData(node->GetData());
         } else {
             parent->SetData(brother->GetData());
         }
-        Update(parent);
+
+        node = parent;
     }
 }
 
@@ -441,19 +439,22 @@ void TParking::Update(TNode<TPlaceNumber>* const node) {
 
 TParkingAnswer TParking::TakePlace(const TPlaceNumber& placeNumber) {
     if (root->GetData() == NOT_FREE) {
-        return TParkingAnswer(placeNumber, NO_PLACE_TO_BE_TAKEN_ERROR);
+        return TParkingAnswer(
+                placeNumber,
+                /* itWasTakeEvent */ true,
+                NO_PLACE_TO_BE_TAKEN_ERROR);
     }
 
-    TParkingPlace* placeLeaf = &places.at(placeNumber);
+    TNodePointer placeLeaf(placeNumber, &rangeTreeNodes);
 
     if (placeLeaf->IsFree()) {
         placeLeaf->Take();
         Update(placeLeaf);
-        return TParkingAnswer(placeNumber);
+        return TParkingAnswer(placeNumber, /* itWasTakeEvent */ true);
     }
 
-    TParkingPlace* nextFreeLeaf = GetNextFreePlace(placeLeaf);
-    TParkingAnswer ans = nextFreeLeaf->Take();
+    TNodePointer nextFreeLeaf = GetNextFreePlace(placeLeaf);
+    TParkingAnswer ans(nextFreeLeaf->Take(), /* itWasTakeEvent */ true);
     Update(nextFreeLeaf);
 
     return ans;
@@ -461,16 +462,19 @@ TParkingAnswer TParking::TakePlace(const TPlaceNumber& placeNumber) {
 
 
 TParkingAnswer TParking::LeavePlace(const TPlaceNumber& placeNumber) {
-    TParkingPlace* placeLeaf = &places.at(placeNumber);
+    TNodePointer placeLeaf(placeNumber, &rangeTreeNodes);
 
     if (placeLeaf->IsFree()) {
-        return TParkingAnswer(placeNumber, PLACE_WAS_FREE_ERROR);
+        return TParkingAnswer(
+                placeNumber,
+                /* itWasTakeEvent */ false,
+                PLACE_WAS_FREE_ERROR);
     }
 
     placeLeaf->Leave(placeNumber);
     Update(placeLeaf);
 
-    return TParkingAnswer(-1);
+    return TParkingAnswer(LEAVE_PLACE_OK, /* itWasTakeEvent */ false);
 }
 
 
@@ -663,9 +667,6 @@ std::vector<TParkingAnswer> ReadAndProcessEvents(std::istream& in) {
 
 
 
-
-
-
 int main() {
     std::vector<TParkingAnswer> result(ReadAndProcessEvents(std::cin));
 
@@ -673,7 +674,11 @@ int main() {
          cit != result.end();
          ++cit) {
         if (cit->IsOk()) {
-            std::cout << cit->GetAnswer() + 1 << std::endl;
+            if (cit->ItWasTakeEvent()) {
+                std::cout << cit->GetAnswer() + 1 << std::endl;
+            } else {
+                std::cout << cit->GetAnswer() << std::endl;
+            }
         } else {
             std::cout << cit->GetErrorCode() << std::endl;
         }
