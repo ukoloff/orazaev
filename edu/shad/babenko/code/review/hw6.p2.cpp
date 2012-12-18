@@ -47,57 +47,51 @@ typedef std::vector<TAgent> TAgentsVector;
 
 
 
-
-
-
 std::ostream& operator<< (std::ostream& out, const TAgent& agent) {
     out << "[" << agent.GetX() << ", " << agent.GetY() << "]";
 }
 
 
-
+double CalculateDistanceBetweenAgents(
+    const TAgent& first,
+    const TAgent& second
+) {
+    return sqrt(static_cast<double>(
+        pow(first.GetX() - second.GetX(), 2) +
+        pow(first.GetY() - second.GetY(), 2)));
+}
 
 
 
 
 class TEdge {
-    TAgentsVector* agents;
-    size_t firstAgent;
-    size_t secondAgent;
+    size_t firstAgentIndex;
+    size_t secondAgentIndex;
+    double weight;
 
     public:
     TEdge()
-        : agents(NULL)
-        , firstAgent(0)
-        , secondAgent(0) {
+        : firstAgentIndex(0)
+        , secondAgentIndex(0)
+        , weight(0.0) {
     }
 
-    TEdge(TAgentsVector* agents, size_t firstAgent, size_t secondAgent)
-        : agents(agents)
-        , firstAgent(firstAgent)
-        , secondAgent(secondAgent) {
-    }
-
-    const TAgent& GetFirstAgent() const {
-        return (*agents)[firstAgent];
-    }
-
-    const TAgent& GetSecondAgent() const {
-        return (*agents)[secondAgent];
+    TEdge(size_t firstAgentIndex, size_t secondAgentIndex, double weight)
+        : firstAgentIndex(firstAgentIndex)
+        , secondAgentIndex(secondAgentIndex)
+        , weight(weight) {
     }
 
     size_t GetFirstAgentIndex() const {
-        return firstAgent;
+        return firstAgentIndex;
     }
 
     size_t GetSecondAgentIndex() const {
-        return secondAgent;
+        return secondAgentIndex;
     }
 
     double GetWeight() const {
-        return sqrt(static_cast<double>(
-            pow(GetFirstAgent().GetX() - GetSecondAgent().GetX(), 2) +
-            pow(GetFirstAgent().GetY() - GetSecondAgent().GetY(), 2)));
+        return weight;
     }
 
     bool operator< (const TEdge& rhs) const {
@@ -115,34 +109,42 @@ typedef std::priority_queue<TEdge> TEdgeHeap;
 
 
 
-struct TDSUElement {
-    size_t data;
-    TDSUElement* pFather;
-    size_t rank;
+class TAgentsDSU {
+    struct TDSUElement {
+        size_t data;
+        TDSUElement* pFather;
+        size_t rank;
 
-    explicit TDSUElement(const size_t& element)
-        : data(element)
-        , pFather(NULL)
-        , rank(0) {
-    }
-
-    bool IsRoot() const {
-        return pFather == NULL;
-    }
-
-    TDSUElement& Root() {
-        if (IsRoot()) {
-            return *this;
+        explicit TDSUElement(const size_t& element)
+            : data(element)
+            , pFather(NULL)
+            , rank(0) {
         }
 
-        TDSUElement* node = pFather;
+        bool IsRoot() const {
+            return pFather == NULL;
+        }
+
+        bool operator== (const TDSUElement& rhs) {
+            return data == rhs.data &&
+                   pFather == rhs.pFather &&
+                   rank == rhs.rank;
+        }
+    };
+
+    TDSUElement* Root(TDSUElement* element) {
+        if (element->IsRoot()) {
+            return element;
+        }
+
+        TDSUElement* node = element->pFather;
 
         while (!node->IsRoot()) {
             node = node->pFather;
         }
 
         TDSUElement* root = node;
-        node = this;
+        node = element;
 
         while (!node->IsRoot()) {
             TDSUElement* fatherNode = node->pFather;
@@ -153,22 +155,9 @@ struct TDSUElement {
             --fatherNode->rank;
         }
 
-        return *root;
+        return root;
     }
 
-    bool operator== (const TDSUElement& rhs) {
-        return data == rhs.data &&
-               pFather == rhs.pFather &&
-               rank == rhs.rank;
-    }
-};
-
-
-
-
-
-
-class TAgentsDSU {
     size_t numberOfClasses;
     std::vector<TDSUElement> nodes;
 
@@ -184,7 +173,7 @@ class TAgentsDSU {
     }
 
     bool Equivalent(size_t firstAgent, size_t secondAgent) {
-        return nodes[firstAgent].Root() == nodes[secondAgent].Root();
+        return Root(&nodes[firstAgent]) == Root(&nodes[secondAgent]);
     }
 
     void Unite(size_t firstAgent, size_t secondAgent) {
@@ -192,15 +181,15 @@ class TAgentsDSU {
             return;
         }
 
-        TDSUElement& firstRoot = nodes[firstAgent].Root();
-        TDSUElement& secondRoot = nodes[secondAgent].Root();
+        TDSUElement* firstRoot = Root(&nodes[firstAgent]);
+        TDSUElement* secondRoot = Root(&nodes[secondAgent]);
 
-        if (firstRoot.rank < secondRoot.rank) {
-            firstRoot.pFather = &secondRoot;
-            ++secondRoot.rank;
+        if (firstRoot->rank < secondRoot->rank) {
+            firstRoot->pFather = secondRoot;
+            ++secondRoot->rank;
         } else {
-            secondRoot.pFather = &firstRoot;
-            ++firstRoot.rank;
+            secondRoot->pFather = firstRoot;
+            ++firstRoot->rank;
         }
 
         --numberOfClasses;
@@ -210,7 +199,6 @@ class TAgentsDSU {
         return numberOfClasses;
     }
 };
-
 
 
 
@@ -227,7 +215,11 @@ TEdgeHeap CreateEdgeHeap(TAgentsVector* agents) {
              secondAgent < agents->size();
              ++secondAgent) {
             if (firstAgent != secondAgent) {
-                resultHeap.push(TEdge(agents, firstAgent, secondAgent));
+                double edgeWeight = CalculateDistanceBetweenAgents(
+                        agents->at(firstAgent),
+                        agents->at(secondAgent));
+
+                resultHeap.push(TEdge(firstAgent, secondAgent, edgeWeight));
             }
         }
     }
@@ -240,7 +232,7 @@ TEdgeHeap CreateEdgeHeap(TAgentsVector* agents) {
 
 
 
-double FindRange(TAgentsVector* agents) {
+double FindOptimalRangeForAgentsRadio(TAgentsVector* agents) {
     if (agents->size() < 2) {
         return 0.0;
     }
@@ -289,10 +281,9 @@ TAgentsVector ReadAgents(std::istream& in) {
 
 
 
-
 int main() {
     TAgentsVector agents = ReadAgents(std::cin);
-    printf("%.10f", FindRange(&agents));
+    printf("%.10f", FindOptimalRangeForAgentsRadio(&agents));
 
     return 0;
 }
