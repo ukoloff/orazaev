@@ -30,26 +30,6 @@ std::ostream& operator<< (std::ostream& out, const TParkingAnswer& ans) {
 }
 
 
-std::vector<TParkingAnswer> GenerateAnswerVectorFromIntVector(
-    std::vector<int>::const_iterator begin,
-    std::vector<int>::const_iterator end
-) {
-    std::vector<TParkingAnswer> result;
-    result.reserve(end - begin);
-
-    while (begin != end) {
-        if (*begin < 0) {
-            result.push_back(TParkingAnswer(0, *begin));
-        } else {
-            result.push_back(TParkingAnswer(*begin));
-        }
-
-        ++begin;
-    }
-
-    return result;
-}
-
 
 
 std::vector<TParkingAnswer> NativeTestProcesEvents(
@@ -76,17 +56,17 @@ std::vector<TParkingAnswer> NativeTestProcesEvents(
             }
 
             if (place == parking.end()) {
-                result.push_back(TParkingAnswer(event->GetPlace(), -1));
+                result.push_back(TParkingAnswer(event->GetPlace(), true, -1));
             } else {
-                result.push_back(TParkingAnswer(place - parking.begin()));
+                result.push_back(TParkingAnswer(place - parking.begin(), true));
                 *place = false;
             }
         } else {
             if (parking[(*event).GetPlace()]) {
-                result.push_back(TParkingAnswer(event->GetPlace(), -2));
+                result.push_back(TParkingAnswer(event->GetPlace(), false, -2));
             } else {
                 parking[(*event).GetPlace()] = true;
-                result.push_back(TParkingAnswer(-1));
+                result.push_back(TParkingAnswer(0, false));
             }
         }
     }
@@ -100,57 +80,6 @@ std::vector<TParkingAnswer> NativeTestProcesEvents(
 
 
 /////////////////////////////////// Testing ////////////////////////////////
-
-
-void test_Nodes_IsLeaf() {
-    TNode<int>* pFirstNode = new TNode<int>(10, true);
-    TNode<int>* pSecondNode = new TNode<int>(100);
-
-    assert(pFirstNode->IsLeaf() == true);
-    assert(pSecondNode->IsLeaf() == false);
-
-    delete pFirstNode;
-    delete pSecondNode;
-}
-
-
-void test_Nodes_Data() {
-    TNode<int>* pFirstNode = new TNode<int>(1, true);
-    assert(pFirstNode->GetData() == 1);
-
-    pFirstNode->SetData(20);
-    assert(pFirstNode->GetData() == 20);
-
-    delete pFirstNode;
-
-    pFirstNode = new TNode<int>(99);
-    assert(pFirstNode->GetData() == 99);
-
-    pFirstNode->SetData(66);
-    assert(pFirstNode->GetData() == 66);
-
-    delete pFirstNode;
-}
-
-
-void test_TParkingPlace() {
-    TParkingPlace place(10);
-
-    assert(place.IsFree() == true);
-
-    place.Take();
-    assert(place.IsFree() == false);
-
-    place.Leave(10);
-    assert(place.IsFree() == true);
-}
-
-
-void test_Nodes() {
-    test_Nodes_IsLeaf();
-    test_Nodes_Data();
-    test_TParkingPlace();
-}
 
 
 void test_TParking_construction() {
