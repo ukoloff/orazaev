@@ -1,14 +1,19 @@
 public class Percolation {
+    private int N;
+    private boolean[] grid;
+    private QuickFindUF unionFind;
+
+
     public Percolation(int N) {
         this.N = N;
-        this.greed = new boolean[java.lang.Math.pow(N, 2)];
+        this.grid = new boolean[N * N];
 
         // id 0 is top and id 1 is bottom
-        this.unionFind = new QuickFindUF(java.lang.Math.pow(N, 2) + 2);
+        this.unionFind = new QuickFindUF(N * N + 2);
     }
 
     public void open(int i, int j) {
-        this.greed[(i - 1) * N + (j - 1)] = true;
+        this.grid[getIndex(i, j)] = true;
 
         connectWithNearPoints(i, j);
         connectWithTopAndBottom(i, j);
@@ -19,14 +24,14 @@ public class Percolation {
             return false;
         }
 
-        return this.greed[(i - 1) * N + (j - 1)];
+        return this.grid[getIndex(i, j)];
     }
 
     public boolean isFull(int i, int j) {
-        return unionFind.connected((i - 1) * N + (j - 1) + 2, 0);
+        return unionFind.connected(getIndex(i, j) + 2, 0);
     }
 
-    public boolean precolates() {
+    public boolean percolates() {
         return unionFind.connected(0, 1);
     }
 
@@ -36,16 +41,9 @@ public class Percolation {
     }
 
 
-    private boolean[] grid;
-    private int N;
-    private QuickFindUF unionFind;
-
-
     private void connectOpenPointWithAnother(int i, int j, int i1, int j1) {
         if (this.isOpen(i1, j1)) {
-            unionFind.union(
-                    (i - 1) * N + (j - 1) + 2,
-                    (i1 - 1) * N + (j1 - 1) + 2);
+            unionFind.union(getIndex(i, j) + 2, getIndex(i1, j1) + 2);
         }
     }
 
@@ -74,15 +72,15 @@ public class Percolation {
 
     private void connectWithTopAndBottom(int i, int j) {
         if (isOnTop(i, j)) {
-            unionFind.union(
-                0,
-                (i - 1) * N + (j - 1) + 2);
+            unionFind.union(0, getIndex(i, j) + 2);
         }
 
         if (isOnBottom(i, j)) {
-            unionFind.union(
-                1,
-                (i - 1) * N + (j - 1) + 2);
+            unionFind.union(1, getIndex(i, j) + 2);
         }
+    }
+
+    private int getIndex(int i, int j) {
+        return (i - 1) * N + (j - 1);
     }
 }
