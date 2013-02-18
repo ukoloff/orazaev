@@ -1,7 +1,7 @@
 public class Percolation {
     private int N;
     private boolean[] grid;
-    private QuickFindUF unionFind;
+    private WeightedQuickUnionUF unionFind;
 
 
     public Percolation(int N) {
@@ -9,7 +9,7 @@ public class Percolation {
         this.grid = new boolean[N * N];
 
         // id 0 is top and id 1 is bottom
-        this.unionFind = new QuickFindUF(N * N + 2);
+        this.unionFind = new WeightedQuickUnionUF(N * N + 2);
     }
 
     public void open(int i, int j) {
@@ -37,7 +37,6 @@ public class Percolation {
 
 
     public static void main(String[] args) {
-        Percolation foo = new Percolation(10);
     }
 
 
