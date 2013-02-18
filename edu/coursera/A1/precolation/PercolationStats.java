@@ -13,10 +13,7 @@ public class PercolationStats {
         this.T = T;
         this.arrayOfResults = new double[T];
 
-        System.out.print("Start experement [");
-
         for (int experementNo = 0; experementNo < T; ++experementNo) {
-            System.out.print(".");
             Percolation anPercolation = new Percolation(N);
 
             int numberOfOpenings = 0;
@@ -28,8 +25,6 @@ public class PercolationStats {
             arrayOfResults[experementNo] =
                     (double) numberOfOpenings / (N * N);
         }
-
-        System.out.println("]");
     }
 
     public double mean() {
