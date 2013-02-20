@@ -80,13 +80,16 @@ public class Dequeue<Item> implements Iterable<Item> {
 
     public void addFirst(Item item) {
         checkNull(item);
+
         if (isEmpty()) {
             head = new Node<Item>(item);
             tail = head;
+            ++sz;
 
             return;
         }
 
+        ++sz;
         Node<Item> newNode = new Node<Item>(item);
         newNode.setPrev(head);
         head.setNext(newNode);
@@ -95,13 +98,16 @@ public class Dequeue<Item> implements Iterable<Item> {
 
     public void addLast(Item item) {
         checkNull(item);
+
         if (isEmpty()) {
             head = new Node<Item>(item);
             tail = head;
+            ++sz;
 
             return;
         }
 
+        ++sz;
         Node<Item> newNode = new Node<Item>(item);
         newNode.setNext(tail);
         tail.setPrev(newNode);
@@ -136,7 +142,7 @@ public class Dequeue<Item> implements Iterable<Item> {
         }
 
         tail = tail.getNext();
-        tail.setNext(null);
+        tail.setPrev(null);
         return result;
     }
 
