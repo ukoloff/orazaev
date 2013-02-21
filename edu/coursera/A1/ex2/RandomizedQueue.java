@@ -36,7 +36,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         checkEmpty();
         swapLastWithAnotherUniformly();
         Item result = data[--sz];
-        
+
         if (size() * 4 == capacity) {
             decreaseCapacity();
         }
@@ -59,7 +59,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     private void increaseCapacity() {
         Item[] oldData = data;
-        Item[] newData = java.util.Arrays.copyOf(data, data.length * 2);
+        Item[] newData = reallocateNewArrayAndCopyOldData(data.length * 2);
 
         capacity *= 2;
         data = newData;
@@ -68,11 +68,24 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
 
     private void decreaseCapacity() {
         Item[] oldData = data;
-        Item[] newData = java.util.Arrays.copyOf(data, data.length / 2);
+        Item[] newData = reallocateNewArrayAndCopyOldData(data.length / 2);
 
         capacity /= 2;
         data = newData;
         oldData = null;
+    }
+
+    private Item[] reallocateNewArrayAndCopyOldData(int newSize) {
+        Item[] newData = (Item[]) new Object[newSize];
+        for (int i = 0; i < newSize; ++i) {
+            if (i < size()) {
+                newData[i] = data[i];
+            } else {
+                newData[i] = null;
+            }
+        }
+
+        return newData;
     }
 
     private void swapLastWithAnotherUniformly() {
