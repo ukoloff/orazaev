@@ -37,10 +37,10 @@ public class RandomizedQueueUnitTest extends Assert {
         for (int i = 0; i < 100; ++i) {
             rq.enqueue(i);
         }
-        
+
         assertEquals(100, rq.size());
         assertTrue(!rq.isEmpty());
-        
+
         for (int i = 0; i < 100; ++i) {
             assertEquals(100 - i, rq.size());
 
@@ -87,6 +87,14 @@ public class RandomizedQueueUnitTest extends Assert {
 
         assertTrue(!isSeqsEqual);
         assertEquals(100, rq.size());
+    }
+
+    @Test
+    public void testEmptyQueue() {
+        RandomizedQueue<Integer> rq = new RandomizedQueue<Integer>();
+        for (int item : rq) {
+            fail();
+        }
     }
 
     public static void main(String[] args) {

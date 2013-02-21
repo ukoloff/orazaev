@@ -83,6 +83,15 @@ public class DequeueUnitTest extends Assert {
         assertTrue(foo.isEmpty());
     }
 
+    @Test
+    public void testEmptyDequeue() {
+        Dequeue<Integer> foo = new Dequeue<Integer>();
+
+        for (int i : foo) {
+            fail();
+        }
+    }
+
     public static junit.framework.Test suite() {
         return new JUnit4TestAdapter(DequeueUnitTest.class);
     }
