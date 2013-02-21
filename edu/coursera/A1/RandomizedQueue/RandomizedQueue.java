@@ -55,7 +55,6 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
 
     public static void main(String[] args) {
-        RandomizedQueue<Integer> rq = new RandomizedQueue<Integer>();
     }
 
     private void increaseCapacity() {
@@ -94,8 +93,8 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
     }
 
     private class RandomizedQueueIterator implements Iterator<Item> {
-        int current;
-        int[] order;
+        private int current;
+        private int[] order;
 
         public RandomizedQueueIterator() {
             this.current = 0;
