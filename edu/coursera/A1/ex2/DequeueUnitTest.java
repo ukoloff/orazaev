@@ -75,7 +75,7 @@ public class DequeueUnitTest extends Assert {
             --i;
         }
 
-        for (i = 99; i >=0; --i) {
+        for (i = 99; i >= 0; --i) {
             assertEquals((int) foo.removeFirst(), i);
         }
 
