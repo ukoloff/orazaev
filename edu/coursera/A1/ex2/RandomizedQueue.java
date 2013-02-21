@@ -36,6 +36,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         checkEmpty();
         swapLastWithAnotherUniformly();
         Item result = data[--sz];
+        data[sz] = null;
 
         if (size() * 4 == capacity) {
             decreaseCapacity();
