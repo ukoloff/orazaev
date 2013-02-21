@@ -62,6 +62,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         Item[] oldData = data;
         Item[] newData = java.util.Arrays.copyOf(data, data.length * 2);
 
+        capacity *= 2;
         data = newData;
         oldData = null;
     }
@@ -70,6 +71,7 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         Item[] oldData = data;
         Item[] newData = java.util.Arrays.copyOf(data, data.length / 2);
 
+        capacity /= 2;
         data = newData;
         oldData = null;
     }
@@ -98,6 +100,9 @@ public class RandomizedQueue<Item> implements Iterable<Item> {
         public RandomizedQueueIterator() {
             this.current = 0;
             this.order = new int[size()];
+            for (int i = 0; i < size(); ++i) {
+                order[i] = i;
+            }
             StdRandom.shuffle(order);
         }
 
