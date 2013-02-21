@@ -4,41 +4,41 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import org.junit.runner.JUnitCore;
 
-public class DequeueUnitTest extends Assert {
+public class DequeUnitTest extends Assert {
     @Test
     public void testConstruction() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+        Deque<Integer> foo = new Deque<Integer>();
         assertTrue(foo.isEmpty());
         assertTrue(foo.size() == 0);
     }
 
     @Test(expected = java.util.NoSuchElementException.class)
-    public void testRemoveFirstFromEmptyDequeue() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+    public void testRemoveFirstFromEmptyDeque() {
+        Deque<Integer> foo = new Deque<Integer>();
         foo.removeFirst();
     }
 
     @Test(expected = java.util.NoSuchElementException.class)
-    public void testRemoveLastFromEmptyDequeue() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+    public void testRemoveLastFromEmptyDeque() {
+        Deque<Integer> foo = new Deque<Integer>();
         foo.removeLast();
     }
 
     @Test(expected = java.lang.NullPointerException.class)
     public void testAddFirstNullElement() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+        Deque<Integer> foo = new Deque<Integer>();
         foo.addFirst(null);
     }
 
     @Test(expected = java.lang.NullPointerException.class)
     public void testAddLastNullElement() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+        Deque<Integer> foo = new Deque<Integer>();
         foo.addLast(null);
     }
 
     @Test
     public void testWorkflow() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+        Deque<Integer> foo = new Deque<Integer>();
 
         for (int i = 0; i < 10; ++i) {
             foo.addLast(i);
@@ -84,8 +84,8 @@ public class DequeueUnitTest extends Assert {
     }
 
     @Test
-    public void testEmptyDequeue() {
-        Dequeue<Integer> foo = new Dequeue<Integer>();
+    public void testEmptyDeque() {
+        Deque<Integer> foo = new Deque<Integer>();
 
         for (int i : foo) {
             fail();
@@ -93,10 +93,10 @@ public class DequeueUnitTest extends Assert {
     }
 
     public static junit.framework.Test suite() {
-        return new JUnit4TestAdapter(DequeueUnitTest.class);
+        return new JUnit4TestAdapter(DequeUnitTest.class);
     }
 
     public static void main(String[] args) {
-        new JUnitCore().main("DequeueUnitTest");
+        new JUnitCore().main("DequeUnitTest");
     }
 }

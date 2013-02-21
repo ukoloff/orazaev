@@ -1,6 +1,6 @@
 import java.util.Iterator;
 
-public class Dequeue<Item> implements Iterable<Item> {
+public class Deque<Item> implements Iterable<Item> {
     private int sz;
 
     private Node<Item> head;
@@ -42,9 +42,9 @@ public class Dequeue<Item> implements Iterable<Item> {
         }
     }
 
-    private class DequeueIterator implements Iterator<Item> {
+    private class DequeIterator implements Iterator<Item> {
         private Node<Item> current;
-        public DequeueIterator() {
+        public DequeIterator() {
             this.current = head;
         }
 
@@ -64,7 +64,7 @@ public class Dequeue<Item> implements Iterable<Item> {
         }
     }
 
-    public Dequeue() {
+    public Deque() {
         this.sz = 0;
         this.head = null;
         this.tail = null;
@@ -147,7 +147,7 @@ public class Dequeue<Item> implements Iterable<Item> {
     }
 
     public Iterator<Item> iterator() {
-        return new DequeueIterator();
+        return new DequeIterator();
     }
 
     private void checkNull(Item item) {
