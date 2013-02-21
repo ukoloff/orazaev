@@ -9,7 +9,7 @@ public class Subset {
         }
 
         for (int i = 0; i < k; ++i) {
-            StdOut.println(aRandomizedQueue.dequeue() + " ");
+            StdOut.println(aRandomizedQueue.dequeue());
         }
     }
 }
