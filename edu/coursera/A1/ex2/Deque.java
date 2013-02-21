@@ -57,6 +57,10 @@ public class Deque<Item> implements Iterable<Item> {
         }
 
         public Item next() {
+            if (!hasNext()) {
+                throw new java.util.NoSuchElementException();
+            }
+
             Item result = current.getItem();
             current = current.getPrev();
 
