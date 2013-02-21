@@ -58,7 +58,7 @@ public class Deque<Item> implements Iterable<Item> {
 
         public Item next() {
             Item result = current.getItem();
-            current = current.getNext();
+            current = current.getPrev();
 
             return result;
         }
@@ -71,7 +71,7 @@ public class Deque<Item> implements Iterable<Item> {
     }
 
     public boolean isEmpty() {
-        return sz == 0;
+        return size() == 0;
     }
 
     public int size() {
@@ -85,7 +85,6 @@ public class Deque<Item> implements Iterable<Item> {
             head = new Node<Item>(item);
             tail = head;
             ++sz;
-
             return;
         }
 

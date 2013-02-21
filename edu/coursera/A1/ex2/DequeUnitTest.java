@@ -84,6 +84,19 @@ public class DequeUnitTest extends Assert {
     }
 
     @Test
+    public void testAddFirst100() {
+        Deque<String> foo = new Deque<String>();
+        for (int i = 0; i < 100; ++i) {
+            foo.addFirst(String.valueOf(i));
+        }
+
+        int i = 99;
+        for (String item : foo) {
+            assertEquals(String.valueOf(i--), item);
+        }
+    }
+
+    @Test
     public void testEmptyDeque() {
         Deque<Integer> foo = new Deque<Integer>();
 
