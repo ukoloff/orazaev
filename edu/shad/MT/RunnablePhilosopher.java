@@ -32,7 +32,8 @@ class Philosopher {
 
     public Philosopher(int position, Fork left, Fork right, int seed) {
         if (left == right) {
-            throw new java.lang.IllegalArgumentException("Philosopher must have 2 different forks.");
+            throw new java.lang.IllegalArgumentException(
+                    "Philosopher must have 2 different forks.");
         }
 
         this.eatCount = 0;
@@ -134,6 +135,7 @@ public class RunnablePhilosopher extends Philosopher implements Runnable {
     throws java.lang.InterruptedException {
         int count = 5;
         int seed = 360;
+        int dinnerTimeInSeconds = 60;
 
         RunnablePhilosopher[] phils = new RunnablePhilosopher[count];
 
@@ -152,8 +154,8 @@ public class RunnablePhilosopher extends Philosopher implements Runnable {
             threads[i].start();
         }
 
-        Thread.sleep(60000);
-        
+        Thread.sleep(dinnerTimeInSeconds * 1000);
+
         for (RunnablePhilosopher phil : phils) {
             phil.stop();
         }
@@ -163,8 +165,9 @@ public class RunnablePhilosopher extends Philosopher implements Runnable {
         }
 
         for (RunnablePhilosopher phil : phils) {
-            System.out.println("Philosopher " + phil.getPosition() + " ate = "
-                    + phil.getEatCount() + " times and waited = " + phil.getWaitTime() + " ms.");
+            System.out.println("Philosopher " + phil.getPosition()
+                    + " ate = " + phil.getEatCount()
+                    + " times and waited = " + phil.getWaitTime() + " ms.");
         }
     }
 }
