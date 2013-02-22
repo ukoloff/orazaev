@@ -94,7 +94,7 @@ class Philosopher {
 
 
 
-public class RunnablePhilosopher extends Philosopher implements Runnable {
+class RunnablePhilosopher extends Philosopher implements Runnable {
     private volatile boolean stopFlag;
 
     RunnablePhilosopher(int position, Fork left, Fork right, int seed) {
@@ -131,6 +131,12 @@ public class RunnablePhilosopher extends Philosopher implements Runnable {
         stopFlag = true;
     }
 
+}
+
+
+
+
+public class PhilosopherProblemDemo {
     public static void main(String[] args)
     throws java.lang.InterruptedException {
         int count = 5;
