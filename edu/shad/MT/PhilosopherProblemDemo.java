@@ -6,7 +6,7 @@
  *      - Add standart deviation of waiting time calculation.
  *      - Philosopher class has verbose flag.
  *      - RunnablePhilosopher class has polite mode to minimize
-          waiting time standart deviation.
+ *        waiting time standart deviation.
  *
  *  Compilation:
  *  $ javac PhilosopherProblemDemo.java
