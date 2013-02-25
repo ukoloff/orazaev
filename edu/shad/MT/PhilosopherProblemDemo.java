@@ -1,3 +1,48 @@
+/**
+ *  Home work 1.
+ *  Philosopher problem.
+ *
+ *  Features:
+ *      - Add standart deviation of waiting time calculation.
+ *      - Philosopher class has verbose flag.
+ *      - RunnablePhilosopher class has polite mode to minimize
+          waiting time standart deviation.
+ *
+ *  Compilation:
+ *  $ javac PhilosopherProblemDemo.java
+ *
+ *  =================================================================
+ *
+ *  Run example 1 (with polite mode).
+ *  5 philosophers, 60 seconds for dinner, seed = 360, polite mode on:
+ *  $ java PhilosopherProblemDemo
+ *  Philosopher 0 ate = 376 times and waited = 21565 ms.
+ *  Philosopher 1 ate = 385 times and waited = 21429 ms.
+ *  Philosopher 2 ate = 389 times and waited = 21307 ms.
+ *  Philosopher 3 ate = 386 times and waited = 21353 ms.
+ *  Philosopher 4 ate = 385 times and waited = 21433 ms.
+ *  -------------- Summary ---------------
+ *  Mean: 21415.0 ms.
+ *  Stddev: 98.14275317108238.
+ *
+ *
+ *  Run example 2 (Without polite mode).
+ *  5 philosophers, 60 seconds for dinner, seed = 360, polite mode off:
+ *  $ java PhilosopherProblemDemo
+ *  Philosopher 0 ate = 355 times and waited = 24181 ms.
+ *  Philosopher 1 ate = 400 times and waited = 19521 ms.
+ *  Philosopher 2 ate = 427 times and waited = 17530 ms.
+ *  Philosopher 3 ate = 462 times and waited = 13751 ms.
+ *  Philosopher 4 ate = 369 times and waited = 23036 ms.
+ *  -------------- Summary ---------------
+ *  Mean: 19603.0 ms.
+ *  Stddev: 4221.774804510539.
+ *
+ *
+ *  @author Aman Orazaev
+ *
+ */
+
 import java.util.Random;
 
 
@@ -186,6 +231,7 @@ class RunnablePhilosopher extends Philosopher implements Runnable {
 
 
 
+
 public class PhilosopherProblemDemo {
     private int count;
     private int dinnerTimeInSeconds;
@@ -197,7 +243,7 @@ public class PhilosopherProblemDemo {
         this.seed = seed;
     }
 
-    public void Demo() {
+    public void demo() {
         RunnablePhilosopher[] phils = createPhilosophers();
 
         try {
@@ -289,6 +335,6 @@ public class PhilosopherProblemDemo {
     }
 
     public static void main(String[] args) {
-        new PhilosopherProblemDemo(5, 10, 360).Demo();
+        new PhilosopherProblemDemo(5, 60, 360).demo();
     }
 }
