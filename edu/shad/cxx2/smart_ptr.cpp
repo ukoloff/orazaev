@@ -35,7 +35,7 @@ public:
     TSmartPointer(const TSmartPointer& other)
         : TStoragePolicy<T>()
         , ownershipPolicyImpl(other.ownershipPolicyImpl) {
-        GetImplRef(*this) = other.ownershipPolicyImpl.Clone(GetImplRef(other));
+        GetImplRef(*this) = ownershipPolicyImpl.Clone(GetImplRef(other));
     }
 
     TSmartPointer& operator=(const TSmartPointer& rhs) {
@@ -193,20 +193,15 @@ class TRefLinkedOwnershipPolicy {
 public:
     TRefLinkedOwnershipPolicy()
         : _next(0)
-        , _prev(0) { }
-
-    TRefLinkedOwnershipPolicy(const TRefLinkedOwnershipPolicy& other)
-        : _next(0)
-        , _prev(0) {
-        _next = &const_cast<TRefLinkedOwnershipPolicy&>(other);
-        _prev = other._prev;
-        if (_prev) {
-            _prev->_next = this;
-        }
-        _next->_prev = this;
+        , _prev(0)
+        , _cur(0) {
+        _cur = this;
     }
 
-    T Clone(const T& val) const {
+    T Clone(const T& val) {
+        _cur->_next = this;
+        _prev = _cur;
+        _cur = this;
         return val;
     }
 
@@ -214,17 +209,18 @@ public:
         if (_next == _prev) {
             return true;
         }
+
         if (_prev)
             _prev->_next = _next;
         if (_next)
             _next->_prev = _prev;
-
         return false;
     }
 
 private:
     TRefLinkedOwnershipPolicy* _next;
     TRefLinkedOwnershipPolicy* _prev;
+    TRefLinkedOwnershipPolicy* _cur;
 };
 
 
@@ -261,7 +257,6 @@ int main() {
                 TRefCountOwnershipPolicy
         > spFoo(new Foo(*sp + 200, 80));
 
-        std::cout << "TRefCountOwnershipPolicy" << std::endl;
         std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
 
         {
@@ -320,7 +315,6 @@ int main() {
                 TRefLinkedOwnershipPolicy
         > spFoo(new Foo(*sp + 200, 80));
 
-        std::cout << "TRefCountOwnershipPolicy" << std::endl;
         std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
 
         {
@@ -329,6 +323,12 @@ int main() {
                     TDefaultStoragePolicy,
                     TRefLinkedOwnershipPolicy
             > spBar(spFoo);
+
+            TSmartPointer<
+                    Foo,
+                    TDefaultStoragePolicy,
+                    TRefLinkedOwnershipPolicy
+            > spQux(spFoo);
             std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
         }
 
@@ -344,6 +344,7 @@ int main() {
         }
 
         std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
+
     }
     return 0;
 }
