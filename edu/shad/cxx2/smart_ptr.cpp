@@ -3,9 +3,44 @@
  *
  *  @brief TSmartPointer<T> class realization.
  *
+ *
+ *  Compilation:
+ *  $ g++ smart_ptr.cpp -o smart_ptr.out
+ *
+ *
+ *  Valgrind output:
+ *  $ valgrind ./smart_ptr.out
+ *  ==3487== Memcheck, a memory error detector
+ *  ==3487== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
+ *  ==3487== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
+ *  ==3487== Command: ./smart_ptr.out
+ *  ==3487== 
+ *  ==3487== 
+ *  ==3487== HEAP SUMMARY:
+ *  ==3487==     in use at exit: 0 bytes in 0 blocks
+ *  ==3487==   total heap usage: 19 allocs, 19 frees, 10,524 bytes allocated
+ *  ==3487== 
+ *  ==3487== All heap blocks were freed -- no leaks are possible
+ *  ==3487== 
+ *  ==3487== For counts of detected and suppressed errors, rerun with: -v
+ *  ==3487== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 17 from 6)
+ *
+ *
  *  @author Aman Orazaev
  */
+#include <cstdlib>
 #include <iostream>
+
+
+
+/// VERIFY macros for testing TSmartPointer.
+#define VERIFY(EXPECT, HAS) \
+    if (EXPECT != HAS) { \
+        std::cout << "ASSERTION FAILED! line: " << __LINE__ << "\n"; \
+        std::cout << "Expected = " << EXPECT << "\n"; \
+        std::cout << "Has = " << HAS << "\n"; \
+        std::abort(); \
+    }
 
 
 
@@ -17,6 +52,7 @@ class TNonCopyableOwnershipPolicy;
 
 
 
+/// TSmartPointer
 template <
     typename T,
     template <typename> class TStoragePolicy = TDefaultStoragePolicy,
@@ -77,6 +113,12 @@ private:
 
 
 
+/**
+ * TDefaultStoragePolicy.
+ * @brief Storage policy for TSmartPointer.
+ * 
+ * Has default delete operator (without bracets []).
+ */
 template <typename T>
 class TDefaultStoragePolicy {
 protected:
@@ -122,6 +164,13 @@ protected:
 
 
 
+/**
+ *  TArrayStoragePolicy.
+ *  @brief Storage policy for TSmartPointer.
+ *
+ *  Has array delete operator (delete[]).
+ *  Also has operator[] for indexing array;
+ */
 template <typename T>
 class TArrayStoragePolicy : public TDefaultStoragePolicy<T> {
 public:
@@ -130,12 +179,26 @@ public:
             const typename TDefaultStoragePolicy<T>::TStoredType& pointer)
         : TDefaultStoragePolicy<T>(pointer) { }
 
+    T& operator[](size_t index) {
+        return *(GetImpl(*this) + index);
+    }
+
+    const T& operator[](size_t index) const {
+        return *(GetImpl(*this) + index);
+    }
+
 protected:
     void Destroy() { delete[] TDefaultStoragePolicy<T>::_pointer; }
 };
 
 
 
+/**
+ *  TNonCopyableOwnershipPolicy.
+ *  @brief Ownership policy for TSmartPointer.
+ *
+ *  Disallow copying.
+ */
 template <typename T>
 class TNonCopyableOwnershipPolicy {
 private:
@@ -149,6 +212,13 @@ public:
 
 
 
+/**
+ *  TRefCountOwnershipPolicy.
+ *  @brief Ownership policy for TSmartPointer.
+ *
+ *  Counting reference to pointer, delete when there
+ *  are no reference has left.
+ */
 template <typename T>
 class TRefCountOwnershipPolicy {
 public:
@@ -174,6 +244,12 @@ private:
 
 
 
+/**
+ *  TDestructiveCopyOwnershipPolicy.
+ *  @brief Ownership policy for TSmartPointer.
+ *  
+ *  Set pointer to 0, when it is copyied in another place.
+ */
 template <typename T>
 class TDestructiveCopyOwnershipPolicy {
 public:
@@ -188,6 +264,17 @@ public:
 
 
 
+/**
+ *  TRefLinkedOwnershipPolicy.
+ *  @brief Ownership policy for TSmartPointer.
+ *
+ *  Use double linked list for reference tracking.
+ *  If it is just one element in linked list, we can
+ *  delete pointer.
+ *
+ *  Addition of reference equal to addition of new element
+ *  to linked list.
+ */
 template <typename T>
 class TRefLinkedOwnershipPolicy {
 public:
@@ -198,10 +285,29 @@ public:
         _cur = this;
     }
 
+    /// Need for Swap function in TSmartPointer.
+    TRefLinkedOwnershipPolicy& operator=(const TRefLinkedOwnershipPolicy& other) {
+        if (this == &other) {
+            return *this;
+        }
+        _next = other._next;
+        _prev = other._prev;
+        _cur = this;
+
+        if (_next)
+            _next->_prev = _cur;
+        if (_prev)
+            _prev->_next = _cur;
+    }
+
     T Clone(const T& val) {
         _cur->_next = this;
         _prev = _cur;
         _cur = this;
+
+        if (_next) {
+            _next->_prev = _cur;
+        }
         return val;
     }
 
@@ -210,10 +316,13 @@ public:
             return true;
         }
 
-        if (_prev)
+        if (_prev) {
             _prev->_next = _next;
-        if (_next)
+        }
+        if (_next) {
             _next->_prev = _prev;
+        }
+        _cur = _prev = _next = 0;
         return false;
     }
 
@@ -224,7 +333,7 @@ private:
 };
 
 
-
+/// Testing TSmartPointer and its policies.
 class Foo {
 public:
     int x;
@@ -237,114 +346,151 @@ public:
         : x(x), y(y) { }
 };
 
-
-
-
-int main() {
+template <
+    template <typename> class TOwnershipPolicy
+> void TestSmartPointer() {
     TSmartPointer<int> sp(new int(20));
 
-    std::cout << *sp << std::endl;
-
-    TSmartPointer<Foo> foo(new Foo(*sp, 78));
-
-    std::cout << "foo = {" << foo->x << ", '"
-              << foo->y << "'}\n";
+    TSmartPointer<
+            Foo,
+            TDefaultStoragePolicy,
+            TOwnershipPolicy
+    > spFoo(new Foo(*sp + 200, 80));
+    VERIFY(220, spFoo->x);
+    VERIFY(80, spFoo->y);
 
     {
         TSmartPointer<
                 Foo,
                 TDefaultStoragePolicy,
-                TRefCountOwnershipPolicy
-        > spFoo(new Foo(*sp + 200, 80));
+                TOwnershipPolicy
+        > spBar(spFoo);
 
-        std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
+        TSmartPointer<
+                Foo,
+                TDefaultStoragePolicy,
+                TOwnershipPolicy
+        > spQux(spFoo);
 
-        {
-            TSmartPointer<Foo, TDefaultStoragePolicy, TRefCountOwnershipPolicy>
-                    spBar(spFoo);
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-        }
-
-        {
-            TSmartPointer<
-                    Foo,
-                    TDefaultStoragePolicy,
-                    TRefCountOwnershipPolicy
-            > spBar(new Foo(1, 90));
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-            spBar = spFoo;
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-        }
-
-        std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
+        VERIFY(220, spBar->x);
+        VERIFY(80, spBar->y);
+        VERIFY(220, spQux->x);
+        VERIFY(80, spQux->y);
     }
 
     {
-        TSmartPointer<int> nullPointer;
         TSmartPointer<
                 Foo,
                 TDefaultStoragePolicy,
-                TDestructiveCopyOwnershipPolicy
-        > pQux(new Foo(666, 81));
+                TOwnershipPolicy
+        > spBar(new Foo(1, 90));
+        VERIFY(1, spBar->x);
+        VERIFY(90, spBar->y);
 
-        TSmartPointer<
-                Foo,
-                TDefaultStoragePolicy,
-                TDestructiveCopyOwnershipPolicy
-        > pBar(pQux);
+        spBar = spFoo;
 
-        std::cout << GetImpl(pQux) << std::endl;
-        std::cout << pBar->x << " " << pBar->y << std::endl;
+        VERIFY(220, spFoo->x);
+        VERIFY(80, spFoo->y);
+        VERIFY(220, spBar->x);
+        VERIFY(80, spBar->y);
+    }
+};
 
-        TSmartPointer<
-                Foo,
-                TDefaultStoragePolicy,
-                TDestructiveCopyOwnershipPolicy
-        > pFoo;
+void TestDestructiveSmartPointer() {
+    TSmartPointer<int> nullPointer;
+    VERIFY(0, GetImpl(nullPointer));
+
+    TSmartPointer<
+            Foo,
+            TDefaultStoragePolicy,
+            TDestructiveCopyOwnershipPolicy
+    > pQux(new Foo(666, 81));
+
+    TSmartPointer<
+            Foo,
+            TDefaultStoragePolicy,
+            TDestructiveCopyOwnershipPolicy
+    > pBar(pQux);
+
+    VERIFY(0, GetImpl(pQux));
+    VERIFY(666, pBar->x);
+    VERIFY(81, pBar->y);
+
+    TSmartPointer<
+            Foo,
+            TDefaultStoragePolicy,
+            TDestructiveCopyOwnershipPolicy
+    > pFoo;
+
+    pFoo = pBar;
+    VERIFY(0, GetImpl(pBar));
+    VERIFY(666, pFoo->x);
+    VERIFY(81, pFoo->y);
+}
+
+template <
+    template <typename> class TOwnershipPolicy
+> void TestArrayPointer() {
+    typedef TSmartPointer<
+        int,
+        TArrayStoragePolicy,
+        TOwnershipPolicy
+    > TTestSmartPointer;
+
+    TTestSmartPointer pFoo(new int[100]);
+
+    for (int i = 0; i < 100; ++i) {
+        pFoo[i] = i + 800;
+    }
+    for (int i = 0; i < 100; ++i) {
+        VERIFY(i + 800, pFoo[i]);
+    }
+
+    {
+        TTestSmartPointer pBar(pFoo);
+        for (int i = 0; i < 100; ++i) {
+            VERIFY(i + 800, pFoo[i]);
+        }
+    }
+    for (int i = 0; i < 100; ++i) {
+        VERIFY(i + 800, pFoo[i]);
+    }
+
+    {
+        TTestSmartPointer pBar(new int[1000]);
+        pBar = pFoo;
+        for (int i = 0; i < 100; ++i) {
+            VERIFY(i + 800, pFoo[i]);
+        }
+    }
+    for (int i = 0; i < 100; ++i) {
+        VERIFY(i + 800, pFoo[i]);
+    }
+
+    {
+        TTestSmartPointer pBar(new int[200]);
+        for (int i = 0; i < 200; ++i) {
+            pBar[i] = i + 1;
+        }
 
         pFoo = pBar;
-
-        std::cout << GetImpl(pBar) << std::endl;
-        std::cout << pFoo->x << " " << pFoo->y << std::endl;
     }
-
-    {
-        TSmartPointer<
-                Foo,
-                TDefaultStoragePolicy,
-                TRefLinkedOwnershipPolicy
-        > spFoo(new Foo(*sp + 200, 80));
-
-        std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
-
-        {
-            TSmartPointer<
-                    Foo,
-                    TDefaultStoragePolicy,
-                    TRefLinkedOwnershipPolicy
-            > spBar(spFoo);
-
-            TSmartPointer<
-                    Foo,
-                    TDefaultStoragePolicy,
-                    TRefLinkedOwnershipPolicy
-            > spQux(spFoo);
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-        }
-
-        {
-            TSmartPointer<
-                    Foo,
-                    TDefaultStoragePolicy,
-                    TRefLinkedOwnershipPolicy
-            > spBar(new Foo(1, 90));
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-            spBar = spFoo;
-            std::cout << "bar = {" << spBar->x << ", '" << spBar->y << "'}\n";
-        }
-
-        std::cout << "foo = {" << spFoo->x << ", '" << spFoo->y << "'}\n";
-
+    for (int i = 0; i < 200; ++i) {
+        VERIFY(i + 1, pFoo[i]);
     }
+}
+
+int main() {
+    TSmartPointer<Foo> foo(new Foo(87, 78));
+    VERIFY(87, foo->x);
+    VERIFY(78, foo->y);
+
+    TestDestructiveSmartPointer();
+    TestSmartPointer<TRefCountOwnershipPolicy>();
+    TestSmartPointer<TRefLinkedOwnershipPolicy>();
+
+    TestArrayPointer<TRefCountOwnershipPolicy>();
+    TestArrayPointer<TRefLinkedOwnershipPolicy>();
+
     return 0;
 }
