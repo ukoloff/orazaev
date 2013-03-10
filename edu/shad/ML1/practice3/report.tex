@@ -1,0 +1,57 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage[dvips]{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[ruled, lined]{algorithm2e}
+\usepackage{verbatim}
+
+\textheight=220mm
+\textwidth=160mm
+
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\NA}{\operatorname{NA}}
+\newcommand{\OR}{\operatorname{ or }}
+\newcommand{\LCS}{\operatorname{LCS}}
+%\DeclareMathOperator{\sgn}{sgn}
+
+\title{\bf Лабораторная работа № 2. \\ <<Машинное
+Обучение.>>}
+\author{А.Е. Оразаев}
+\date{}
+\begin{document}
+
+\voffset=-20mm
+\hoffset=-12mm
+\font\Got=eufm10 scaled\magstep2 \font\Got=eufm10
+
+\maketitle
+
+\section{Реализация QDA.}
+В ходе лабораторной работы было реализовано обучение и тестирование
+квадратичного дескриминанта. Фактически пришлось внести изменения по
+сравнению с готовы кодом наивного баессовского классификатора только в:
+\begin{itemize}
+    \item Вычисление ковариационной матрицы.
+    \item Функцию \verb=qdaClassify=
+\end{itemize}
+
+Также в конце листинга можно найти обучение и клссификацию с помощью
+функции \verb=qda= из пакета \textbf{MASS}.
+
+\paragraph{Результаты.}
+В итоге 4 \% ошибки на самописном \verb=qda=, абсолютно такой же
+процент ошибки и для \verb=qda= из коробки.
+
+
+\paragraph{Листинг.}
+\begingroup
+    \fontsize{10pt}{12pt}\selectfont
+    \verbatiminput{qda_todo.R}
+\endgroup
+
+\end{document}
