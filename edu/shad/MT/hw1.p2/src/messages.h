@@ -43,6 +43,13 @@ public:
         , type(type)
     { }
 
+    TTaskMessage(
+        const std::string& s,
+        const TMessageType& type)
+        : pData(std::make_shared<std::string>(s))
+        , type(type)
+    { }
+
 
     const TMessageType& GetType() const {
         return type;

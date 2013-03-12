@@ -11,18 +11,9 @@
 int main() {
     TWorkerEnvironment env;
 
-    env.taskQueue->Put(TTaskMessage(
-        std::shared_ptr<std::string>(new std::string("http://ya.ru")),
-        T_GET
-    ));
-    env.taskQueue->Put(TTaskMessage(
-        std::shared_ptr<std::string>(new std::string("http://google.ru")),
-        T_GET
-    ));
-    env.taskQueue->Put(TTaskMessage(
-        std::shared_ptr<std::string>(new std::string("http://yahoo.ru")),
-        T_GET
-    ));
+    env.taskQueue->Put(TTaskMessage("http://ya.ru", T_GET));
+    env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
+    env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
 
     std::cout << env.taskQueue->Size() << std::endl;
 
@@ -44,10 +35,7 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    env.taskQueue->Put(TTaskMessage(
-        std::shared_ptr<std::string>(),
-        T_POISON
-    ));
+    env.taskQueue->Put(TTaskMessage("", T_POISON));
 
     return 0;
 }

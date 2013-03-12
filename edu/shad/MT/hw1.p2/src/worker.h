@@ -84,15 +84,11 @@ public:
         char buffer[500];
 
         sprintf(buffer, "Loggin get message = '%s'", message.GetData()->c_str());
-        TTaskMessage logTask(
-            std::shared_ptr<std::string>(new std::string(buffer)),
-            T_LOG);
+        TTaskMessage logTask(buffer, T_LOG);
         env_.taskQueue->Put(logTask);
 
         sprintf(buffer, "Parsing message = '%s'", message.GetData()->c_str());
-        TTaskMessage parseTask(
-            std::shared_ptr<std::string>(new std::string(buffer)),
-            T_PARSE);
+        TTaskMessage parseTask(buffer, T_PARSE);
         env_.taskQueue->Put(parseTask);
     }
 
@@ -101,18 +97,14 @@ public:
         char buffer[500];
 
         sprintf(buffer, "Loggin parse message = '%s'", message.GetData()->c_str());
-        TTaskMessage logTask(
-            std::shared_ptr<std::string>(new std::string(buffer)),
-            T_LOG);
+        TTaskMessage logTask(buffer, T_LOG);
         env_.taskQueue->Put(logTask);
     }
 
     void ProcessPoisonedMessage() {
         printf("POISON:\n");
 
-        TTaskMessage poisonedTask(
-            std::shared_ptr<std::string>(),
-            T_POISON);
+        TTaskMessage poisonedTask("", T_POISON);
         env_.taskQueue->Put(poisonedTask);
     }
 
