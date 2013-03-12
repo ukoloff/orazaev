@@ -10,9 +10,9 @@
     @brief run functor for std::thread.
     Process messages until get poisoned message.
 */
-class TThreadProcess {
+class TThreadWorker {
 public:
-    TThreadProcess(
+    TThreadWorker(
             const std::shared_ptr<TSynchronizedQueue<TTaskMessage> >& messages)
     : messages(messages) { }
 
@@ -104,19 +104,19 @@ int main() {
     std::cout << messages->Size() << std::endl;
 
     TThreadGuard first(std::thread([&messages] {
-        TThreadProcess a(messages);
+        TThreadWorker a(messages);
         a();
     }));
     TThreadGuard second(std::thread([&messages] {
-        TThreadProcess a(messages);
+        TThreadWorker a(messages);
         a();
     }));
     TThreadGuard third(std::thread([&messages] {
-        TThreadProcess a(messages);
+        TThreadWorker a(messages);
         a();
     }));
 
-    TThreadProcess p(messages);
+    TThreadWorker p(messages);
     TThreadGuard guard(std::thread(std::ref(p)));
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
