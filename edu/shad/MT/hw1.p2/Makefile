@@ -1,6 +1,6 @@
 src = \
-		test_page_downloader.cpp \
-		page_downloader.cpp
+		src/test_page_downloader.cpp \
+		src/page_downloader.cpp
 
 CC = g++ -std=c++0x
 CCFLAGS = -I. -lcurl
