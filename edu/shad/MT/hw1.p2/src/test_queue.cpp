@@ -17,21 +17,10 @@ int main() {
 
     std::cout << env.taskQueue->Size() << std::endl;
 
-    TThreadGuard first(std::thread([&env] {
-        TThreadWorker a(env);
-        a();
-    }));
-    TThreadGuard second(std::thread([&env] {
-        TThreadWorker a(env);
-        a();
-    }));
-    TThreadGuard third(std::thread([&env] {
-        TThreadWorker a(env);
-        a();
-    }));
-
-    TThreadWorker p(env);
-    TThreadGuard guard(std::thread(std::ref(p)));
+    TThreadGuard first(std::thread(StartWorker, env));
+    TThreadGuard second(std::thread(StartWorker, env));
+    TThreadGuard third(std::thread(StartWorker, env));
+    TThreadGuard guard(std::thread(StartWorker, env));
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 

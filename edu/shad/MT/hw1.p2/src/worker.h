@@ -116,3 +116,12 @@ public:
 private:
     TWorkerEnvironment env_;
 };
+
+
+/**
+    @brief wrapper for std::thread constructor.
+*/
+void StartWorker(const TWorkerEnvironment& env) {
+    TThreadWorker worker(env);
+    worker();
+}
