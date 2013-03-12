@@ -9,43 +9,42 @@
 
 
 int main() {
-    std::shared_ptr<TSynchronizedQueue<TTaskMessage> > messages(
-            new TSynchronizedQueue<TTaskMessage>());
+    TWorkerEnvironment env;
 
-    messages->Put(TTaskMessage(
+    env.taskQueue->Put(TTaskMessage(
         std::shared_ptr<std::string>(new std::string("http://ya.ru")),
         T_GET
     ));
-    messages->Put(TTaskMessage(
+    env.taskQueue->Put(TTaskMessage(
         std::shared_ptr<std::string>(new std::string("http://google.ru")),
         T_GET
     ));
-    messages->Put(TTaskMessage(
+    env.taskQueue->Put(TTaskMessage(
         std::shared_ptr<std::string>(new std::string("http://yahoo.ru")),
         T_GET
     ));
 
-    std::cout << messages->Size() << std::endl;
+    std::cout << env.taskQueue->Size() << std::endl;
 
-    TThreadGuard first(std::thread([&messages] {
-        TThreadWorker a(messages);
+    TThreadGuard first(std::thread([&env] {
+        TThreadWorker a(env);
         a();
     }));
-    TThreadGuard second(std::thread([&messages] {
-        TThreadWorker a(messages);
+    TThreadGuard second(std::thread([&env] {
+        TThreadWorker a(env);
         a();
     }));
-    TThreadGuard third(std::thread([&messages] {
-        TThreadWorker a(messages);
+    TThreadGuard third(std::thread([&env] {
+        TThreadWorker a(env);
         a();
     }));
 
-    TThreadWorker p(messages);
+    TThreadWorker p(env);
     TThreadGuard guard(std::thread(std::ref(p)));
 
     std::this_thread::sleep_for(std::chrono::seconds(3));
 
-    messages->Put(TTaskMessage(
+    env.taskQueue->Put(TTaskMessage(
         std::shared_ptr<std::string>(),
         T_POISON
     ));

@@ -5,12 +5,19 @@
     queue with tasks (GET, PARSE, POISON), log
     messages queue for dumping pages and 
     common set for check twice downloading.
+
+    @author Aman Orazaev
 */
 #pragma once
+
 #include <memory>
+#include <string>
+
 #include <messages.h>
 #include <queue.h>
 #include <set.h>
+
+
 
 typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> >
         TMsgQueueHolder;
@@ -18,6 +25,12 @@ typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> >
 typedef std::shared_ptr<TSynchronizedSet<std::string> >
         TStringSetHolder;
 
+
+/**
+    @brief worker thread environment.
+
+    TODO: add downloader, parser, and handler factory.
+*/
 struct TWorkerEnvironment {
     TMsgQueueHolder taskQueue;
     TMsgQueueHolder logQueue;
@@ -25,7 +38,15 @@ struct TWorkerEnvironment {
 
     /// FIXME(orazaev@): add downloader and parser here.
     /// FIXME(orazaev@): add message handlers factory.
+
+    TWorkerEnvironment()
+        : taskQueue(new TSynchronizedQueue<TTaskMessage>())
+        , logQueue(new TSynchronizedQueue<TTaskMessage>())
+        , downloadedUrls(new TSynchronizedSet<std::string>())
+    { }
 };
+
+
 
 /**
     @brief run functor for std::thread.
@@ -33,14 +54,13 @@ struct TWorkerEnvironment {
 */
 class TThreadWorker {
 public:
-    TThreadWorker(
-            const std::shared_ptr<TSynchronizedQueue<TTaskMessage> >& messages)
-    : messages(messages) { }
+    TThreadWorker(const TWorkerEnvironment& env)
+        : env_(env) { }
 
     void operator()() {
         bool alive = true;
         while (alive) {
-            TTaskMessage message = messages->Take();
+            TTaskMessage message = env_.taskQueue->Take();
             switch (message.GetType()) {
                 case T_GET:
                     ProcessGetMessage(message);
@@ -67,13 +87,13 @@ public:
         TTaskMessage logTask(
             std::shared_ptr<std::string>(new std::string(buffer)),
             T_LOG);
-        messages->Put(logTask);
+        env_.taskQueue->Put(logTask);
 
         sprintf(buffer, "Parsing message = '%s'", message.GetData()->c_str());
         TTaskMessage parseTask(
             std::shared_ptr<std::string>(new std::string(buffer)),
             T_PARSE);
-        messages->Put(parseTask);
+        env_.taskQueue->Put(parseTask);
     }
 
     void ProcessParseMessage(const TTaskMessage& message) {
@@ -84,7 +104,7 @@ public:
         TTaskMessage logTask(
             std::shared_ptr<std::string>(new std::string(buffer)),
             T_LOG);
-        messages->Put(logTask);
+        env_.taskQueue->Put(logTask);
     }
 
     void ProcessPoisonedMessage() {
@@ -93,7 +113,7 @@ public:
         TTaskMessage poisonedTask(
             std::shared_ptr<std::string>(),
             T_POISON);
-        messages->Put(poisonedTask);
+        env_.taskQueue->Put(poisonedTask);
     }
 
     void ProcessLogMessage(const TTaskMessage& message) {
@@ -102,5 +122,5 @@ public:
 
 
 private:
-    std::shared_ptr<TSynchronizedQueue<TTaskMessage> > messages;
+    TWorkerEnvironment env_;
 };
