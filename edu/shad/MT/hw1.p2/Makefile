@@ -4,10 +4,10 @@ src = \
 		src/test_queue.cpp
 
 src2 = \
-		test_parser.cpp \
-		link_parser.cpp
+		src/test_parser.cpp \
+		src/link_parser.cpp
 
-CC = g++ -std=c++0x -lpthread -Wall
+CC = g++ -std=c++0x -lpthread -Wall -g -pthread
 CCFLAGS = -I./src -lcurl -lboost_graph -lboost_regex
 
 outfile = a.out
