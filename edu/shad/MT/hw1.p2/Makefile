@@ -1,5 +1,6 @@
 src = \
 		src/worker.cpp \
+		src/messages.cpp \
 		src/test_queue.cpp
 
 CC = g++ -std=c++0x -lpthread -Wall
