@@ -1,11 +1,11 @@
 src = \
-		src/test_page_downloader.cpp \
-		src/page_downloader.cpp
+		src/worker.cpp \
+		src/test_queue.cpp
 
-CC = g++ -std=c++0x
-CCFLAGS = -I. -lcurl
+CC = g++ -std=c++0x -lpthread -Wall
+CCFLAGS = -I./src
 
-outfile = test_page_downloader.out
+outfile = a.out
 
 all: sources
 	$(CC) $(src) $(CCFLAGS) -o $(outfile)
