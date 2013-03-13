@@ -25,9 +25,12 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 /** @brief Message type for TTaskMessage. */
 enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
+
+typedef std::shared_ptr<std::string> TStringHolder;
 
 /**
     class TTaskMessage.
@@ -40,7 +43,7 @@ enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
 class TTaskMessage {
 public:
     TTaskMessage(
-        const std::shared_ptr<std::string>& pData,
+        const TStringHolder& pData,
         const TMessageType& type)
         : pData(pData)
         , type(type)
@@ -54,16 +57,16 @@ public:
     { }
 
 
-    const TMessageType& GetType() const {
+    inline const TMessageType& GetType() const {
         return type;
     }
 
-    const std::shared_ptr<std::string>& GetData() const {
+    inline const TStringHolder& GetData() const {
         return pData;
     }
 
 private:
-    const std::shared_ptr<std::string> pData;
+    const TStringHolder pData;
     TMessageType type;
 };
 
