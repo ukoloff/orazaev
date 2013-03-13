@@ -7,7 +7,7 @@ src2 = \
 		src/test_parser.cpp \
 		src/link_parser.cpp
 
-CC = g++ -std=c++0x -lpthread -Wall -g -pthread
+CC = g++-4.6 -std=c++0x -lpthread -Wall -g -pthread
 CCFLAGS = -I./src -lcurl -lboost_graph -lboost_regex
 
 outfile = a.out

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <link_parser.h>
 
 int main() {
