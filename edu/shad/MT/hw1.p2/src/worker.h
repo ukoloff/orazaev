@@ -1,5 +1,15 @@
 /**
     @brief TThreadWorker.
+    
+    Worker thread class and its run function.
+    Run function is more comfortable becouse need
+    past std::ref to std::thread constructor for
+    TThreadWorker class.
+    
+    Example:
+    <code>
+    TThreadGuard guard(std::thread(StartWorker, env));
+    </code>
 
     @author Aman Orazaev
 */

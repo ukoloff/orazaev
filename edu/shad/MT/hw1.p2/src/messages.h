@@ -4,6 +4,7 @@
     Need for thread message queue. Each message
     type should have its handler or processor.
 
+    class TTaskMessage.
     Messages types:
         T_GET: crawler thread get command for
         download url. There are url link in string data.
@@ -20,12 +21,14 @@
         queue and one individual thread to dump pages.
 
 
+    class TWorkerEnvironment.
     Each worker environment has common message
     queue with tasks (GET, PARSE, POISON), log
     messages queue for dumping pages and 
     common set for check twice downloading.
 
 
+    class TMsgProcessor.
     Also has TMsgProcessor class. Thread should call:
         TMsgProcessor::Process(msg, env);
     to process msg. TMsgProcessor will call message
