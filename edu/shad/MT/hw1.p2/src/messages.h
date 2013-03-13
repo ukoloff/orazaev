@@ -19,9 +19,12 @@
         It means that that messages need one individual
         queue and one individual thread to dump pages.
 
+
     @author Aman Orazaev
 */
 #pragma once
+
+#include <memory>
 
 /** @brief Message type for TTaskMessage. */
 enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
@@ -63,3 +66,6 @@ private:
     const std::shared_ptr<std::string> pData;
     TMessageType type;
 };
+
+
+

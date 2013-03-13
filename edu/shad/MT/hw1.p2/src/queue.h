@@ -14,6 +14,7 @@ public:
 
     T Take();
     void Put(const T&);
+    /** Not consistant Size() */
     size_t Size() const;
 
 private:
