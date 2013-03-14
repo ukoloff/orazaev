@@ -134,12 +134,16 @@ struct TWorkerEnvironment {
     */
     TDownloaderHolder downloader;
 
+    /** To identifying threads. Default = 0.*/
+    int thread_number;
+
     TWorkerEnvironment()
         : taskQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
         , alive(true)
         , downloader(0)
+        , thread_number(0)
     { }
 };
 

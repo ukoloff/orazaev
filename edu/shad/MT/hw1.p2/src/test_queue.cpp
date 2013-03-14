@@ -29,11 +29,13 @@ int main() {
     std::cout << env.taskQueue->Size() << std::endl;
 
     TThreadGuard first(std::thread(StartWorker, env));
+    env.thread_number++;
     TThreadGuard second(std::thread(StartWorker, env));
+    //env.thread_number++;
     //TThreadGuard third(std::thread(StartWorker, env));
     //TThreadGuard guard(std::thread(StartWorker, env));
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 
     env.taskQueue->Clear();
     env.taskQueue->Put(TTaskMessage("", T_POISON));

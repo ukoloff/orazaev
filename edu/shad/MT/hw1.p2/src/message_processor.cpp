@@ -2,7 +2,7 @@
 
 void TGetMessageHandler::Process(const TTaskMessage& msg) {
     TStringHolder url = msg.GetUrl();
-    printf("GET: %s\n", url->c_str());
+    printf("[%d] GET: %s, task_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
     TTaskMessage parseTask(url, html, T_PARSE);
@@ -17,7 +17,7 @@ void TParseMessageHandler::Process(const TTaskMessage& msg) {
 
     for (auto link : links) {
         if (env_.downloadedUrls->Insert(link)) {
-            printf("Link: '%s'\n", link.c_str());
+            printf("[%d] Link: '%s'\n", env_.thread_number, link.c_str());
             TTaskMessage getTask(link, T_GET);
             env_.taskQueue->Put(getTask);
         }
@@ -25,7 +25,7 @@ void TParseMessageHandler::Process(const TTaskMessage& msg) {
 }
 
 void TPoisonMessageHandler::Process(const TTaskMessage&) {
-    printf("POISON:\n");
+    printf("[%d] POISON:\n", env_.thread_number);
 
     TTaskMessage poisonedTask(T_POISON);
     env_.taskQueue->Clear();
@@ -34,7 +34,7 @@ void TPoisonMessageHandler::Process(const TTaskMessage&) {
 }
 
 void TLogMessageHandler::Process(const TTaskMessage& msg) {
-    printf("LOG: %s\n", msg.GetUrl()->c_str());
+    printf("[%d] LOG: %s\n", env_.thread_number, msg.GetUrl()->c_str());
 }
 
 void TMsgProcessor::Process(

@@ -60,7 +60,7 @@ bool IsLink(const std::string& link) {
     boost::regex checkIsArchive(R"__(.*\.(?:(?:zip)|(?:rar)|(?:tar\.bz)|(?:tar\.bz2)|(?:7z)))__", boost::regex::icase);
     boost::regex checkIsVideo(R"__(.*\.(?:(?:avi)|(?:mpeg)|(?:m4)|(?:3gp)|(?:mov)|(?:swf)))__", boost::regex::icase);
     boost::regex checkIsImage(R"__(.*\.(?:(?:jpg)|(?:png)|(?:gif)))__", boost::regex::icase);
-    boost::regex checkIsDocument(R"__(.*\.(?:(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
+    boost::regex checkIsDocument(R"__(.*\.(?:(?:xml)|(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
 
     if (link == ""
         || boost::regex_match(link, start_hash)
@@ -94,7 +94,7 @@ std::string GetDomain(const std::string& url) {
 bool IsDomain(const std::string& something) {
     boost::regex checkDomainZone(R"__(^[\w\d][\w\d\.-]*\.[a-z]{2,4})__", boost::regex::icase);
     boost::regex checkIsImage(R"__(.*\.(?:(?:jpg)|(?:png)|(?:gif)))__", boost::regex::icase);
-    boost::regex checkIsDocument(R"__(.*\.(?:(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
+    boost::regex checkIsDocument(R"__(.*\.(?:(?:xml)|(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
     boost::regex checkIsArchive(R"__(.*\.(?:(?:zip)|(?:rar)|(?:tar\.bz)|(?:tar\.bz2)|(?:7z)))__", boost::regex::icase);
     boost::regex checkIsVideo(R"__(.*\.(?:(?:avi)|(?:mpeg)|(?:m4)|(?:3gp)|(?:mov)))__", boost::regex::icase);
     boost::regex checkIsHtml(R"__(.*\.(?:(?:html)|(?:htm)|(?:php)))__", boost::regex::icase);
