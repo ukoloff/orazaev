@@ -1,8 +1,13 @@
+#include <iterator>
+#include <iostream>
+#include <algorithm>
+
 #include <link_parser.h>
 
-std::set<std::string> TLinkParser::ParseText(
+std::set<std::string> TBoostXmlLinkParser::ParseText(
         const std::string& text)
 {
+    printf("PARSER:\n%s\n\n\n", text.c_str());
     ptree xmlTree;
     std::stringstream stream(text, std::stringstream::in);
     boost::property_tree::read_xml(stream, xmlTree);
@@ -13,7 +18,19 @@ std::set<std::string> TLinkParser::ParseText(
     return result;
 }
 
-void TLinkParser::ParseXmlTree(
+std::set<std::string> TBoostXmlLinkParser::ParseText(
+        std::istream& istream)
+{
+    ptree xmlTree;
+    boost::property_tree::read_xml(istream, xmlTree);
+
+    std::set<std::string> result;
+    ParseXmlTree(xmlTree, &result);
+
+    return result;
+}
+
+void TBoostXmlLinkParser::ParseXmlTree(
         ptree& xmlTree,
         std::set<std::string>* result)
 {
@@ -36,7 +53,7 @@ void TLinkParser::ParseXmlTree(
     }
 }
 
-bool TLinkParser::isLink(const std::string& link) {
+bool isLink(const std::string& link) {
     boost::regex start_hash(R"__(^\s*#.*)__");
     boost::regex mailto(R"__(^\s*mailto:.*)__");
     boost::regex at(R"__(.*\@.*)__");
@@ -50,4 +67,35 @@ bool TLinkParser::isLink(const std::string& link) {
     }
 
     return true;
+}
+
+std::set<std::string> THtmlcxxLinkParser::ParseText(const std::string& text) {
+    std::set<std::string> result;
+    htmlcxx::HTML::ParserDom parser;
+    tree<htmlcxx::HTML::Node> dom = parser.parseTree(text);
+
+    for (auto node : dom) {
+        if (node.tagName() == "a") {
+            node.parseAttributes();
+            std::string link = node.attribute("href").second;
+
+            if (isLink(link)) {
+                result.insert(link);
+            }
+        }
+    }
+
+    return result;
+}
+
+std::set<std::string> THtmlcxxLinkParser::ParseText(std::istream& istream) {
+    istream >> std::noskipws;
+    std::stringstream text(std::stringstream::out);
+    std::copy(
+        std::istream_iterator<char>(istream),
+        std::istream_iterator<char>(),
+        std::ostream_iterator<char>(text)
+    );
+
+    return THtmlcxxLinkParser::ParseText(text.str());
 }

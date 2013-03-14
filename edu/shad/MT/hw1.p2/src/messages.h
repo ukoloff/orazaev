@@ -47,6 +47,8 @@
 
 #include <queue.h>
 #include <set.h>
+#include <link_parser.h>
+#include <page_downloader.h>
 
 /** @brief Message type for TTaskMessage. */
 enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
@@ -93,17 +95,17 @@ private:
 
 
 
-typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> >
-        TMsgQueueHolder;
-
-typedef std::shared_ptr<TSynchronizedSet<std::string> >
-        TStringSetHolder;
+typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> > TMsgQueueHolder;
+typedef std::shared_ptr<TSynchronizedSet<std::string> > TStringSetHolder;
+typedef std::shared_ptr<TPageDownloader> TDownloaderHolder;
 
 
 /**
     @brief worker thread environment.
 
-    TODO: add downloader, parser, and handler factory.
+    Use static function of TMsgProcessor to process messages.
+    Use static function of TLinkParser to extract links from
+    downloaded html.
 */
 struct TWorkerEnvironment {
     TMsgQueueHolder taskQueue;
@@ -113,14 +115,18 @@ struct TWorkerEnvironment {
     /** alive = true, until wasn't processed poisoned message. */
     bool alive;
 
-    /// FIXME(orazaev@): add downloader and parser here.
-    /// FIXME(orazaev@): add message handlers factory.
+    /**
+        Page downloader are one for each thread.
+        Should be created in run function.
+    */
+    TDownloaderHolder downloader;
 
     TWorkerEnvironment()
         : taskQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
         , alive(true)
+        , downloader(0)
     { }
 };
 

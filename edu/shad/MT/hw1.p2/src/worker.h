@@ -24,9 +24,7 @@
 */
 class TThreadWorker {
 public:
-    TThreadWorker(const TWorkerEnvironment& env)
-        : env_(env) { }
-
+    TThreadWorker(const TWorkerEnvironment&);
     void Run();
 private:
     TWorkerEnvironment env_;

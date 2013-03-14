@@ -12,8 +12,8 @@ int main() {
     TWorkerEnvironment env;
 
     env.taskQueue->Put(TTaskMessage("http://ya.ru", T_GET));
-    env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
-    env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
+    //env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
+    //env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
 
     std::cout << env.taskQueue->Size() << std::endl;
 

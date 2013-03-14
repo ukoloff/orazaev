@@ -2,24 +2,18 @@
 
 void TGetMessageHandler::Process(const TTaskMessage& msg) {
     printf("GET: %s\n", msg.GetData()->c_str());
-    char buffer[500];
 
-    sprintf(buffer, "Loggin get message = '%s'", msg.GetData()->c_str());
-    TTaskMessage logTask(buffer, T_LOG);
-    env_.taskQueue->Put(logTask);
-
-    sprintf(buffer, "Parsing message = '%s'", msg.GetData()->c_str());
-    TTaskMessage parseTask(buffer, T_PARSE);
+    TTaskMessage parseTask(env_.downloader->GetUrl(*msg.GetData()), T_PARSE);
     env_.taskQueue->Put(parseTask);
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {
-    printf("PARSE: %s\n", msg.GetData()->c_str());
-    char buffer[500];
+    /// printf("PARSE:\n%s\n\n\n", msg.GetData()->c_str());
+    std::set<std::string> links = TLinkParser::ParseText(*msg.GetData());
 
-    sprintf(buffer, "Loggin parse message = '%s'", msg.GetData()->c_str());
-    TTaskMessage logTask(buffer, T_LOG);
-    env_.taskQueue->Put(logTask);
+    for (auto link : links) {
+        printf("Link: %s\n", link.c_str());
+    }
 }
 
 void TPoisonMessageHandler::Process(const TTaskMessage&) {

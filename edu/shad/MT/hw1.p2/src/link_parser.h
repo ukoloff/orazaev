@@ -1,13 +1,16 @@
 /**
-    @brief Parse xml(html) to get vector of links.
+    @brief Parse xml/html to get set of links.
 
-    Use boost xml parser, and boost regex to check
-    link.
+    Use htmlcxx parser and boost xml parser.
+    Use boost regex to check link.
 
-    Required installed boost library.
+    Required installed boost and htmlcxx library.
+    To install that libraries just execute next:
+    $ sudo apt-get install libhtmlcxx-dev libboost-all-dev
 
-    For compiling to add flags '-lboost_graph'
-    and '-lboost_regex'.
+
+    For compiling add this flags '-lboost_graph',
+    '-lboost_regex', '-lhtmlcxx' to compiler.
 
     @author Aman Orazaev
 */
@@ -21,20 +24,34 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/regex.hpp>
 
+#include <htmlcxx/html/ParserDom.h>
 
-/** @brief href parser class */
-class TLinkParser {
+/** @brief check link policy */
+bool isLink(const std::string&);
+
+/** @brief Boost xml parser. */
+class TBoostXmlLinkParser {
     typedef boost::property_tree::ptree ptree;
 public:
     static std::set<std::string> ParseText(const std::string& text);
-
-    private:
-    static void ParseXmlTree(
-            ptree&,
-            std::set<std::string>*);
-    static bool isLink(const std::string&);
+    static std::set<std::string> ParseText(std::istream& istream);
 
 private:
-    TLinkParser();
+    TBoostXmlLinkParser();
+
+private:
+    static void ParseXmlTree(ptree&, std::set<std::string>*);
 };
 
+/** @brief Htmlcxx html parser */
+class THtmlcxxLinkParser {
+public:
+    static std::set<std::string> ParseText(const std::string& text);
+    static std::set<std::string> ParseText(std::istream& istream);
+
+private:
+    THtmlcxxLinkParser();
+};
+
+/** Use htmlcxx parser for crawler */
+typedef THtmlcxxLinkParser TLinkParser;

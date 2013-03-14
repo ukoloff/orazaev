@@ -17,7 +17,7 @@ int main() {
         </div>\
     </body></html><a href='some@href' />";
 
-    std::set<std::string> links = TLinkParser::ParseText(xmlData);
+    std::set<std::string> links = TLinkParser::ParseText(std::cin);
 
     for (std::string link : links) {
         std::cout << link << "\n";
