@@ -17,6 +17,9 @@ public:
     /** Not consistant Size() */
     size_t Size() const;
 
+    /** You should to Put poisoned task after call Clear(). */
+    void Clear();
+
 private:
     TSynchronizedQueue(const TSynchronizedQueue&) = delete;
     TSynchronizedQueue& operator=(const TSynchronizedQueue&) = delete;
@@ -47,6 +50,12 @@ void TSynchronizedQueue<T>::Put(const T& elem) {
     std::lock_guard<std::mutex> lock(mutex_);
     queue_.push(elem);
     cond_.notify_one();
+}
+
+template <typename T>
+void TSynchronizedQueue<T>::Clear() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    queue_ = std::queue<T>();
 }
 
 template <typename T>

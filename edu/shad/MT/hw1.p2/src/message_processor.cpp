@@ -28,6 +28,7 @@ void TPoisonMessageHandler::Process(const TTaskMessage&) {
     printf("POISON:\n");
 
     TTaskMessage poisonedTask(T_POISON);
+    env_.taskQueue->Clear();
     env_.taskQueue->Put(poisonedTask);
     env_.alive = false;
 }
