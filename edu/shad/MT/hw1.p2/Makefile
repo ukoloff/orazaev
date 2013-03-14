@@ -17,7 +17,7 @@ outfile2 = test_link_parser.out
 
 all: sources
 	$(CC) $(src) $(CCFLAGS) -o $(outfile)
-	#$(CC) $(src2) $(CCFLAGS) -o $(outfile2)
+	$(CC) $(src2) $(CCFLAGS) -o $(outfile2)
 
 sources: $(src) $(src2)
 

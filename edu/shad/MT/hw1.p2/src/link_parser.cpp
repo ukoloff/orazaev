@@ -119,13 +119,21 @@ std::string NormalizeUrl(const std::string& url) {
     boost::regex lastSlash(R"__(/$)__", boost::regex::icase);
     boost::regex severalSlashs(R"__(//*)__", boost::regex::icase);
     boost::regex hashEnded(R"__(#.*$)__", boost::regex::icase);
+    boost::regex leftStrip(R"__(^\s\s*)__", boost::regex::icase);
+    boost::regex rightStrip(R"__(\s\s*$)__", boost::regex::icase);
+    boost::regex jsQuery(R"__(\?.*$)__", boost::regex::icase);
 
-    std::string result = boost::regex_replace(url, protocolHttp, "");
+    std::string result = boost::regex_replace(url, leftStrip, "");
+    result = boost::regex_replace(result, rightStrip, "");
+    result = boost::regex_replace(result, protocolHttp, "");
     result = boost::regex_replace(result, protocolHttps, "");
-    result = boost::regex_replace(result, lastSlash, "");
     result = boost::regex_replace(result, www, "");
     result = boost::regex_replace(result, hashEnded, "");
     result = boost::regex_replace(result, severalSlashs, "/");
+
+    result = boost::regex_replace(result, jsQuery, "");
+
+    result = boost::regex_replace(result, lastSlash, "");
 
     return result;
 }

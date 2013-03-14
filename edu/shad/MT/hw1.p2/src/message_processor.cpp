@@ -17,7 +17,7 @@ void TParseMessageHandler::Process(const TTaskMessage& msg) {
 
     for (auto link : links) {
         if (env_.downloadedUrls->Insert(link)) {
-            printf("Link: %s\n", link.c_str());
+            printf("Link: '%s'\n", link.c_str());
             TTaskMessage getTask(link, T_GET);
             env_.taskQueue->Put(getTask);
         }

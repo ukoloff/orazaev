@@ -11,7 +11,8 @@
 int main() {
     TWorkerEnvironment env;
 
-    std::string url = NormalizeUrl("http://ndev.vsv.lokos.net/");
+    std::string url = NormalizeUrl("ndev.vsv.lokos.net");
+    url = NormalizeUrl("http://silikatsemey.kz/");
     env.taskQueue->Put(TTaskMessage(url, T_GET));
     env.downloadedUrls->Insert(url);
 
@@ -32,8 +33,9 @@ int main() {
     //TThreadGuard third(std::thread(StartWorker, env));
     //TThreadGuard guard(std::thread(StartWorker, env));
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::seconds(3));
 
+    env.taskQueue->Clear();
     env.taskQueue->Put(TTaskMessage("", T_POISON));
 
     return 0;
