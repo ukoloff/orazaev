@@ -59,37 +59,55 @@ typedef std::shared_ptr<std::string> TStringHolder;
     class TTaskMessage.
     @brief queued messages for std::threads.
 
-    pData: url to get, or url content to parse.
+    pUrl: shared pointer to url.
+    pHtml: shared pointer to downloaded page.
     type: \in {T_GET, T_PARSE, T_POISON, T_LOG}, parse, get message
           or temenate thread.
+
+    TODO: add graph detph.
 */
 class TTaskMessage {
 public:
     TTaskMessage(
-        const TStringHolder& pData,
+        const TStringHolder& pUrl,
+        const TStringHolder& pHtml,
         const TMessageType& type)
-        : pData(pData)
+        : pUrl(pUrl)
+        , pHtml(pHtml)
         , type(type)
     { }
 
     TTaskMessage(
-        const std::string& s,
+        const std::string& url,
+        const std::string& html,
         const TMessageType& type)
-        : pData(std::make_shared<std::string>(s))
+        : pUrl(std::make_shared<std::string>(url))
+        , pHtml(std::make_shared<std::string>(html))
+        , type(type)
+    { }
+
+    TTaskMessage(
+        const std::string& url,
+        const TMessageType& type)
+        : pUrl(std::make_shared<std::string>(url))
+        , pHtml(NULL)
+        , type(type)
+    { }
+
+    TTaskMessage(const TMessageType& type)
+        : pUrl(NULL)
+        , pHtml(NULL)
         , type(type)
     { }
 
 
-    inline const TMessageType& GetType() const {
-        return type;
-    }
-
-    inline const TStringHolder& GetData() const {
-        return pData;
-    }
+    inline const TStringHolder& GetUrl() const { return pUrl; }
+    inline const TStringHolder& GetHtml() const { return pHtml; }
+    inline const TMessageType& GetType() const { return type; }
 
 private:
-    const TStringHolder pData;
+    const TStringHolder pUrl;
+    const TStringHolder pHtml;
     TMessageType type;
 };
 

@@ -11,7 +11,9 @@
 int main() {
     TWorkerEnvironment env;
 
-    env.taskQueue->Put(TTaskMessage("http://ya.ru", T_GET));
+    std::string url = "http://ndev.vsv.lokos.net/";
+    env.taskQueue->Put(TTaskMessage(url, T_GET));
+    env.downloadedUrls->Insert(url);
     //env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
     //env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
 

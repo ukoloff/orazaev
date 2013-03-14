@@ -57,11 +57,13 @@ bool isLink(const std::string& link) {
     boost::regex start_hash(R"__(^\s*#.*)__");
     boost::regex mailto(R"__(^\s*mailto:.*)__");
     boost::regex at(R"__(.*\@.*)__");
+    boost::regex file(R"__(.*\.(?:(?:jpg)|(?:png)|(?:pdf)|(?:doc)|(?:docx)|(?:gif)|(?:ppt)|(?:pptx)|(?:pps)))__");
 
     if (link == ""
         || boost::regex_match(link, start_hash)
         || boost::regex_match(link, mailto)
-        || boost::regex_match(link, at))
+        || boost::regex_match(link, at)
+        || boost::regex_match(link, file))
     {
         return false;
     }
