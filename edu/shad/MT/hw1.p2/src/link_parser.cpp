@@ -71,7 +71,11 @@ bool isLink(const std::string& link) {
     return true;
 }
 
-std::set<std::string> THtmlcxxLinkParser::ParseText(const std::string& text) {
+/** FIXME(orazaev@): add local url normalizing */
+std::set<std::string> THtmlcxxLinkParser::ParseText(
+        const std::string& text,
+        const std::string& url)
+{
     std::set<std::string> result;
     htmlcxx::HTML::ParserDom parser;
     tree<htmlcxx::HTML::Node> dom = parser.parseTree(text);
@@ -90,6 +94,10 @@ std::set<std::string> THtmlcxxLinkParser::ParseText(const std::string& text) {
     return result;
 }
 
+std::set<std::string> THtmlcxxLinkParser::ParseText(const std::string& text) {
+    return THtmlcxxLinkParser::ParseText(text, "");
+}
+
 std::set<std::string> THtmlcxxLinkParser::ParseText(std::istream& istream) {
     istream >> std::noskipws;
     std::stringstream text(std::stringstream::out);
@@ -100,4 +108,8 @@ std::set<std::string> THtmlcxxLinkParser::ParseText(std::istream& istream) {
     );
 
     return THtmlcxxLinkParser::ParseText(text.str());
+}
+
+std::set<std::string> THtmlcxxLinkParser::ParseText(const TTaskMessage& msg) {
+    return THtmlcxxLinkParser::ParseText(*msg.GetHtml(), *msg.GetUrl());
 }

@@ -15,7 +15,7 @@
 */
 #pragma once
 
-#include <messages.h>
+#include <message_processor.h>
 
 
 /**

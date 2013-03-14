@@ -1,8 +1,8 @@
 src = \
 		src/worker.cpp \
-		src/messages.cpp \
 		src/test_queue.cpp \
         src/link_parser.cpp \
+		src/message_processor.cpp \
         src/page_downloader.cpp
 
 src2 = \

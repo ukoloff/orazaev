@@ -1,5 +1,5 @@
 /**
-    @brief Thread messages description, environment and message handlers.
+    @brief Thread messages description and thread environment.
 
     Need for thread message queue. Each message
     type should have its handler or processor.
@@ -28,12 +28,6 @@
     common set for check twice downloading.
 
 
-    class TMsgProcessor.
-    Also has TMsgProcessor class. Thread should call:
-        TMsgProcessor::Process(msg, env);
-    to process msg. TMsgProcessor will call message
-    type handler.
-
     If you add new message type, you need define
     it's handler class also and add it to TMsgProcessor.
 
@@ -47,13 +41,14 @@
 
 #include <queue.h>
 #include <set.h>
-#include <link_parser.h>
 #include <page_downloader.h>
 
 /** @brief Message type for TTaskMessage. */
 enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
 
 typedef std::shared_ptr<std::string> TStringHolder;
+
+
 
 /**
     class TTaskMessage.
@@ -150,79 +145,3 @@ struct TWorkerEnvironment {
 
 
 
-/** @brief Abstract message handler. */
-class TMessageHandler {
-protected:
-    TMessageHandler(TWorkerEnvironment& env)
-        : env_(env)
-    { }
-    ~TMessageHandler() { }
-
-protected:
-    void Process(TTaskMessage&);
-
-protected:
-    TWorkerEnvironment& env_;
-};
-
-
-
-/** @brief T_GET message handler. */
-class TGetMessageHandler : public TMessageHandler {
-public:
-    TGetMessageHandler(TWorkerEnvironment& env)
-        : TMessageHandler(env)
-    { }
-
-    void Process(const TTaskMessage& msg);
-};
-
-
-
-/** @brief T_PARSE message handler. */
-class TParseMessageHandler : public TMessageHandler {
-public:
-    TParseMessageHandler(TWorkerEnvironment& env)
-        : TMessageHandler(env)
-    { }
-
-    void Process(const TTaskMessage& msg);
-};
-
-
-
-/** @brief T_POISON message handler. */
-class TPoisonMessageHandler : public TMessageHandler {
-public:
-    TPoisonMessageHandler(TWorkerEnvironment& env)
-        : TMessageHandler(env)
-    { }
-
-    void Process(const TTaskMessage&);
-};
-
-
-
-/** @brief T_LOG message handler. */
-class TLogMessageHandler : public TMessageHandler {
-public:
-    TLogMessageHandler(TWorkerEnvironment& env)
-        : TMessageHandler(env)
-    { }
-
-    void Process(const TTaskMessage& msg);
-};
-
-
-
-/** @brief Message handlers trigger. */
-class TMsgProcessor {
-public:
-    static void Process(
-            const TTaskMessage& msg,
-            TWorkerEnvironment& env);
-
-private:
-    TMsgProcessor() = delete;
-    ~TMsgProcessor() = delete;
-};

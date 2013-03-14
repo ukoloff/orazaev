@@ -23,8 +23,10 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/regex.hpp>
-
 #include <htmlcxx/html/ParserDom.h>
+
+#include <messages.h>
+
 
 /** @brief check link policy */
 bool isLink(const std::string&);
@@ -35,6 +37,7 @@ class TBoostXmlLinkParser {
 public:
     static std::set<std::string> ParseText(const std::string& text);
     static std::set<std::string> ParseText(std::istream& istream);
+    static std::set<std::string> ParseText(const TTaskMessage& msg);
 
 private:
     TBoostXmlLinkParser();
@@ -46,8 +49,13 @@ private:
 /** @brief Htmlcxx html parser */
 class THtmlcxxLinkParser {
 public:
+    static std::set<std::string> ParseText(
+            const std::string& text,
+            const std::string& url);
+
     static std::set<std::string> ParseText(const std::string& text);
     static std::set<std::string> ParseText(std::istream& istream);
+    static std::set<std::string> ParseText(const TTaskMessage& msg);
 
 private:
     THtmlcxxLinkParser();

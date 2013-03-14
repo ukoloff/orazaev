@@ -1,4 +1,4 @@
-#include <messages.h>
+#include <message_processor.h>
 
 void TGetMessageHandler::Process(const TTaskMessage& msg) {
     TStringHolder url = msg.GetUrl();
