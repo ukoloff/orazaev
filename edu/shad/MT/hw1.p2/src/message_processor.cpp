@@ -13,10 +13,14 @@ void TGetMessageHandler::Process(const TTaskMessage& msg) {
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {
-    std::set<std::string> links = TLinkParser::ParseText(*msg.GetHtml());
+    std::set<std::string> links = TLinkParser::ParseText(msg);
 
     for (auto link : links) {
-        printf("Link: %s\n", link.c_str());
+        if (env_.downloadedUrls->Insert(link)) {
+            printf("Link: %s\n", link.c_str());
+            TTaskMessage getTask(link, T_GET);
+            env_.taskQueue->Put(getTask);
+        }
     }
 }
 

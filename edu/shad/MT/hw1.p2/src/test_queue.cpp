@@ -11,9 +11,17 @@
 int main() {
     TWorkerEnvironment env;
 
-    std::string url = "http://ndev.vsv.lokos.net/";
+    std::string url = NormalizeUrl("http://ndev.vsv.lokos.net/");
     env.taskQueue->Put(TTaskMessage(url, T_GET));
     env.downloadedUrls->Insert(url);
+
+    // url = NormalizeUrl("http://www.youtube.com/user/ndevschool");
+    // env.taskQueue->Put(TTaskMessage(url, T_GET));
+    // env.downloadedUrls->Insert(url);
+
+    // url = NormalizeUrl("ndev.vsv.lokos.net/pnpo.htm");
+    // env.taskQueue->Put(TTaskMessage(url, T_GET));
+    // env.downloadedUrls->Insert(url);
     //env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
     //env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
 
@@ -21,10 +29,10 @@ int main() {
 
     TThreadGuard first(std::thread(StartWorker, env));
     TThreadGuard second(std::thread(StartWorker, env));
-    TThreadGuard third(std::thread(StartWorker, env));
-    TThreadGuard guard(std::thread(StartWorker, env));
+    //TThreadGuard third(std::thread(StartWorker, env));
+    //TThreadGuard guard(std::thread(StartWorker, env));
 
-    std::this_thread::sleep_for(std::chrono::seconds(3));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     env.taskQueue->Put(TTaskMessage("", T_POISON));
 

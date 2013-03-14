@@ -28,8 +28,24 @@
 #include <messages.h>
 
 
-/** @brief check link policy */
-bool isLink(const std::string&);
+/** @brief Check link policy. */
+bool IsLink(const std::string& something);
+
+/** @brief Get url domain using boost::regex. */
+std::string GetDomain(const std::string& url);
+
+/**
+    @brief Check domain policy.
+
+    Checks domain returned from function GetDomain(url).
+
+    Rules for domain names you can find here:
+        http://tools.ietf.org/html/rfc1034 (3.5)
+*/
+bool IsDomain(const std::string& something);
+
+/** @brief Url normalization operations. */
+std::string NormalizeUrl(const std::string& url);
 
 /** @brief Boost xml parser. */
 class TBoostXmlLinkParser {

@@ -6,7 +6,7 @@ src = \
         src/page_downloader.cpp
 
 src2 = \
-		src/test_parser.cpp \
+		src/test_get_domain.cpp \
 		src/link_parser.cpp
 
 CC = g++-4.6 -std=c++0x -lpthread -Wall -g -pthread
