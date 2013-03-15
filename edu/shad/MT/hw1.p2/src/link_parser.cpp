@@ -44,7 +44,7 @@ void TBoostXmlLinkParser::ParseXmlTree(
                 href = "";
             }
 
-            if (IsLink(href)) {
+            if (TUrlProcess::IsLink(href)) {
                 result->insert(href);
             }
         }
@@ -53,19 +53,30 @@ void TBoostXmlLinkParser::ParseXmlTree(
     }
 }
 
-bool IsLink(const std::string& link) {
-    boost::regex start_hash(R"__(^\s*#.*)__", boost::regex::icase);
-    boost::regex mailto(R"__(^\s*mailto:.*)__", boost::regex::icase);
-    boost::regex at(R"__(.*\@.*)__", boost::regex::icase);
-    boost::regex checkIsArchive(R"__(.*\.(?:(?:zip)|(?:rar)|(?:tar\.bz)|(?:tar\.bz2)|(?:7z)))__", boost::regex::icase);
-    boost::regex checkIsVideo(R"__(.*\.(?:(?:avi)|(?:mpeg)|(?:m4)|(?:3gp)|(?:mov)|(?:swf)))__", boost::regex::icase);
-    boost::regex checkIsImage(R"__(.*\.(?:(?:jpg)|(?:png)|(?:gif)))__", boost::regex::icase);
-    boost::regex checkIsDocument(R"__(.*\.(?:(?:xml)|(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsArchive(R"__(.*\.(?:(?:zip)|(?:rar)|(?:tar\.bz)|(?:tar\.bz2)|(?:7z)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsVideo(R"__(.*\.(?:(?:avi)|(?:mpeg)|(?:m4)|(?:3gp)|(?:mov)|(?:swf)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsImage(R"__(.*\.(?:(?:jpg)|(?:png)|(?:gif)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsDocument(R"__(.*\.(?:(?:xml)|(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsMailto(R"__(^\s*mailto:.*)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsAt(R"__(.*\@.*)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsHttpProtocol(R"__(^\s*http://)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsHttpsProtocol(R"__(^\s*https://)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsHtml(R"__(.*\.(?:(?:html)|(?:htm)|(?:php)))__", boost::regex::icase);
+const boost::regex TUrlProcess::checkDomainZone(R"__(^[\w\d][\w\d\.-]*\.[a-z]{2,4})__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsSlashEnded(R"__(/$)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsSeveralSlashes(R"__(//*)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsHashTag(R"__(#.*$)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsStartWithSpaces(R"__(^\s\s*)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsTrailingSpaces(R"__(\s\s*$)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsJsQuery(R"__(\?.*$)__", boost::regex::icase);
+const boost::regex TUrlProcess::charactersAfterSlash(R"__(/.*$)__", boost::regex::icase);
+const boost::regex TUrlProcess::www(R"__(^\s*www\.)__", boost::regex::icase);
 
+
+bool TUrlProcess::IsLink(const std::string& link) {
     if (link == ""
-        || boost::regex_match(link, start_hash)
-        || boost::regex_match(link, mailto)
-        || boost::regex_match(link, at)
+        || boost::regex_match(link, checkIsMailto)
+        || boost::regex_match(link, checkIsAt)
         || boost::regex_match(link, checkIsImage)
         || boost::regex_match(link, checkIsDocument)
         || boost::regex_match(link, checkIsArchive)
@@ -77,28 +88,16 @@ bool IsLink(const std::string& link) {
     return true;
 }
 
-std::string GetDomain(const std::string& url) {
-    boost::regex protocolHttp(R"__(^\s*http://)__", boost::regex::icase);
-    boost::regex protocolHttps(R"__(^\s*https://)__", boost::regex::icase);
-    boost::regex charactersAfterSlash(R"__(/.*$)__", boost::regex::icase);
-    boost::regex www(R"__(^\s*www\.)__", boost::regex::icase);
-
-    std::string result = boost::regex_replace(url, protocolHttp, "");
-    result = boost::regex_replace(result, protocolHttps, "");
+std::string TUrlProcess::GetDomain(const std::string& url) {
+    std::string result = boost::regex_replace(url, checkIsHttpProtocol, "");
+    result = boost::regex_replace(result, checkIsHttpsProtocol, "");
     result = boost::regex_replace(result, charactersAfterSlash, "");
     result = boost::regex_replace(result, www, "");
 
     return IsDomain(result) ? result : "";
 }
 
-bool IsDomain(const std::string& something) {
-    boost::regex checkDomainZone(R"__(^[\w\d][\w\d\.-]*\.[a-z]{2,4})__", boost::regex::icase);
-    boost::regex checkIsImage(R"__(.*\.(?:(?:jpg)|(?:png)|(?:gif)))__", boost::regex::icase);
-    boost::regex checkIsDocument(R"__(.*\.(?:(?:xml)|(?:pdf)|(?:doc)|(?:docx)|(?:ppt)|(?:pptx)|(?:pps)|(?:exe)|(?:txt)|(?:xls)|(?:xlsx)|(?:djvu)))__", boost::regex::icase);
-    boost::regex checkIsArchive(R"__(.*\.(?:(?:zip)|(?:rar)|(?:tar\.bz)|(?:tar\.bz2)|(?:7z)))__", boost::regex::icase);
-    boost::regex checkIsVideo(R"__(.*\.(?:(?:avi)|(?:mpeg)|(?:m4)|(?:3gp)|(?:mov)))__", boost::regex::icase);
-    boost::regex checkIsHtml(R"__(.*\.(?:(?:html)|(?:htm)|(?:php)))__", boost::regex::icase);
-
+bool TUrlProcess::IsDomain(const std::string& something) {
     if (something == ""
         || boost::regex_match(something, checkIsImage)
         || boost::regex_match(something, checkIsDocument)
@@ -112,28 +111,19 @@ bool IsDomain(const std::string& something) {
     return true;
 }
 
-std::string NormalizeUrl(const std::string& url) {
-    boost::regex protocolHttp(R"__(^\s*http://)__", boost::regex::icase);
-    boost::regex protocolHttps(R"__(^\s*https://)__", boost::regex::icase);
-    boost::regex www(R"__(^\s*www\.)__", boost::regex::icase);
-    boost::regex lastSlash(R"__(/$)__", boost::regex::icase);
-    boost::regex severalSlashs(R"__(//*)__", boost::regex::icase);
-    boost::regex hashEnded(R"__(#.*$)__", boost::regex::icase);
-    boost::regex leftStrip(R"__(^\s\s*)__", boost::regex::icase);
-    boost::regex rightStrip(R"__(\s\s*$)__", boost::regex::icase);
-    boost::regex jsQuery(R"__(\?.*$)__", boost::regex::icase);
+std::string TUrlProcess::NormalizeUrl(const std::string& url) {
 
-    std::string result = boost::regex_replace(url, leftStrip, "");
-    result = boost::regex_replace(result, rightStrip, "");
-    result = boost::regex_replace(result, protocolHttp, "");
-    result = boost::regex_replace(result, protocolHttps, "");
+    std::string result = boost::regex_replace(url, checkIsStartWithSpaces, "");
+    result = boost::regex_replace(result, checkIsTrailingSpaces, "");
+    result = boost::regex_replace(result, checkIsHttpProtocol, "");
+    result = boost::regex_replace(result, checkIsHttpsProtocol, "");
     result = boost::regex_replace(result, www, "");
-    result = boost::regex_replace(result, hashEnded, "");
-    result = boost::regex_replace(result, severalSlashs, "/");
+    result = boost::regex_replace(result, checkIsHashTag, "");
+    result = boost::regex_replace(result, checkIsSeveralSlashes, "/");
 
-    result = boost::regex_replace(result, jsQuery, "");
+    result = boost::regex_replace(result, checkIsJsQuery, "");
 
-    result = boost::regex_replace(result, lastSlash, "");
+    result = boost::regex_replace(result, checkIsSlashEnded, "");
 
     return result;
 }
@@ -145,18 +135,18 @@ std::set<std::string> THtmlcxxLinkParser::ParseText(
     std::set<std::string> result;
     htmlcxx::HTML::ParserDom parser;
     tree<htmlcxx::HTML::Node> dom = parser.parseTree(text);
-    std::string domain = GetDomain(url);
+    std::string domain = TUrlProcess::GetDomain(url);
 
     for (auto node : dom) {
         if (node.tagName() == "a") {
             node.parseAttributes();
             std::string link = node.attribute("href").second;
 
-            if (IsLink(link)) {
-                if (GetDomain(link) != "") {
-                    result.insert(NormalizeUrl(link));
+            if (TUrlProcess::IsLink(link)) {
+                if (TUrlProcess::GetDomain(link) != "") {
+                    result.insert(TUrlProcess::NormalizeUrl(link));
                 } else {
-                    result.insert(NormalizeUrl(domain + "/" + link));
+                    result.insert(TUrlProcess::NormalizeUrl(domain + "/" + link));
                 }
             }
         }

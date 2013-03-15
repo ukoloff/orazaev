@@ -31,7 +31,7 @@ all: $(obj_list)
 
 %.o: src/%.cpp
 	$(info Compiling $^)
-	@[ -e $(obj_dir) ] || mkdir $(obj_dir)
+	@mkdir -p $(obj_dir)
 	@$(CC) -c $^ $(CCFLAGS) -o $(obj_dir)/$@
 
 .PHONY: clean

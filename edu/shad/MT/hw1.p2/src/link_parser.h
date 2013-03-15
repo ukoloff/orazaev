@@ -1,8 +1,10 @@
 /**
     @brief Parse xml/html to get set of links.
 
-    Use htmlcxx parser and boost xml parser.
-    Use boost regex to check link.
+    Also has TUrlProcessor class to work with urls.
+
+    Uses htmlcxx parser and boost xml parser.
+    Uses boost regex to check link.
 
     Required installed boost and htmlcxx library.
     To install that libraries just execute next:
@@ -28,24 +30,51 @@
 #include <messages.h>
 
 
-/** @brief Check link policy. */
-bool IsLink(const std::string& something);
-
-/** @brief Get url domain using boost::regex. */
-std::string GetDomain(const std::string& url);
 
 /**
-    @brief Check domain policy.
-
-    Checks domain returned from function GetDomain(url).
-
-    Rules for domain names you can find here:
-        http://tools.ietf.org/html/rfc1034 (3.5)
+    @brief Policy for work with urls.
 */
-bool IsDomain(const std::string& something);
+class TUrlProcess {
+public:
+    /** @brief Check is it link. */
+    static bool IsLink(const std::string& something);
 
-/** @brief Url normalization operations. */
-std::string NormalizeUrl(const std::string& url);
+    /** @brief Get url domain using boost::regex. */
+    static std::string GetDomain(const std::string& url);
+
+    /**
+        @brief Check domain policy.
+    
+        Checks domain returned from function GetDomain(url).
+    
+        Rules for domain names you can find here:
+            http://tools.ietf.org/html/rfc1034 (3.5)
+    */
+    static bool IsDomain(const std::string& something);
+
+    /** @brief Url normalization operations. */
+    static std::string NormalizeUrl(const std::string& url);
+
+private:
+    static const boost::regex checkIsArchive;
+    static const boost::regex checkIsVideo;
+    static const boost::regex checkIsImage;
+    static const boost::regex checkIsDocument;
+    static const boost::regex checkIsMailto;
+    static const boost::regex checkIsAt;
+    static const boost::regex checkIsHttpProtocol;
+    static const boost::regex checkIsHttpsProtocol;
+    static const boost::regex checkIsHtml;
+    static const boost::regex checkDomainZone;
+    static const boost::regex checkIsSlashEnded;
+    static const boost::regex checkIsSeveralSlashes;
+    static const boost::regex checkIsHashTag;
+    static const boost::regex checkIsStartWithSpaces;
+    static const boost::regex checkIsTrailingSpaces;
+    static const boost::regex checkIsJsQuery;
+    static const boost::regex charactersAfterSlash;
+    static const boost::regex www;
+};
 
 /** @brief Boost xml parser. */
 class TBoostXmlLinkParser {

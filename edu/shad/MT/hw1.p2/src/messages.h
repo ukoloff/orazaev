@@ -103,7 +103,7 @@ public:
 private:
     const TStringHolder pUrl;
     const TStringHolder pHtml;
-    TMessageType type;
+    const TMessageType type;
 };
 
 
