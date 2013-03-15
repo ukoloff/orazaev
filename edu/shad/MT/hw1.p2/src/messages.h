@@ -42,6 +42,7 @@
 #include <queue.h>
 #include <set.h>
 #include <page_downloader.h>
+#include <file_guard.h>
 
 /** @brief Message type for TTaskMessage. */
 enum TMessageType {T_GET, T_PARSE, T_POISON, T_LOG};
@@ -111,7 +112,7 @@ private:
 typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> > TMsgQueueHolder;
 typedef std::shared_ptr<TSynchronizedSet<std::string> > TStringSetHolder;
 typedef std::shared_ptr<TPageDownloader> TDownloaderHolder;
-
+typedef std::shared_ptr<TOfstreamGuard> TLogHolder;
 
 /**
     @brief worker thread environment.
@@ -124,6 +125,7 @@ struct TWorkerEnvironment {
     TMsgQueueHolder taskQueue;
     TMsgQueueHolder logQueue;
     TStringSetHolder downloadedUrls;
+    TLogHolder log;
 
     /** alive = true, until wasn't processed poisoned message. */
     bool alive;
@@ -137,10 +139,27 @@ struct TWorkerEnvironment {
     /** To identifying threads. Default = 0.*/
     int thread_number;
 
-    TWorkerEnvironment()
+    /** Dump file handler */
+
+    TWorkerEnvironment(const std::string filename)
         : taskQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
+        , log(new TOfstreamGuard(filename))
+        , alive(true)
+        , downloader(0)
+        , thread_number(0)
+    { }
+
+    TWorkerEnvironment(
+        const TMsgQueueHolder& taskQueue,
+        const TMsgQueueHolder& logQueue,
+        const TStringSetHolder& urls,
+        const TLogHolder& log)
+        : taskQueue(taskQueue)
+        , logQueue(logQueue)
+        , downloadedUrls(urls)
+        , log(log)
         , alive(true)
         , downloader(0)
         , thread_number(0)

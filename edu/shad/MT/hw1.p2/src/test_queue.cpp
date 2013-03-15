@@ -9,7 +9,12 @@
 
 
 int main() {
-    TWorkerEnvironment env;
+    TWorkerEnvironment env("pages.dump");
+    TWorkerEnvironment thread_parser_env(
+        env.logQueue,
+        env.taskQueue,
+        env.downloadedUrls,
+        env.log);
 
     std::string url = TUrlProcess::NormalizeUrl("ndev.vsv.lokos.net");
     url = TUrlProcess::NormalizeUrl("http://silikatsemey.kz/");
@@ -29,16 +34,26 @@ int main() {
     std::cout << env.taskQueue->Size() << std::endl;
 
     TThreadGuard first(std::thread(StartWorker, env));
-    env.thread_number++;
+    ++env.thread_number;
     TThreadGuard second(std::thread(StartWorker, env));
-    env.thread_number++;
+    ++env.thread_number;
     TThreadGuard third(std::thread(StartWorker, env));
-    //TThreadGuard guard(std::thread(StartWorker, env));
+    ++env.thread_number;
+    TThreadGuard fourth(std::thread(StartWorker, env));
+    // ++env.thread_number;
+    // TThreadGuard five(std::thread(StartWorker, env));
+
+    // May do it in main thread.
+    thread_parser_env.thread_number = ++env.thread_number;
+    TThreadGuard thread_parser(std::thread(StartWorker, thread_parser_env));
+
 
     std::this_thread::sleep_for(std::chrono::seconds(15));
 
     env.taskQueue->Clear();
     env.taskQueue->Put(TTaskMessage("", T_POISON));
+    env.logQueue->Clear();
+    env.logQueue->Put(TTaskMessage("", T_POISON));
 
     return 0;
 }

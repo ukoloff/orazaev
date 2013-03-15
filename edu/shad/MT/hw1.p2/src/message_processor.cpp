@@ -6,10 +6,10 @@ void TGetMessageHandler::Process(const TTaskMessage& msg) {
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
     TTaskMessage parseTask(url, html, T_PARSE);
-    env_.taskQueue->Put(parseTask);
+    env_.logQueue->Put(parseTask);
 
-    TTaskMessage logTask(url, html, T_LOG);
-    env_.logQueue->Put(logTask);
+    // TTaskMessage logTask(url, html, T_LOG);
+    // env_.logQueue->Put(logTask);
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {
@@ -19,9 +19,11 @@ void TParseMessageHandler::Process(const TTaskMessage& msg) {
         if (env_.downloadedUrls->Insert(link)) {
             printf("[%d] Link: '%s'\n", env_.thread_number, link.c_str());
             TTaskMessage getTask(link, T_GET);
-            env_.taskQueue->Put(getTask);
+            env_.logQueue->Put(getTask);
         }
     }
+
+    TLogMessageHandler(env_).Process(msg);
 }
 
 void TPoisonMessageHandler::Process(const TTaskMessage&) {
@@ -35,6 +37,12 @@ void TPoisonMessageHandler::Process(const TTaskMessage&) {
 
 void TLogMessageHandler::Process(const TTaskMessage& msg) {
     printf("[%d] LOG: %s\n", env_.thread_number, msg.GetUrl()->c_str());
+    TLogHolder log = env_.log;
+
+    *log << "URL: " << *msg.GetUrl() << "\n";
+    *log << "DUMP:\n\n";
+    *log << *msg.GetHtml();
+    *log << "\n\n\n";
 }
 
 void TMsgProcessor::Process(
