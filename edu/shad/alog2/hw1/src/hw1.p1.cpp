@@ -5,15 +5,17 @@
  *  @author Aman Orazaev
  */
 
+#include <cstdlib>
+
 #include <string>
 #include <iostream>
 #include <vector>
 
 
 template <typename T>
-void PrintVector(T begin, T end) {
+void PrintVector(T begin, T end, std::ostream& out = std::cout) {
     while(begin != end) {
-        std::cout << *begin++ << (begin + 1 == end ? "" : " ");
+        out << *begin++ << (begin + 1 == end ? "" : " ");
         
     }
     std::cout << "\n";
@@ -39,6 +41,8 @@ std::vector<size_t> GetPrefixFunction(const std::string& s) {
 }
 
 
+#include "hw1.p1.testing.h"
+
 
 int main() {
     std::vector<size_t> pref = GetPrefixFunction("abacaba");
@@ -48,5 +52,6 @@ int main() {
             "abxzzabxhhhhabxzzabxk......................abxzzabxhhhhabxzzabxz");
     PrintVector(pref.begin(), pref.end());
     
+    return RunTests();
     return 0;
 }
