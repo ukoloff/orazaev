@@ -67,44 +67,53 @@ public:
     TTaskMessage(
         const TStringHolder& pUrl,
         const TStringHolder& pHtml,
-        const TMessageType& type)
+        const TMessageType& type,
+        size_t depth)
         : pUrl(pUrl)
         , pHtml(pHtml)
         , type(type)
+        , depth(depth)
     { }
 
     TTaskMessage(
         const std::string& url,
         const std::string& html,
-        const TMessageType& type)
+        const TMessageType& type,
+        size_t depth)
         : pUrl(std::make_shared<std::string>(url))
         , pHtml(std::make_shared<std::string>(html))
         , type(type)
+        , depth(depth)
     { }
 
     TTaskMessage(
         const std::string& url,
-        const TMessageType& type)
+        const TMessageType& type,
+        size_t depth)
         : pUrl(std::make_shared<std::string>(url))
         , pHtml(NULL)
         , type(type)
+        , depth(depth)
     { }
 
     TTaskMessage(const TMessageType& type)
         : pUrl(NULL)
         , pHtml(NULL)
         , type(type)
+        , depth(0)
     { }
 
 
     inline const TStringHolder& GetUrl() const { return pUrl; }
     inline const TStringHolder& GetHtml() const { return pHtml; }
     inline const TMessageType& GetType() const { return type; }
+    inline size_t GetDepth() const { return depth; }
 
 private:
     const TStringHolder pUrl;
     const TStringHolder pHtml;
     const TMessageType type;
+    const size_t depth;
 };
 
 
@@ -139,9 +148,12 @@ struct TWorkerEnvironment {
     /** To identifying threads. Default = 0.*/
     int thread_number;
 
-    /** Dump file handler */
+    /** Max web graph depth to download. */
+    const size_t maxDownloadDepth;
 
-    TWorkerEnvironment(const std::string filename)
+    TWorkerEnvironment(
+        const std::string filename,
+        size_t maxDownloadDepth)
         : taskQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
@@ -149,13 +161,15 @@ struct TWorkerEnvironment {
         , alive(true)
         , downloader(0)
         , thread_number(0)
+        , maxDownloadDepth(maxDownloadDepth)
     { }
 
     TWorkerEnvironment(
         const TMsgQueueHolder& taskQueue,
         const TMsgQueueHolder& logQueue,
         const TStringSetHolder& urls,
-        const TLogHolder& log)
+        const TLogHolder& log,
+        size_t maxDownloadDepth)
         : taskQueue(taskQueue)
         , logQueue(logQueue)
         , downloadedUrls(urls)
@@ -163,6 +177,7 @@ struct TWorkerEnvironment {
         , alive(true)
         , downloader(0)
         , thread_number(0)
+        , maxDownloadDepth(maxDownloadDepth)
     { }
 };
 

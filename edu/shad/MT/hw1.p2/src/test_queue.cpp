@@ -9,16 +9,22 @@
 
 
 int main() {
-    TWorkerEnvironment env("pages.dump");
+    // FIXME(orazaev@): calculate download depth.
+    size_t maxDownloadDepth = 2;
+
+    TWorkerEnvironment env(
+        "pages.dump",
+        maxDownloadDepth);
     TWorkerEnvironment thread_parser_env(
         env.logQueue,
         env.taskQueue,
         env.downloadedUrls,
-        env.log);
+        env.log,
+        maxDownloadDepth);
 
     std::string url = TUrlProcess::NormalizeUrl("ndev.vsv.lokos.net");
     url = TUrlProcess::NormalizeUrl("http://silikatsemey.kz/");
-    env.taskQueue->Put(TTaskMessage(url, T_GET));
+    env.taskQueue->Put(TTaskMessage(url, T_GET, 0));
     env.downloadedUrls->Insert(url);
 
     // url = NormalizeUrl("http://www.youtube.com/user/ndevschool");
@@ -48,12 +54,22 @@ int main() {
     TThreadGuard thread_parser(std::thread(StartWorker, thread_parser_env));
 
 
-    std::this_thread::sleep_for(std::chrono::seconds(15));
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+    while (env.taskQueue->Size()) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        printf("QUEUE SIZE = %d\n", env.taskQueue->Size());
+    }
 
     env.taskQueue->Clear();
-    env.taskQueue->Put(TTaskMessage("", T_POISON));
+    env.taskQueue->Put(TTaskMessage(T_POISON));
+
+    while (env.logQueue->Size()) {
+        std::this_thread::yield();
+    }
+    std::this_thread::sleep_for(std::chrono::seconds(10));
+
     env.logQueue->Clear();
-    env.logQueue->Put(TTaskMessage("", T_POISON));
+    env.logQueue->Put(TTaskMessage(T_POISON));
 
     return 0;
 }
