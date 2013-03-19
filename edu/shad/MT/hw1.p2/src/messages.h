@@ -132,6 +132,7 @@ typedef std::shared_ptr<TOfstreamGuard> TLogHolder;
 */
 struct TWorkerEnvironment {
     TMsgQueueHolder taskQueue;
+    TMsgQueueHolder resultQueue;
     TMsgQueueHolder logQueue;
     TStringSetHolder downloadedUrls;
     TLogHolder log;
@@ -155,6 +156,7 @@ struct TWorkerEnvironment {
         const std::string filename,
         size_t maxDownloadDepth)
         : taskQueue(new TSynchronizedQueue<TTaskMessage>())
+        , resultQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
         , log(new TOfstreamGuard(filename))
@@ -166,11 +168,13 @@ struct TWorkerEnvironment {
 
     TWorkerEnvironment(
         const TMsgQueueHolder& taskQueue,
+        const TMsgQueueHolder& resultQueue,
         const TMsgQueueHolder& logQueue,
         const TStringSetHolder& urls,
         const TLogHolder& log,
         size_t maxDownloadDepth)
         : taskQueue(taskQueue)
+        , resultQueue(resultQueue)
         , logQueue(logQueue)
         , downloadedUrls(urls)
         , log(log)

@@ -5,35 +5,34 @@ void TGetMessageHandler::Process(const TTaskMessage& msg) {
     printf("[%d] GET: %s, task_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
+    TTaskMessage logTask(url, html, T_LOG, msg.GetDepth());
+    env_.logQueue->Put(logTask);
+
     TTaskMessage parseTask(url, html, T_PARSE, msg.GetDepth());
-    env_.logQueue->Put(parseTask);
+    env_.resultQueue->Put(parseTask);
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {
     if (msg.GetDepth() + 1 > env_.maxDownloadDepth) {
-        TLogMessageHandler(env_).Process(msg);
         return;
     }
+
     std::set<std::string> links = TLinkParser::ParseText(msg);
 
     for (auto link : links) {
         if (env_.downloadedUrls->Insert(link)) {
             printf("[%d] Link(%d): '%s'\n", env_.thread_number, msg.GetDepth() + 1, link.c_str());
             TTaskMessage getTask(link, T_GET, msg.GetDepth() + 1);
-            if (getTask.GetDepth() <= env_.maxDownloadDepth) {
-                env_.logQueue->Put(getTask);
-            }
+            env_.resultQueue->Put(getTask);
         }
     }
-
-    TLogMessageHandler(env_).Process(msg);
 }
 
 void TPoisonMessageHandler::Process(const TTaskMessage&) {
     printf("[%d] POISON:\n", env_.thread_number);
 
     TTaskMessage poisonedTask(T_POISON);
-    env_.taskQueue->Clear();
+    //env_.taskQueue->Clear();
     env_.taskQueue->Put(poisonedTask);
     env_.alive = false;
 }
@@ -47,6 +46,15 @@ void TLogMessageHandler::Process(const TTaskMessage& msg) {
     *log << "DUMP:\n\n";
     *log << *msg.GetHtml();
     *log << "\n\n\n";
+
+    if (env_.taskQueue->Size() == 0
+        && env_.resultQueue->Size() == 0
+        && env_.logQueue->Size() == 0)
+    {
+        TTaskMessage poisonedTask(T_POISON);
+        env_.taskQueue->Put(poisonedTask);
+        env_.alive = false;
+    }
 }
 
 void TMsgProcessor::Process(

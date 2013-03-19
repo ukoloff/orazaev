@@ -16,8 +16,9 @@ int main() {
         "pages.dump",
         maxDownloadDepth);
     TWorkerEnvironment thread_parser_env(
-        env.logQueue,
+        env.resultQueue,
         env.taskQueue,
+        /* Do not create dump messages. */ NULL,
         env.downloadedUrls,
         env.log,
         maxDownloadDepth);
@@ -49,27 +50,26 @@ int main() {
     // ++env.thread_number;
     // TThreadGuard five(std::thread(StartWorker, env));
 
-    // May do it in main thread.
+    // Start thread-parser.
     thread_parser_env.thread_number = ++env.thread_number;
     TThreadGuard thread_parser(std::thread(StartWorker, thread_parser_env));
 
+    TWorkerEnvironment thread_logger_env(
+        env.logQueue,
+        env.taskQueue,
+        env.resultQueue,
+        env.downloadedUrls,
+        env.log,
+        maxDownloadDepth);
 
-    std::this_thread::sleep_for(std::chrono::seconds(1));
-    while (env.taskQueue->Size()) {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        printf("QUEUE SIZE = %d\n", env.taskQueue->Size());
-    }
+    thread_logger_env.thread_number = ++env.thread_number;
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    StartWorker(thread_logger_env);
 
-    env.taskQueue->Clear();
+    // env.taskQueue->Clear();
+    // env.resultQueue->Clear();
     env.taskQueue->Put(TTaskMessage(T_POISON));
-
-    while (env.logQueue->Size()) {
-        std::this_thread::yield();
-    }
-    std::this_thread::sleep_for(std::chrono::seconds(10));
-
-    env.logQueue->Clear();
-    env.logQueue->Put(TTaskMessage(T_POISON));
+    env.resultQueue->Put(TTaskMessage(T_POISON));
 
     return 0;
 }
