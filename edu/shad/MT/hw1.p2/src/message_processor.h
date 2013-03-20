@@ -17,6 +17,7 @@
 
 #include <messages.h> 
 #include <link_parser.h>
+#include <atomic>
  
 
  
@@ -81,6 +82,7 @@ public:
     { }
 
     void Process(const TTaskMessage& msg);
+    static std::atomic<size_t> numberOfDumpedPages;
 };
 
 

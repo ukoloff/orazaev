@@ -20,6 +20,8 @@ public:
     */
     bool Insert(const T& elem);
 
+    inline size_t Size() const { return uset_.size(); }
+
 private:
     std::unordered_set<T> uset_;
     std::mutex mutex_;

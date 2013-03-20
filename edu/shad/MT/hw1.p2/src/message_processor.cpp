@@ -2,26 +2,25 @@
 
 void TGetMessageHandler::Process(const TTaskMessage& msg) {
     TStringHolder url = msg.GetUrl();
-    printf("[%d] GET: %s, task_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
+    printf("[%d] GET: %s, get_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
     TTaskMessage logTask(url, html, T_LOG, msg.GetDepth());
     env_.logQueue->Put(logTask);
 
-    TTaskMessage parseTask(url, html, T_PARSE, msg.GetDepth());
-    env_.resultQueue->Put(parseTask);
+
+    if (msg.GetDepth() + 1 <= env_.maxDownloadDepth) {
+        TTaskMessage parseTask(url, html, T_PARSE, msg.GetDepth());
+        env_.resultQueue->Put(parseTask);
+    }
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {
-    if (msg.GetDepth() + 1 > env_.maxDownloadDepth) {
-        return;
-    }
-
     std::set<std::string> links = TLinkParser::ParseText(msg);
 
     for (auto link : links) {
         if (env_.downloadedUrls->Insert(link)) {
-            printf("[%d] Link(%d): '%s'\n", env_.thread_number, msg.GetDepth() + 1, link.c_str());
+            printf("[%d] Link(%d): '%s', parse_queue.size = %d\n", env_.thread_number, msg.GetDepth() + 1, link.c_str(), env_.taskQueue->Size());
             TTaskMessage getTask(link, T_GET, msg.GetDepth() + 1);
             env_.resultQueue->Put(getTask);
         }
@@ -37,19 +36,28 @@ void TPoisonMessageHandler::Process(const TTaskMessage&) {
     env_.alive = false;
 }
 
+std::atomic<size_t> TLogMessageHandler::numberOfDumpedPages(0);
+
 void TLogMessageHandler::Process(const TTaskMessage& msg) {
-    printf("[%d] LOG: %s\n", env_.thread_number, msg.GetUrl()->c_str());
+    printf("[%d] LOG: '%s', log_queue.size = %d\n", env_.thread_number, msg.GetUrl()->c_str(), env_.logQueue->Size());
     TLogHolder log = env_.log;
 
     *log << "URL: " << *msg.GetUrl() << "\n";
     *log << "DEPTH: " << msg.GetDepth() << "\n";
-    *log << "DUMP:\n\n";
-    *log << *msg.GetHtml();
+    if (msg.GetHtml() != 0) {
+        *log << "DUMP:\n\n";
+        *log << *msg.GetHtml();
+    } else {
+        *log << "ERROR: Bad url.\n";
+    }
     *log << "\n\n\n";
+
+    ++numberOfDumpedPages;
 
     if (env_.taskQueue->Size() == 0
         && env_.resultQueue->Size() == 0
-        && env_.logQueue->Size() == 0)
+        && env_.logQueue->Size() == 0
+        && numberOfDumpedPages == env_.downloadedUrls->Size())
     {
         TTaskMessage poisonedTask(T_POISON);
         env_.taskQueue->Put(poisonedTask);

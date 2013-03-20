@@ -3,12 +3,26 @@
 #include <condition_variable>
 #include <mutex>
 
+template <typename T>
+class TQueue {
+protected:
+    TQueue()  { }
+    virtual ~TQueue() { }
+
+public:
+    virtual T Take() = 0;
+    virtual void Put(const T&) = 0;
+
+    virtual size_t Size() const = 0;
+    virtual void Clear() = 0;
+};
+
 /**
     class TSynchronizedQueue.
     @brief synchonized queue realization from lecture.
 */
 template <typename T>
-class TSynchronizedQueue {
+class TSynchronizedQueue : public TQueue<T> {
 public:
     TSynchronizedQueue() { }
 
@@ -32,13 +46,13 @@ private:
 
 
 /**
-    class TSynchronizedCirledBuffer.
+    class TSynchronizedCircledBuffer.
     @brief Circled buffer realization.
 */
 template <typename T, size_t BUF_SIZE>
-class TSynchronizedCirledBuffer {
+class TSynchronizedCircledBuffer : public TQueue<T> {
 public:
-    TSynchronizedCirledBuffer()
+    TSynchronizedCircledBuffer()
         : start(1)
     { }
 
@@ -46,7 +60,7 @@ public:
     void Put(const T&);
 
     /** Non consistant Size(), IsEmpty() and IsFull() */
-    inline bool Size() const { return (start + BUF_SIZE - end) % BUF_SIZE - 1; }
+    inline size_t Size() const { return (start + BUF_SIZE - end) % BUF_SIZE - 1; }
     inline bool IsEmpty() const { return (end + 1) % BUF_SIZE == start; }
     inline bool IsFull() const { return (start + 1) % BUF_SIZE == end; }
 
@@ -95,35 +109,35 @@ size_t TSynchronizedQueue<T>::Size() const {
 }
 
 template <typename T, size_t BS>
-T TSynchronizedCirledBuffer<T, BS>::Take() {
-    // FIXME(orazaev@): fill
+T TSynchronizedCircledBuffer<T, BS>::Take() {
     std::unique_lock<std::mutex> ulock(mutex_);
 
     while (IsEmpty()) {
         cond_empty.wait(ulock);
     }
 
-    T result = buffer_[++end];
+    end = (end + 1) % BS;
+    T result = buffer_[end];
     cond_full.notify_one();
 
     return result;
 }
 
 template <typename T, size_t BS>
-void TSynchronizedCirledBuffer<T, BS>::Put(const T& elem) {
-    // FIXME(orazaev@): fill
+void TSynchronizedCircledBuffer<T, BS>::Put(const T& elem) {
     std::unique_lock<std::mutex> ulock(mutex_);
 
     while (IsFull()) {
         cond_full.wait(ulock);
     }
 
-    buffer_[start++] = elem;
+    new(buffer_ + start++) T(elem);
+    start %= BS;
     cond_empty.notify_one();
 }
 
 template <typename T, size_t BS>
-void TSynchronizedCirledBuffer<T, BS>::Clear() {
+void TSynchronizedCircledBuffer<T, BS>::Clear() {
     std::lock_guard<std::mutex> lock(mutex_);
     end = start;
 }

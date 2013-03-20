@@ -69,6 +69,7 @@ private:
     static const boost::regex checkIsSlashEnded;
     static const boost::regex checkIsSeveralSlashes;
     static const boost::regex checkIsHashTag;
+    static const boost::regex checkIsStar;
     static const boost::regex checkIsStartWithSpaces;
     static const boost::regex checkIsTrailingSpaces;
     static const boost::regex checkIsJsQuery;

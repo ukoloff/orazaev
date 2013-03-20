@@ -66,6 +66,7 @@ const boost::regex TUrlProcess::checkDomainZone(R"__(^[\w\d][\w\d\.-]*\.[a-z]{2,
 const boost::regex TUrlProcess::checkIsSlashEnded(R"__(/$)__", boost::regex::icase);
 const boost::regex TUrlProcess::checkIsSeveralSlashes(R"__(//*)__", boost::regex::icase);
 const boost::regex TUrlProcess::checkIsHashTag(R"__(#.*$)__", boost::regex::icase);
+const boost::regex TUrlProcess::checkIsStar(R"__(.*\*.*$)__", boost::regex::icase);
 const boost::regex TUrlProcess::checkIsStartWithSpaces(R"__(^\s\s*)__", boost::regex::icase);
 const boost::regex TUrlProcess::checkIsTrailingSpaces(R"__(\s\s*$)__", boost::regex::icase);
 const boost::regex TUrlProcess::checkIsJsQuery(R"__(\?.*$)__", boost::regex::icase);
@@ -80,6 +81,7 @@ bool TUrlProcess::IsLink(const std::string& link) {
         || boost::regex_match(link, checkIsImage)
         || boost::regex_match(link, checkIsDocument)
         || boost::regex_match(link, checkIsArchive)
+        || boost::regex_match(link, checkIsStar)
         || boost::regex_match(link, checkIsVideo))
     {
         return false;

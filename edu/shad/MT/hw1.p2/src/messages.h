@@ -103,6 +103,13 @@ public:
         , depth(0)
     { }
 
+    TTaskMessage()
+        : pUrl(NULL)
+        , pHtml(NULL)
+        , type(T_POISON)
+        , depth(0)
+    { }
+
 
     inline const TStringHolder& GetUrl() const { return pUrl; }
     inline const TStringHolder& GetHtml() const { return pHtml; }
@@ -118,7 +125,7 @@ private:
 
 
 
-typedef std::shared_ptr<TSynchronizedQueue<TTaskMessage> > TMsgQueueHolder;
+typedef std::shared_ptr<TQueue<TTaskMessage> > TMsgQueueHolder;
 typedef std::shared_ptr<TSynchronizedSet<std::string> > TStringSetHolder;
 typedef std::shared_ptr<TPageDownloader> TDownloaderHolder;
 typedef std::shared_ptr<TOfstreamGuard> TLogHolder;
@@ -155,7 +162,7 @@ struct TWorkerEnvironment {
     TWorkerEnvironment(
         const std::string filename,
         size_t maxDownloadDepth)
-        : taskQueue(new TSynchronizedQueue<TTaskMessage>())
+        : taskQueue(new TSynchronizedCircledBuffer<TTaskMessage, 20>())
         , resultQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())

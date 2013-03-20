@@ -21,6 +21,9 @@ public:
     /** Use default timeout: GetUrl(url, DEFAULT_TIMEOUT); */
     std::string GetUrl(const std::string& url) throw();
 
+    /** Check is url downloadable. */
+    bool CheckUrl(const std::string& url) const throw();
+
 
     /** Summary functions for current downloader */
     inline size_t GetNumbeOfPages() const { return numberOfDownloadedPages; }
@@ -31,6 +34,12 @@ private:
 
 private:
     static size_t string_write(
+        void *contents,
+        size_t size,
+        size_t nmemb,
+        void *userp);
+
+    static size_t null_write(
         void *contents,
         size_t size,
         size_t nmemb,
