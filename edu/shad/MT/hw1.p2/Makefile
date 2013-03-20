@@ -1,6 +1,7 @@
 src = \
+		src/main.cpp \
 		src/worker.cpp \
-		src/test_queue.cpp \
+		src/crawler.cpp \
 		src/link_parser.cpp \
 		src/message_processor.cpp \
 		src/page_downloader.cpp
