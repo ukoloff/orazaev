@@ -50,12 +50,14 @@ sys     0m4.080s
 
 host: work
 comment: cirled buffer with window(80), 5 download threads.
+levels: 2
 real    0m5.605s
 user    0m0.124s
 sys     0m0.088s
 
 host: work
 comment: cirled buffer with window(80), 4 download threads.
+levels: 2
 real    0m5.481s
 user    0m0.112s
 sys     0m0.088s
