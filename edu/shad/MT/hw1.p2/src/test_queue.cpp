@@ -28,25 +28,15 @@ int main() {
     env.taskQueue->Put(TTaskMessage(url, T_GET, 0));
     env.downloadedUrls->Insert(url);
 
-    // url = NormalizeUrl("http://www.youtube.com/user/ndevschool");
-    // env.taskQueue->Put(TTaskMessage(url, T_GET));
-    // env.downloadedUrls->Insert(url);
-
-    // url = NormalizeUrl("ndev.vsv.lokos.net/pnpo.htm");
-    // env.taskQueue->Put(TTaskMessage(url, T_GET));
-    // env.downloadedUrls->Insert(url);
-    //env.taskQueue->Put(TTaskMessage("http://google.ru", T_GET));
-    //env.taskQueue->Put(TTaskMessage("http://yahoo.ru", T_GET));
-
     std::cout << env.taskQueue->Size() << std::endl;
 
     TThreadGuard first(std::thread(StartWorker, env));
-    // ++env.thread_number;
-    // TThreadGuard second(std::thread(StartWorker, env));
-    // ++env.thread_number;
-    // TThreadGuard third(std::thread(StartWorker, env));
-    // ++env.thread_number;
-    // TThreadGuard fourth(std::thread(StartWorker, env));
+    ++env.thread_number;
+    TThreadGuard second(std::thread(StartWorker, env));
+    ++env.thread_number;
+    TThreadGuard third(std::thread(StartWorker, env));
+    ++env.thread_number;
+    TThreadGuard fourth(std::thread(StartWorker, env));
     // ++env.thread_number;
     // TThreadGuard five(std::thread(StartWorker, env));
 
