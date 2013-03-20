@@ -7,7 +7,9 @@
 #include <worker.h>
 
 void TCrawler::Start() {
-    TWorkerEnvironment thread_downloader_env(_config.dumpFileName,
+    std::string fullDumpFileName = _config.pathToDumpFile + "/" +
+                                   _config.dumpFileName;
+    TWorkerEnvironment thread_downloader_env(fullDumpFileName,
                                              _config.maxDepth);
     TWorkerEnvironment thread_parser_env(
         thread_downloader_env.resultQueue,
