@@ -128,7 +128,7 @@ void TSynchronizedCircledBuffer<T, BS>::Put(const T& elem) {
     std::unique_lock<std::mutex> ulock(mutex_);
 
     while (IsFull()) {
-        cond_full.wait(ulock);
+        cond_full.wait(ulock, [this](){ return this->Size() < BS / 2; });
     }
 
     new(buffer_ + start++) T(elem);

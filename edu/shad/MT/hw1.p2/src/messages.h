@@ -162,7 +162,7 @@ struct TWorkerEnvironment {
     TWorkerEnvironment(
         const std::string filename,
         size_t maxDownloadDepth)
-        : taskQueue(new TSynchronizedCircledBuffer<TTaskMessage, 20>())
+        : taskQueue(new TSynchronizedCircledBuffer<TTaskMessage, 80>())
         , resultQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
         , downloadedUrls(new TSynchronizedSet<std::string>())
