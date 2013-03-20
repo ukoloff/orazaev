@@ -1,0 +1,61 @@
+host: work
+comment: cirled buffer(20), 4 download threads.
+real    8m56.892s
+user    0m3.596s
+sys     0m3.468s
+
+host: work
+comment: cirled buffer with window(20), 4 download threads.
+real    9m9.864s
+user    0m3.508s
+sys     0m3.584s
+
+host: work
+comment: cirled buffer with window(20), 4 download threads.
+real    8m41.674s
+user    0m3.540s
+sys     0m3.540s
+
+host: work
+comment: cirled buffer with window(80), 4 download threads.
+real    8m46.661s
+user    0m3.592s
+sys     0m3.592s
+
+host: work
+comment: cirled buffer with window(80), 4 download threads.
+real    9m16.870s
+user    0m3.576s
+sys     0m3.604s
+
+host: work
+comment: cirled buffer with window(80), 3 download threads.
+real    11m19.777s
+user    0m3.728s
+sys     0m3.944s
+
+host: work
+comment: cirled buffer with window(80), 5 download threads.
+comment: Add atomic totalCountOfDownloaded pages and new atomic exit condition
+real    9m51.215s
+user    0m3.572s
+sys     0m3.780s
+
+host: work
+comment: cirled buffer with window(80), 5 download threads.
+comment: Add atomic totalCountOfDownloaded pages and new atomic exit condition
+real    9m3.615s
+user    0m3.712s
+sys     0m4.080s
+
+host: work
+comment: cirled buffer with window(80), 5 download threads.
+real    0m5.605s
+user    0m0.124s
+sys     0m0.088s
+
+host: work
+comment: cirled buffer with window(80), 4 download threads.
+real    0m5.481s
+user    0m0.112s
+sys     0m0.088s
