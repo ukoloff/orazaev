@@ -1,4 +1,5 @@
 #include "page_downloader.h"
+#include <timer.h>
 
 
 size_t TPageDownloader::string_write(
@@ -24,8 +25,11 @@ std::string TPageDownloader::GetUrl(
     const std::string& url,
     long timeout) throw()
 {
+    TTimer theTimer;
     std::string buffer;
     CURLcode code(CURLE_FAILED_INIT);
+
+    theTimer.Start();
     CURL* curl = curl_easy_init();
 
     if (curl) {
@@ -42,6 +46,8 @@ std::string TPageDownloader::GetUrl(
         }
         curl_easy_cleanup(curl);
     }
+    theTimer.Stop();
+    totalDownloadingTime += theTimer.GetSeconds();
 
     if (code != CURLE_OK) {
         buffer = "DOWNLOADING ERROR: " +
@@ -82,4 +88,8 @@ bool TPageDownloader::CheckUrl(const std::string& url) const throw() {
 std::string TPageDownloader::GetUrl(const std::string& url) throw()
 {
     return GetUrl(url, DEFAULT_TIMEOUT);
+}
+
+double TPageDownloader::GetTotalTime() const throw() {
+    return totalDownloadingTime;
 }

@@ -11,7 +11,9 @@ class TPageDownloader {
 public:
     TPageDownloader()
         : numberOfDownloadedPages(0)
-        , sizeOfDownloadedData(0) { }
+        , sizeOfDownloadedData(0)
+        , totalDownloadingTime(0.)
+    { }
 
     /** GET url -> std::string. using curl.*/
     std::string GetUrl(
@@ -24,6 +26,8 @@ public:
     /** Check is url downloadable. */
     bool CheckUrl(const std::string& url) const throw();
 
+
+    double GetTotalTime() const throw();
 
     /** Summary functions for current downloader */
     inline size_t GetNumbeOfPages() const { return numberOfDownloadedPages; }
@@ -47,5 +51,7 @@ private:
 
     size_t numberOfDownloadedPages;
     unsigned long long sizeOfDownloadedData;
+
+    double totalDownloadingTime;
 };
 

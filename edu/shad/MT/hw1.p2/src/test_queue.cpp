@@ -41,12 +41,12 @@ int main() {
     std::cout << env.taskQueue->Size() << std::endl;
 
     TThreadGuard first(std::thread(StartWorker, env));
-    ++env.thread_number;
-    TThreadGuard second(std::thread(StartWorker, env));
-    ++env.thread_number;
-    TThreadGuard third(std::thread(StartWorker, env));
-    ++env.thread_number;
-    TThreadGuard fourth(std::thread(StartWorker, env));
+    // ++env.thread_number;
+    // TThreadGuard second(std::thread(StartWorker, env));
+    // ++env.thread_number;
+    // TThreadGuard third(std::thread(StartWorker, env));
+    // ++env.thread_number;
+    // TThreadGuard fourth(std::thread(StartWorker, env));
     // ++env.thread_number;
     // TThreadGuard five(std::thread(StartWorker, env));
 

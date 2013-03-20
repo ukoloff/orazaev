@@ -12,6 +12,10 @@ void TThreadWorker::Run() {
         TTaskMessage message = env_.taskQueue->Take();
         TMsgProcessor::Process(message, env_);
     }
+
+    printf("[%d] Total downloading time for this thread is %f sec.\n",
+           env_.thread_number,
+           env_.downloader->GetTotalTime());
 }
 
 void StartWorker(const TWorkerEnvironment& env) {
