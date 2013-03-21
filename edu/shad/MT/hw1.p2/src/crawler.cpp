@@ -49,7 +49,6 @@ void TCrawler::Start() {
     );
 
     logger_env.thread_number = thread_parser_env.thread_number;
-    // std::this_thread::sleep_for(std::chrono::seconds(1));
     StartWorker(logger_env);
 
     thread_downloader_env.taskQueue->Put(TTaskMessage(T_POISON));
