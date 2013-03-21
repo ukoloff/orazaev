@@ -3,7 +3,7 @@
     @brief TCrawler class description.
 
     PDC course home work 1. problem 2.
-    Develop multithreaded crawler.
+    Develop an multithreaded crawler.
 
     @author Aman Orazaev (aorazaev@gmai.com)
 */
@@ -11,37 +11,52 @@
 #include <string>
 
 /**
-    @brief Wrapper around crawler configuration data.
+    @brief Wrapper around singlethreaded crawler configuration data.
 
-    Fiels.
-    startUrl: zero level url to download.
-    maxDepth: max level of graph depth to download.
-    numberOfDownloaderThreads: number of threads who will do download.
-    numberOfParserThreads: number of threads who will do parsing.
-    pathToDumpFile: path where dump file should be writed. (default current path)
-    dumpFileName: dump file with add downloaded pages name. (default pages.dump)
+    Fields.
+      startUrl: zero level url to download.
+      maxDepth: max level of graph depth to download.
+      pathToDumpFile: path where dump file should be writed. (default current path)
+      dumpFileName: dump file with add downloaded pages name. (default pages.dump)
+
+    There no virtual destructor in class because we dont need polymorphism here.
 */
-struct TCrawlerConfiguration {
-    TCrawlerConfiguration(const std::string& url,
+struct TSimpleCrawlerConfiguration {
+    TSimpleCrawlerConfiguration(const std::string& url,
                           size_t maxDepth)
         : startUrl(url)
         , maxDepth(maxDepth)
-        , numberOfDownloaderThreads(0)
-        , numberOfParserThreads(0)
         , pathToDumpFile(".")
         , dumpFileName("pages.dump")
+    { }
+
+    std::string startUrl;
+    size_t maxDepth;
+    std::string pathToDumpFile;
+    std::string dumpFileName;
+};
+
+/**
+    @brief Wrapper around multithreaded crawler configuration data.
+
+    Fields.
+      numberOfDownloaderThreads: number of threads who will do download.
+      numberOfParserThreads: number of threads who will do parsing.
+*/
+struct TCrawlerConfiguration : public TSimpleCrawlerConfiguration {
+    TCrawlerConfiguration(const std::string& url,
+                          size_t maxDepth)
+        : TSimpleCrawlerConfiguration(url, maxDepth)
+        , numberOfDownloaderThreads(0)
+        , numberOfParserThreads(0)
     {
         // FIXME(orazaev@): Calculation default number of threads.
         numberOfDownloaderThreads = 4;
         numberOfParserThreads = 1;
     }
 
-    std::string startUrl;
-    size_t maxDepth;
     size_t numberOfDownloaderThreads;
     size_t numberOfParserThreads;
-    std::string pathToDumpFile;
-    std::string dumpFileName;
 };
 
 /**
@@ -71,4 +86,26 @@ public:
 
 private:
     TCrawlerConfiguration _config;
+};
+
+/**
+    @brief Singlethreaded crawler.
+
+    Need for timing.
+*/
+class TSimpleCrawler {
+public:
+    TSimpleCrawler(const std::string url,
+             size_t maxDepth)
+        : _config(url, maxDepth)
+    { }
+
+    TSimpleCrawler(const TSimpleCrawlerConfiguration& config)
+        : _config(config)
+    { }
+
+    void Start();
+
+private:
+    TSimpleCrawlerConfiguration _config;
 };

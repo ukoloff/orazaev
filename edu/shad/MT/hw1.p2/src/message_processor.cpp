@@ -6,14 +6,13 @@ void TGetMessageHandler::Process(const TTaskMessage& msg) {
     printf("[%d] GET: %s, get_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
-    TTaskMessage logTask(url, html, T_LOG, msg.GetDepth());
-    env_.logQueue->Put(logTask);
-
-
     if (msg.GetDepth() + 1 <= env_.maxDownloadDepth) {
         TTaskMessage parseTask(url, html, T_PARSE, msg.GetDepth());
         env_.resultQueue->Put(parseTask);
     }
+
+    TTaskMessage logTask(url, html, T_LOG, msg.GetDepth());
+    env_.logQueue->Put(logTask);
 }
 
 void TParseMessageHandler::Process(const TTaskMessage& msg) {

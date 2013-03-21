@@ -19,7 +19,7 @@ public:
 
 /**
     class TSynchronizedQueue.
-    @brief synchonized queue realization from lecture.
+    @brief Synchonized queue realization from lecture.
 */
 template <typename T>
 class TSynchronizedQueue : public TQueue<T> {
@@ -76,6 +76,30 @@ private:
 };
 
 
+/**
+    class TSimpleQueue
+    @brief Singlethreaded wrapper around std::queue.
+
+    Need for singlethreaded crawler.
+*/
+template <typename T>
+class TSimpleQueue : public TQueue<T> {
+public:
+    TSimpleQueue() { }
+
+    virtual T Take() {
+        T res = queue_.front();
+        queue_.pop();
+        return res;
+    }
+    virtual void Put(const T& elem) { queue_.push(elem); }
+
+    virtual size_t Size() const { return queue_.size(); }
+    virtual void Clear() { queue_ = std::queue<T>(); }
+
+private:
+    std::queue<T> queue_;
+};
 
 template <typename T>
 T TSynchronizedQueue<T>::Take() {

@@ -69,3 +69,10 @@ levels: 3
 real    8m7.506s
 user    0m3.548s
 sys     0m3.404s
+
+host: work
+comment: TSimplCrawler in action. First implementation.
+levels: 2
+real    0m18.794s
+user    0m0.088s
+sys     0m0.080s

@@ -20,8 +20,6 @@ void TCrawler::Start() {
         _config.maxDepth
     );
 
-    std::cout << _config.startUrl << std::endl;
-
     std::string url = TUrlProcess::NormalizeUrl(_config.startUrl);
     thread_downloader_env.taskQueue->Put(TTaskMessage(url, T_GET, 0));
     thread_downloader_env.downloadedUrls->Insert(url);
@@ -60,4 +58,26 @@ void TCrawler::Start() {
     for (auto thread = threads.begin(); thread != threads.end(); ++thread) {
         thread->join();
     }
+}
+
+void TSimpleCrawler::Start() {
+    std::string fullDumpFileName = _config.pathToDumpFile + "/" +
+                                   _config.dumpFileName;
+
+    TMsgQueueHolder commonQueue(new TSimpleQueue<TTaskMessage>());
+
+    TWorkerEnvironment env(
+        commonQueue,
+        commonQueue,
+        commonQueue,
+        TStringSetHolder(new TSynchronizedSet<std::string>()),
+        TLogHolder(new TOfstreamGuard(fullDumpFileName)),
+        _config.maxDepth
+    );
+
+    std::string url = TUrlProcess::NormalizeUrl(_config.startUrl);
+    env.taskQueue->Put(TTaskMessage(url, T_GET, 0));
+    env.downloadedUrls->Insert(url);
+
+    StartWorker(env);
 }
