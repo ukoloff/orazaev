@@ -7,31 +7,30 @@
 */
 #pragma once
 #include <stdlib.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/microsec_time_clock.hpp>
+#include <boost/date_time/time_duration.hpp>
 
 class TTimer {
-    clock_t startClocks;
-    clock_t endClocks;
+    boost::posix_time::ptime start;
+    boost::posix_time::ptime end;
 
     public:
     TTimer()
-        : startClocks(0)
-        , endClocks(0) {
+        : start()
+        , end() {
     }
 
     void Start() {
-        startClocks = clock();
+        start = boost::posix_time::microsec_clock::local_time();
     }
 
     void Stop() {
-        endClocks = clock();
+        end = boost::posix_time::microsec_clock::local_time();
     }
 
     double GetSeconds() const {
-        return static_cast<double>(
-            endClocks - startClocks) / CLOCKS_PER_SEC;
-    }
-
-    clock_t GetClocks() const {
-        return endClocks - startClocks;
+    boost::posix_time::time_duration diff = end -start;
+        return static_cast<double>(diff.total_milliseconds() / 1000.);
     }
 };

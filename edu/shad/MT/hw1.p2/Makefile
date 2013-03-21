@@ -21,7 +21,7 @@ obj_dir := obj
 
 CC := ccache g++-4.6 -std=c++0x
 CCFLAGS := -lpthread -Wall -g -pthread
-CCFLAGS += -I./src -lcurl -lboost_graph -lboost_regex -lhtmlcxx
+CCFLAGS += -I./src -lcurl -lboost_graph -lboost_regex -lhtmlcxx -lboost_date_time
 
 outfile = crawler
 outfile2 = simple_crawler
