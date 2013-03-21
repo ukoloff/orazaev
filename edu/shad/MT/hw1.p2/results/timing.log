@@ -98,3 +98,21 @@ comment: TCrawler in action, add polymorphism for set.
 real    0m5.069s
 user    0m0.112s
 sys     0m0.068s
+
+host: work
+comment: TSimplCrawler in action. Set without mutexes.
+comment: Right download time calculation.
+levels: 2
+[0] Total downloading time for this thread is 20.516000 sec.
+real    0m20.607s
+user    0m0.108s
+sys     0m0.064s
+
+host: work
+comment: TSimplCrawler in action. Set without mutexes.
+comment: Right download time calculation.
+levels: 2
+[0] Total downloading time for this thread is 17.097000 sec.
+real    0m17.170s
+user    0m0.080s
+sys     0m0.080s
