@@ -126,7 +126,7 @@ private:
 
 
 typedef std::shared_ptr<TQueue<TTaskMessage> > TMsgQueueHolder;
-typedef std::shared_ptr<TSynchronizedSet<std::string> > TStringSetHolder;
+typedef std::shared_ptr<TSet<std::string> > TStringSetHolder;
 typedef std::shared_ptr<TPageDownloader> TDownloaderHolder;
 typedef std::shared_ptr<TOfstreamGuard> TLogHolder;
 

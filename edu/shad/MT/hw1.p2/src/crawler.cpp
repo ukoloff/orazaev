@@ -70,7 +70,7 @@ void TSimpleCrawler::Start() {
         commonQueue,
         commonQueue,
         commonQueue,
-        TStringSetHolder(new TSynchronizedSet<std::string>()),
+        TStringSetHolder(new TSimpleSet<std::string>()),
         TLogHolder(new TOfstreamGuard(fullDumpFileName)),
         _config.maxDepth
     );

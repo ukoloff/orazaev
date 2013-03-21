@@ -1,35 +1,78 @@
 /**
     @brief Unordered set thread safe version.
-    
+
     @author Aman Orazaev
 */
 #pragma once
 #include <unordered_set>
 #include <mutex>
 
+/**
+    @brief Abstract interface for crawler set.
+*/
 template <typename T>
-class TSynchronizedSet {
+class TSet {
+public:
+    virtual bool Insert(const T& elem) = 0;
+    virtual size_t Size() const = 0;
+
+    virtual ~TSet() { }
+};
+
+/**
+    @brief Lock-based thread-safe unordered set.
+*/
+template <typename T>
+class TSynchronizedSet : public TSet<T> {
 public:
     TSynchronizedSet() { }
 
-    /** 
+    /**
         @brief try to insert element if it isn't in set.
-        This is just one public method for work with set.
-
         @return true - if element was added to set. false - if element was already in set.
     */
-    bool Insert(const T& elem);
+    virtual bool Insert(const T& elem);
 
-    inline size_t Size() const { return uset_.size(); }
+    virtual size_t Size() const { return uset_.size(); }
 
 private:
     std::unordered_set<T> uset_;
     std::mutex mutex_;
 };
 
+/**
+    @brief Singlethreaded std::unordered_set wrapper.
+*/
+template <typename T>
+class TSimpleSet : public TSet<T> {
+public:
+    TSimpleSet() { }
+
+    /**
+        @brief try to insert element if it isn't in set.
+        @return true - if element was added to set. false - if element was already in set.
+    */
+    virtual bool Insert(const T& elem);
+
+    virtual size_t Size() const { return uset_.size(); }
+
+private:
+    std::unordered_set<T> uset_;
+};
+
 template <typename T>
 bool TSynchronizedSet<T>::Insert(const T& elem) {
     std::lock_guard<std::mutex> guard(mutex_);
+    if (uset_.count(elem)) {
+        return false;
+    }
+
+    uset_.insert(elem);
+    return true;
+}
+
+template <typename T>
+bool TSimpleSet<T>::Insert(const T& elem) {
     if (uset_.count(elem)) {
         return false;
     }

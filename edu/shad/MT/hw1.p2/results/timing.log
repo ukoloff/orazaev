@@ -76,3 +76,18 @@ levels: 2
 real    0m18.794s
 user    0m0.088s
 sys     0m0.080s
+
+host: work
+comment: cirled buffer with window(80), 4 download threads.
+comment: TCrawler in action, add polymorphism for set.
+levels: 2
+real    0m5.588s
+user    0m0.116s
+sys     0m0.072s
+
+host: work
+comment: TSimplCrawler in action. Set without mutexes.
+levels: 2
+real    0m18.762s
+user    0m0.120s
+sys     0m0.044s
