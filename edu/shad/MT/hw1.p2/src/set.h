@@ -5,6 +5,7 @@
 */
 #pragma once
 #include <unordered_set>
+#include <atomic>
 #include <mutex>
 
 /**
@@ -27,6 +28,8 @@ class TSynchronizedSet : public TSet<T> {
 public:
     TSynchronizedSet(size_t maxPages)
         : maxPages_(maxPages)
+        , uset_()
+        , mutex_()
     { }
 
     /**

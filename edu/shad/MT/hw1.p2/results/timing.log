@@ -129,3 +129,25 @@ real    3m36.526s
 user    0m5.516s
 sys     0m2.444s
 
+host: work
+comment: Add maxPage limitation
+levels: 3
+maxPages: 1000
+[0] Total downloading time for this thread is 130.391000 sec.
+[2] Total downloading time for this thread is 126.810000 sec.
+[3] Total downloading time for this thread is 126.881000 sec.
+[1] Total downloading time for this thread is 127.075000 sec.
+real    2m11.090s
+user    0m1.732s
+sys     0m1.204s
+
+host: work
+comment: simple_crawler with limitation
+levels: 3
+maxPages: 1000
+[0] Total downloading time for this thread is 564.549000 sec.
+real    9m25.932s
+user    0m1.744s
+sys     0m1.096s
+
+All experements is about: http://silikatsemey.kz/

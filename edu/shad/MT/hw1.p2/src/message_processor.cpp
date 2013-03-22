@@ -6,7 +6,8 @@ void TGetMessageHandler::Process(const TTaskMessage& msg) {
     printf("[%d] GET: %s, get_queue.size = %d\n", env_.thread_number, url->c_str(), env_.taskQueue->Size());
 
     TStringHolder html = std::make_shared<std::string>(env_.downloader->GetUrl(*url));
-    if (msg.GetDepth() < env_.maxDownloadDepth) {
+    if (msg.GetDepth() < env_.maxDownloadDepth
+        && env_.downloadedUrls->Size() < env_.maxDownloadPages) {
         TTaskMessage parseTask(url, html, T_PARSE, msg.GetDepth());
         env_.resultQueue->Put(parseTask);
     }
@@ -31,7 +32,6 @@ void TPoisonMessageHandler::Process(const TTaskMessage&) {
     printf("[%d] POISON:\n", env_.thread_number);
 
     TTaskMessage poisonedTask(T_POISON);
-    //env_.taskQueue->Clear();
     env_.taskQueue->Put(poisonedTask);
     env_.alive = false;
 }
@@ -58,7 +58,8 @@ void TLogMessageHandler::Process(const TTaskMessage& msg) {
         && env_.resultQueue->Size() == 0
         && env_.logQueue->Size() == 0
         && numberOfDumpedPages == env_.downloadedUrls->Size()
-        && msg.GetDepth() == env_.maxDownloadDepth)
+        && (msg.GetDepth() == env_.maxDownloadDepth
+        || numberOfDumpedPages == env_.maxDownloadPages))
     {
         TTaskMessage poisonedTask(T_POISON);
         env_.taskQueue->Put(poisonedTask);
