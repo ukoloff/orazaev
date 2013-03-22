@@ -10,14 +10,16 @@ void TCrawler::Start() {
     std::string fullDumpFileName = _config.pathToDumpFile + "/" +
                                    _config.dumpFileName;
     TWorkerEnvironment thread_downloader_env(fullDumpFileName,
-                                             _config.maxDepth);
+                                             _config.maxDepth,
+                                             _config.maxPages);
     TWorkerEnvironment thread_parser_env(
         thread_downloader_env.resultQueue,
         thread_downloader_env.taskQueue,
         NULL,
         thread_downloader_env.downloadedUrls,
         thread_downloader_env.log,
-        _config.maxDepth
+        _config.maxDepth,
+        _config.maxPages
     );
 
     std::string url = TUrlProcess::NormalizeUrl(_config.startUrl);
@@ -45,7 +47,8 @@ void TCrawler::Start() {
         thread_downloader_env.resultQueue,
         thread_downloader_env.downloadedUrls,
         thread_downloader_env.log,
-        _config.maxDepth
+        _config.maxDepth,
+        _config.maxPages
     );
 
     logger_env.thread_number = thread_parser_env.thread_number;
@@ -69,9 +72,10 @@ void TSimpleCrawler::Start() {
         commonQueue,
         commonQueue,
         commonQueue,
-        TStringSetHolder(new TSimpleSet<std::string>()),
+        TStringSetHolder(new TSimpleSet<std::string>(_config.maxPages)),
         TLogHolder(new TOfstreamGuard(fullDumpFileName)),
-        _config.maxDepth
+        _config.maxDepth,
+        _config.maxPages
     );
 
     std::string url = TUrlProcess::NormalizeUrl(_config.startUrl);

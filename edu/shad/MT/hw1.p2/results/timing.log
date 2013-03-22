@@ -116,3 +116,16 @@ levels: 2
 real    0m17.170s
 user    0m0.080s
 sys     0m0.080s
+
+host: home
+comment: Add maxPage limitation
+levels: 3
+maxPages: 1000
+[3] Total downloading time for this thread is 215.108000 sec.
+[1] Total downloading time for this thread is 215.074000 sec.
+[0] Total downloading time for this thread is 216.031000 sec.
+[2] Total downloading time for this thread is 216.014000 sec.
+real    3m36.526s
+user    0m5.516s
+sys     0m2.444s
+

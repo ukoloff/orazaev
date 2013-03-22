@@ -25,7 +25,9 @@ public:
 template <typename T>
 class TSynchronizedSet : public TSet<T> {
 public:
-    TSynchronizedSet() { }
+    TSynchronizedSet(size_t maxPages)
+        : maxPages_(maxPages)
+    { }
 
     /**
         @brief try to insert element if it isn't in set.
@@ -36,6 +38,7 @@ public:
     virtual size_t Size() const { return uset_.size(); }
 
 private:
+    size_t maxPages_;
     std::unordered_set<T> uset_;
     std::mutex mutex_;
 };
@@ -46,7 +49,9 @@ private:
 template <typename T>
 class TSimpleSet : public TSet<T> {
 public:
-    TSimpleSet() { }
+    TSimpleSet(size_t maxPages)
+        : maxPages_(maxPages)
+    { }
 
     /**
         @brief try to insert element if it isn't in set.
@@ -57,6 +62,7 @@ public:
     virtual size_t Size() const { return uset_.size(); }
 
 private:
+    size_t maxPages_;
     std::unordered_set<T> uset_;
 };
 
@@ -64,6 +70,9 @@ template <typename T>
 bool TSynchronizedSet<T>::Insert(const T& elem) {
     std::lock_guard<std::mutex> guard(mutex_);
     if (uset_.count(elem)) {
+        return false;
+    }
+    if (uset_.size() == maxPages_) {
         return false;
     }
 
@@ -74,6 +83,9 @@ bool TSynchronizedSet<T>::Insert(const T& elem) {
 template <typename T>
 bool TSimpleSet<T>::Insert(const T& elem) {
     if (uset_.count(elem)) {
+        return false;
+    }
+    if (uset_.size() == maxPages_) {
         return false;
     }
 

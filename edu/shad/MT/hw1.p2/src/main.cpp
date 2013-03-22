@@ -1,7 +1,7 @@
 #include <crawler.h>
 
 int main() {
-    TCrawlerConfiguration config("http://silikatsemey.kz/", 2);
+    TCrawlerConfiguration config("http://silikatsemey.kz/", 3, 1000);
     config.pathToDumpFile = "./results";
 
     TCrawler(config).Start();

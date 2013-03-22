@@ -23,15 +23,18 @@
 */
 struct TSimpleCrawlerConfiguration {
     TSimpleCrawlerConfiguration(const std::string& url,
-                          size_t maxDepth)
+                                size_t maxDepth,
+                                size_t maxPages)
         : startUrl(url)
         , maxDepth(maxDepth)
+        , maxPages(maxPages)
         , pathToDumpFile(".")
         , dumpFileName("pages.dump")
     { }
 
     std::string startUrl;
     size_t maxDepth;
+    size_t maxPages;
     std::string pathToDumpFile;
     std::string dumpFileName;
 };
@@ -45,8 +48,9 @@ struct TSimpleCrawlerConfiguration {
 */
 struct TCrawlerConfiguration : public TSimpleCrawlerConfiguration {
     TCrawlerConfiguration(const std::string& url,
-                          size_t maxDepth)
-        : TSimpleCrawlerConfiguration(url, maxDepth)
+                          size_t maxDepth,
+                          size_t maxPages)
+        : TSimpleCrawlerConfiguration(url, maxDepth, maxPages)
         , numberOfDownloaderThreads(0)
         , numberOfParserThreads(0)
     {
@@ -73,8 +77,9 @@ struct TCrawlerConfiguration : public TSimpleCrawlerConfiguration {
 class TCrawler {
 public:
     TCrawler(const std::string url,
-             size_t maxDepth)
-        : _config(url, maxDepth)
+             size_t maxDepth,
+             size_t maxPages)
+        : _config(url, maxDepth, maxPages)
     { }
 
     TCrawler(const TCrawlerConfiguration& config)
@@ -96,8 +101,9 @@ private:
 class TSimpleCrawler {
 public:
     TSimpleCrawler(const std::string url,
-             size_t maxDepth)
-        : _config(url, maxDepth)
+                   size_t maxDepth,
+                   size_t maxPages)
+        : _config(url, maxDepth, maxPages)
     { }
 
     TSimpleCrawler(const TSimpleCrawlerConfiguration& config)

@@ -158,19 +158,22 @@ struct TWorkerEnvironment {
 
     /** Max web graph depth to download. */
     const size_t maxDownloadDepth;
+    const size_t maxDownloadPages;
 
     TWorkerEnvironment(
         const std::string filename,
-        size_t maxDownloadDepth)
+        size_t maxDownloadDepth,
+        size_t maxDownloadPages)
         : taskQueue(new TSynchronizedCircledBuffer<TTaskMessage, 80>())
         , resultQueue(new TSynchronizedQueue<TTaskMessage>())
         , logQueue(new TSynchronizedQueue<TTaskMessage>())
-        , downloadedUrls(new TSynchronizedSet<std::string>())
+        , downloadedUrls(new TSynchronizedSet<std::string>(maxDownloadPages))
         , log(new TOfstreamGuard(filename))
         , alive(true)
         , downloader(0)
         , thread_number(0)
         , maxDownloadDepth(maxDownloadDepth)
+        , maxDownloadPages(maxDownloadPages)
     { }
 
     TWorkerEnvironment(
@@ -179,7 +182,8 @@ struct TWorkerEnvironment {
         const TMsgQueueHolder& logQueue,
         const TStringSetHolder& urls,
         const TLogHolder& log,
-        size_t maxDownloadDepth)
+        size_t maxDownloadDepth,
+        size_t maxDownloadPages)
         : taskQueue(taskQueue)
         , resultQueue(resultQueue)
         , logQueue(logQueue)
@@ -189,6 +193,7 @@ struct TWorkerEnvironment {
         , downloader(0)
         , thread_number(0)
         , maxDownloadDepth(maxDownloadDepth)
+        , maxDownloadPages(maxDownloadPages)
     { }
 };
 
