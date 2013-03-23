@@ -22,17 +22,17 @@ void PrintVector(T begin, T end, std::ostream* out = &std::cout) {
 
 
 
-std::vector<size_t> GetPrefixFunction(const std::string& s) {
-    std::vector<size_t> prefixFunction(s.size(), 0);
+std::vector<size_t> GetPrefixFunction(const std::string& string) {
+    std::vector<size_t> prefixFunction(string.size(), 0);
 
-    for (size_t curent = 1; curent < s.size(); ++curent) {
-        size_t j = prefixFunction[curent - 1];
-        while (j != 0 && s[curent] != s[j]) {
-            j = prefixFunction[j - 1];
+    for (size_t curent = 1; curent < string.size(); ++curent) {
+        size_t prefixEnd = prefixFunction[curent - 1];
+        while (prefixEnd != 0 && string[curent] != string[prefixEnd]) {
+            prefixEnd = prefixFunction[prefixEnd - 1];
         }
 
-        if (s[curent] == s[j]) {
-            prefixFunction[curent] = j + 1;
+        if (string[curent] == string[prefixEnd]) {
+            prefixFunction[curent] = prefixEnd + 1;
         }
     }
 
