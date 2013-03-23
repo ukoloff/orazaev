@@ -59,8 +59,6 @@ typedef std::shared_ptr<std::string> TStringHolder;
     pHtml: shared pointer to downloaded page.
     type: \in {T_GET, T_PARSE, T_POISON, T_LOG}, parse, get message
           or temenate thread.
-
-    TODO: add graph detph.
 */
 class TTaskMessage {
 public:

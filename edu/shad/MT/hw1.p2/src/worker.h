@@ -8,7 +8,7 @@
     
     Example:
     <code>
-    TThreadGuard guard(std::thread(StartWorker, env));
+    std::thread(StartWorker, env);
     </code>
 
     @author Aman Orazaev

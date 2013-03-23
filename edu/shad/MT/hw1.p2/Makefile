@@ -44,4 +44,5 @@ all: $(obj_list) $(obj_list2)
 clean:
 	@[ ! -e $(obj_dir) ] || rm -rf $(obj_dir)
 	@[ ! -e $(outfile) ] || rm $(outfile)
+	@[ ! -e $(outfile2) ] || rm $(outfile2)
 	$(info Cleaning finished.)
