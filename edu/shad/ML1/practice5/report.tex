@@ -1,0 +1,147 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsfonts,amssymb}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage[ruled, lined]{algorithm2e}
+\usepackage{verbatim}
+
+\textheight=220mm
+\textwidth=160mm
+
+\newcommand{\sgn}{\operatorname{sgn}}
+\newcommand{\argmax}{\operatorname{argmax}}
+\newcommand{\NA}{\operatorname{NA}}
+\newcommand{\OR}{\operatorname{ or }}
+\newcommand{\LCS}{\operatorname{LCS}}
+%\DeclareMathOperator{\sgn}{sgn}
+
+\title{\bf Практикум к семинару № 5. \\ <<Машинное
+Обучение>>}
+\author{А.Е. Оразаев}
+\date{}
+\begin{document}
+
+\voffset=-20mm
+\hoffset=-12mm
+\font\Got=eufm10 scaled\magstep2 \font\Got=eufm10
+
+\maketitle
+
+\section{Проклятие размерности.}
+В ходе лабораторной работы было эксперементально показан эффект
+"проклятия размерности".
+\begin{enumerate}
+    \item Загрузить пакет \verb=lestat=:
+    \begin{verbatim}
+    library('lestat')
+    \end{verbatim}
+
+    \item Сгенерировать точки многомерного нормального распределения:
+    \begin{verbatim}
+    mud = muniformdistribution(rep(-1, dim), rep(1, dim))
+    points = simulate(mud, 100)
+    \end{verbatim}
+
+    \item Реализовать функцию, которая подсчитывает минимальный и
+          максимальный косинус угла между сгенерированными точками:
+    \begin{verbatim}
+    getMinMaxAngles = function(points, index) {
+      angles = data.frame(t(c(Inf, -Inf)))
+      names(angles) = c("Min", "Max")
+    
+      if (nrow(points) == 1) {
+        angles$Min = angles$Max = NaN
+        return (angles)
+      }
+    
+      elem = points[index, ]
+      for (i in 1:nrow(points)) {
+        if (i != index) {
+          cur = points[i, ]
+          cur.angle = sum(cur * elem) / (sum(cur * cur) * sum(elem * elem))
+    
+          if (cur.angle > angles$Max) {
+            angles$Max = cur.angle
+          }
+    
+          if (cur.angle < angles$Min) {
+            angles$Min = cur.angle
+          }
+        }
+      }
+
+    return (angles)
+    }
+    \end{verbatim}
+
+    \item Постройте график зависимости среднего минимального и максимального
+          косинусов от размерности:
+    \begin{center}
+        \fbox{\includegraphics[width=300bp]{angles.png}}
+    \end{center}
+
+    \item Сгенерировать точки для всех размерностей:
+    \begin{verbatim}
+    mud = muniformdistribution(rep(-1, dim), rep(1, dim))
+    points = simulate(mud, 100)
+    \end{verbatim}
+
+    \item Вычислить $ l_2 $-нормы сгенерированных точек:
+    \begin{verbatim}
+    getNormFunctor = function (p) {
+      if (p == Inf) {
+        return (function(x) { return (max(abs(x))) })
+      }
+      return (function(x) { return (sum(abs(x) ^ p) ^ 1/p) })
+    }
+
+    for (i in 1:length(dimensions)) {
+    # ...
+      norms = apply(points, 1, getNormFunctor(2))
+      answersL2[i] = (max(norms) - min(norms))/max(norms)
+    # ...
+    }
+    \end{verbatim}
+
+    \item 8. Построить график зависимости величины $ \frac{max_i||x_i|| - min_i||x_i||}{max_i||x_i||} $.
+          Проделать эксперементы для норм $ l_1 $ и $ l_{\infty} $. Постройте графики и приложите их к
+          отчету.
+    \begin{center}
+        \fbox{\includegraphics[width=300bp]{norms.png}}
+    \end{center}
+\end{enumerate}
+
+\paragraph{Выводы.} Проведенный эксперемент наглядно показывает эффект
+"проклятия размерности". На графике с максимальным и минимальном
+значением косинуса угла между точками можно наблюдать, что с ростом размерности
+все точки становятся одинаково сильно далеки друг от друга. То есть мы теряем
+"похожесть" точек, отсюда следует, что мы не сможем адекватно объеденять в группы
+близкие друг к другу точки и каким-либо образом их классифицировать.
+
+Из 2-ого графика можно сделать похожий вывод. С ростом размерности нормы дают
+все более близкие значения для любых точек из распределения. В случае
+$ l_{\infty} $-нормы уже на размерности 200 мы можем наблюдать, что
+минимальная и максимальная норма для точек из распределения практически
+одинакова. С остальными нормами ситуация получше, но они все равно не дают
+различия больше чем 20\% между максимальным и минимальным значением нормы для
+точек. Таким образом метрические методы классификации будут давать
+неудовлетворительные результаты для пространств с большими размерностями, чтобы
+этого избежать нужно прибегать к уменьшению размерности пространств.
+
+
+\paragraph{Листинг. lab\_5\_angle\_todo.R}
+\begingroup
+    \fontsize{10pt}{12pt}\selectfont
+    \verbatiminput{lab5_angle_todo.R}
+\endgroup
+\paragraph{Листинг. lab\_5\_norm\_todo.R}
+\begingroup
+    \fontsize{10pt}{12pt}\selectfont
+    \verbatiminput{lab5_norm_todo.R}
+\endgroup
+
+\end{document}
