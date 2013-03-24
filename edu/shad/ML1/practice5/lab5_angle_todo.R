@@ -61,6 +61,8 @@ average_max_angles[i] = mean(max_angles)
 answers_min = average_min_angles
 answers_max = average_max_angles
 
+png("angles.png")
 plot(answers_min, ylim=c(-1,1), col="red", pch=20, xlab="dim", ylab="min and max")
 # par(new=T)
 points(answers_max, ylim=c(-1,1), col="blue", pch=20, new=T)
+dev.off()
