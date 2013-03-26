@@ -1,7 +1,7 @@
 qdaLearn = function(train_data, label_column_name) {
   label_column_index = which(names(train_data) == label_column_name)
   class_labels = unique(train_data[,label_column_name])
-  
+
   priors = vector(length=length(class_labels))
   mean_estimates = list(length=length(class_labels))
   var_estimates = list(length=length(class_labels))
