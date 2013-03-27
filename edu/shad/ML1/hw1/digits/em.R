@@ -8,11 +8,28 @@ library('mvtnorm')
 #   * Theta$W -- vector of weights of components
 #   * Theta$Mean -- Matrix of means of components
 #   * Theta$Sigma -- Matrix of varience diagonal values of components
+CreateTheta = function(weights, means, vars) {
+    Theta = list(weights, means, vars)
+    names(Theta) = c("W", "Mean", "Sigma")
+
+    return (Theta)
+}
 
 
 
 Phi = function(x, Theta, i) {
   return (dmvnorm(x, Theta$Mean[i,], diag(Theta$Sigma[i,])))
+}
+
+
+
+CalcDencity = function(x, Theta) {
+    dencity = 0
+    for (i in 1:nrow(Theta$Mean)) {
+        dencity = dencity + Theta$W[i] * Phi(x, Theta, i)
+    }
+
+    return (dencity)
 }
 
 
@@ -50,13 +67,40 @@ EM = function(X, k, Theta, delta) {
                         (nrow(X) * Theta$W[j])
     }
 
+
+    # delta
     print(sprintf("EM: chages mean=%f, sigma=%f",
         max(abs(old_mean - Theta$Mean)),
         max(abs(old_sigma - Theta$Sigma))))
-    # if (max(abs(old_g - g)) < delta) break
+
     if (max(abs(old_mean - Theta$Mean)) < delta &&
         max(abs(old_sigma - Theta$Sigma)) < delta) break
   }
 
   return (Theta)
+}
+
+
+
+GetInitialMeans = function(X, k) {
+    return (X[sample(1:nrow(X), k), ])
+}
+
+GetInitialVars = function(X, k) {
+    return (matrix(1, nrow=k, ncol=ncol(X)))
+}
+
+GetInitialWeights = function(X, k) {
+    return (rep(1/k, k))
+}
+
+GetInitialTheta = function(X, k) {
+    return (CreateTheta(GetInitialWeights(X, k),
+            GetInitialMeans(X, k),
+            GetInitialVars(X, k)))
+}
+
+GEM = function(X, R, m0, delta) {
+    k = 1
+    Theta = EM(X, k, initial_theta, delta)
 }

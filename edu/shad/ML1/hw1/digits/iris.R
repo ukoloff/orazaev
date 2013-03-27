@@ -8,14 +8,8 @@ source("em.R")
 
 k = 4
 delta = 0.005
-initial_mean = matrix(c(X[1:k,]), nrow=k)
-initial_var = matrix(1, nrow=k, ncol=ncol(initial_mean))
-initial_weights = rep(1/k, k)
 
-initial_theta = list(initial_weights, initial_mean, initial_var)
-names(initial_theta) = c("W", "Mean", "Sigma")
-
-Theta = EM(X, k, initial_theta, delta)
+Theta = EM(X, k, GetInitialTheta(X, k), delta)
 
 plot(X, col='blue', pch=19)
 
