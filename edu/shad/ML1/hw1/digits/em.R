@@ -9,10 +9,10 @@ library('mvtnorm')
 #   * Theta$Mean -- Matrix of means of components
 #   * Theta$Sigma -- Matrix of varience diagonal values of components
 CreateTheta = function(weights, means, vars) {
-    Theta = list(weights, means, vars)
-    names(Theta) = c("W", "Mean", "Sigma")
+  Theta = list(weights, means, vars)
+  names(Theta) = c("W", "Mean", "Sigma")
 
-    return (Theta)
+  return (Theta)
 }
 
 
@@ -24,12 +24,12 @@ Phi = function(x, Theta, i) {
 
 
 CalcDencity = function(x, Theta) {
-    dencity = 0
-    for (i in 1:nrow(Theta$Mean)) {
-        dencity = dencity + Theta$W[i] * Phi(x, Theta, i)
-    }
+  dencity = 0
+  for (i in 1:nrow(Theta$Mean)) {
+    dencity = dencity + Theta$W[i] * Phi(x, Theta, i)
+  }
 
-    return (dencity)
+  return (dencity)
 }
 
 
@@ -83,24 +83,24 @@ EM = function(X, k, Theta, delta) {
 
 
 GetInitialMeans = function(X, k) {
-    return (X[sample(1:nrow(X), k), ])
+  return (X[sample(1:nrow(X), k), ])
 }
 
 GetInitialVars = function(X, k) {
-    return (matrix(1, nrow=k, ncol=ncol(X)))
+  return (matrix(1, nrow=k, ncol=ncol(X)))
 }
 
 GetInitialWeights = function(X, k) {
-    return (rep(1/k, k))
+  return (rep(1/k, k))
 }
 
 GetInitialTheta = function(X, k) {
-    return (CreateTheta(GetInitialWeights(X, k),
-            GetInitialMeans(X, k),
-            GetInitialVars(X, k)))
+  return (CreateTheta(GetInitialWeights(X, k),
+      GetInitialMeans(X, k),
+      GetInitialVars(X, k)))
 }
 
 GEM = function(X, R, m0, delta) {
-    k = 1
-    Theta = EM(X, k, initial_theta, delta)
+  k = 1
+  Theta = EM(X, k, initial_theta, delta)
 }
