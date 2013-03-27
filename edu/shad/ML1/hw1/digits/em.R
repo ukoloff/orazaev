@@ -23,6 +23,7 @@ EM = function(X, k, Theta, delta) {
   repeat {
     old_g = g
     old_mean = Theta$Mean
+    old_sigma = Theta$Sigma
 
     # E-step
     for (i in 1:nrow(X)) {
@@ -49,11 +50,12 @@ EM = function(X, k, Theta, delta) {
                         (nrow(X) * Theta$W[j])
     }
 
-    print(max(abs(old_g - g)))
-    print("Hello!")
-    print(g[1, ])
+    print(sprintf("EM: chages mean=%f, sigma=%f",
+        max(abs(old_mean - Theta$Mean)),
+        max(abs(old_sigma - Theta$Sigma))))
     # if (max(abs(old_g - g)) < delta) break
-    if (max(abs(old_mean - Theta$Mean)) < delta) break
+    if (max(abs(old_mean - Theta$Mean)) < delta &&
+        max(abs(old_sigma - Theta$Sigma)) < delta) break
   }
 
   return (Theta)
