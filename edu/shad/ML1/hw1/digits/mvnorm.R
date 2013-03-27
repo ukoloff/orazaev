@@ -1,20 +1,12 @@
-# EM algorithm demonstration
+source('em.R')
+library('mvtnorm')
 
-irisData = datasets::iris
+X = rmvnorm(300, mean=c(5, 0), sigma=rbind(c(2, 0.3), c(0.3, 0.2)))
+X = rbind(X, rmvnorm(300, mean=c(-5, 0)))
 
-X = as.matrix(irisData[irisData$Species == "setosa", c(1, 2)])
+Theta = GEM(X, 0.05)
 
-source("em.R")
-
-k = 4
-delta = 0.005
-R = 2
-m0 = 5
-
-#Theta = EM(X, k, GetInitialTheta(X, k), delta)
-Theta = GEM(X, delta)
 k = nrow(Theta$Mean)
-
 plot(X, col='blue', pch=19)
 
 for (i in 1:k) {

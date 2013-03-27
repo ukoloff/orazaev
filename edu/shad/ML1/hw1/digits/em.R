@@ -41,6 +41,7 @@ EM = function(X, k, Theta, delta) {
     old_g = g
     old_mean = Theta$Mean
     old_sigma = Theta$Sigma
+    old_w = Theta$W
 
     # E-step
     for (i in 1:nrow(X)) {
@@ -64,17 +65,18 @@ EM = function(X, k, Theta, delta) {
     for (j in 1:k)
     for (d in 1:ncol(X)) {
       Theta$Sigma[j, d] = (t(g[,j]) %*% (X[, d] - Theta$Mean[j, d]) ^ 2) /
-                        (nrow(X) * Theta$W[j])
+                          (nrow(X) * Theta$W[j])
     }
 
 
     # delta
-    print(sprintf("EM: chages mean=%f, sigma=%f",
-        max(abs(old_mean - Theta$Mean)),
-        max(abs(old_sigma - Theta$Sigma))))
+    # print(sprintf("EM(%d): chages mean=%f, sigma=%f", k,
+    #     max(abs(old_mean - Theta$Mean)),
+    #     max(abs(old_sigma - Theta$Sigma))))
 
     if (max(abs(old_mean - Theta$Mean)) < delta &&
-        max(abs(old_sigma - Theta$Sigma)) < delta) break
+        max(abs(old_sigma - Theta$Sigma)) < delta &&
+        max(abs(old_w - Theta$W) < delta)) break
   }
 
   return (Theta)
@@ -82,25 +84,84 @@ EM = function(X, k, Theta, delta) {
 
 
 
-GetInitialMeans = function(X, k) {
+GetInitialMeans = function(X, k=1) {
+  if (k == 1) {
+    return (matrix(colMeans(X), nrow=k))
+  }
+
   return (X[sample(1:nrow(X), k), ])
 }
 
-GetInitialVars = function(X, k) {
+GetInitialVars = function(X, k=1) {
+  if (k == 1) {
+    return (matrix(apply(t(X), 1, var), nrow=k))
+  }
+
   return (matrix(1, nrow=k, ncol=ncol(X)))
 }
 
-GetInitialWeights = function(X, k) {
-  return (rep(1/k, k))
+GetInitialWeights = function(X, k=1) {
+  print(k)
+  return (rep(1 / k, k))
 }
 
-GetInitialTheta = function(X, k) {
+GetInitialTheta = function(X, k=1) {
   return (CreateTheta(GetInitialWeights(X, k),
       GetInitialMeans(X, k),
       GetInitialVars(X, k)))
 }
 
-GEM = function(X, R, m0, delta) {
+GEM = function(X, delta) {
   k = 1
-  Theta = EM(X, k, initial_theta, delta)
+  Theta = GetInitialTheta(X)
+  oldTheta = NULL
+
+  repeat {
+    pct = proc.time()
+    plot(X, col='blue', pch=19)
+    points(Theta$Mean, pch=10, col=1:k, cex=10)
+
+    # Choose k using mutual information
+    # http://en.wikipedia.org/wiki/Mutual_information
+    # http://www.google.ru/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=0CDEQFjAA&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.109.8192%26rep%3Drep1%26type%3Dpdf&ei=oXtTUeqCBcaS4ATEyoB4&usg=AFQjCNFXjHdfDggeWS7WSAB5EAB731oluw&bvm=bv.44342787,d.bGE&cad=rjt
+    #
+    if (k != 1) {
+      mutualInformation = matrix(-Inf, nrow=k, ncol=k)
+      for (i in 1:(k - 1)) {
+      for (j in (i + 1):k) {
+        Pi = apply(X, 1, function(x) { return (Phi(x, Theta, i)) })
+        Pj = apply(X, 1, function(x) { return (Phi(x, Theta, j)) })
+
+        mutualInformation[i, j] = nrow(X) * sum(Pi * Pj) / (sum(Pi) * sum(Pj))
+        mutualInformation[i, j] = log(mutualInformation[i, j])
+      }
+      }
+
+      print(mutualInformation)
+      if (max(mutualInformation) >= 0) {
+        break
+      }
+    }
+
+    dens = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
+    minIndex = which.min(dens)
+
+    # Update Theta
+    oldTheta = Theta
+    k = k + 1
+    Theta$Mean = rbind(Theta$Mean, X[minIndex,])
+    Theta$Sigma = rbind(Theta$Sigma, rep(1, ncol(X)))
+    Theta$W = Theta$W * (1 - 1 / k)
+    Theta$W = c(Theta$W, 1 / k)
+
+    print("Time to calculate initial theta: ")
+    print(proc.time() - pct)
+    pct = proc.time()
+    Theta = EM(X, k, Theta, delta)
+    print("EM algorithm time: ")
+    print(proc.time() - pct)
+  }
+
+  print(oldTheta)
+  return (oldTheta)
 }
