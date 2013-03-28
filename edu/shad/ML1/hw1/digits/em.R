@@ -56,6 +56,8 @@ EM = function(X, k, Theta, delta) {
       }
     }
 
+    plot(X, col='blue', pch=19)
+    points(Theta$Mean, pch=10, col=1:k, cex=10)
 
     # M-step
     Theta$W = apply(t(g), 1, sum) / nrow(X)
@@ -70,9 +72,9 @@ EM = function(X, k, Theta, delta) {
 
 
     # delta
-    # print(sprintf("EM(%d): chages mean=%f, sigma=%f", k,
-    #     max(abs(old_mean - Theta$Mean)),
-    #     max(abs(old_sigma - Theta$Sigma))))
+    print(sprintf("EM(%d): chages mean=%f, sigma=%f", k,
+        max(abs(old_mean - Theta$Mean)),
+        max(abs(old_sigma - Theta$Sigma))))
 
     if (max(abs(old_mean - Theta$Mean)) < delta &&
         max(abs(old_sigma - Theta$Sigma)) < delta &&
@@ -118,8 +120,6 @@ GEM = function(X, delta) {
 
   repeat {
     pct = proc.time()
-    plot(X, col='blue', pch=19)
-    points(Theta$Mean, pch=10, col=1:k, cex=10)
 
     # Choose k using mutual information
     # http://en.wikipedia.org/wiki/Mutual_information

@@ -1,10 +1,17 @@
 source('em.R')
 library('mvtnorm')
 
-X = rmvnorm(300, mean=c(5, 0), sigma=rbind(c(2, 0.3), c(0.3, 0.2)))
-X = rbind(X, rmvnorm(300, mean=c(-5, 0)))
+X = rmvnorm(100, mean=c(5, 5), sigma=rbind(c(2, 0.3), c(0.3, 0.2)))
+X = rbind(X, rmvnorm(100, mean=c(-5, 0)))
+X = rbind(X, rmvnorm(100, mean=c(0, 0), sigma=diag(c(5, 5))))
 
-Theta = GEM(X, 0.05)
+mins = apply(t(X), 1, min)
+maxs = apply(t(X), 1, max)
+
+X = X - rep(1, nrow(X)) %*% t(mins)
+X = X / rep(1, nrow(X)) %*% t(maxs - mins)
+
+Theta = GEM(X, 0.01)
 
 k = nrow(Theta$Mean)
 plot(X, col='blue', pch=19)
