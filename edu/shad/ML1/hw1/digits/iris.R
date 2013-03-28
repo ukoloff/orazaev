@@ -2,12 +2,12 @@
 
 irisData = datasets::iris
 
-X = as.matrix(irisData[irisData$Species == "setosa", c(1, 2)])
+X = as.matrix(irisData[irisData$Species == "setosa", -5])
 
 source("em.R")
 
 k = 4
-delta = 0.005
+delta = 0.001
 R = 2
 m0 = 5
 

@@ -18,7 +18,13 @@ CreateTheta = function(weights, means, vars) {
 
 
 Phi = function(x, Theta, i) {
-  return (dmvnorm(x, Theta$Mean[i,], diag(Theta$Sigma[i,])))
+  # very slow box implementation
+  # return (dmvnorm(x, Theta$Mean[i,], diag(Theta$Sigma[i,])))
+  dim = nrow(Theta$Mean)
+  sigma = Theta$Sigma[i,]
+  mu = Theta$Mean[i,]
+  return (exp(-0.5 * (x - mu) %*% diag(sigma^(-1)) %*% (x - mu)) /
+      ((2 * pi) ^ (dim / 2) * sqrt(prod(sigma))))
 }
 
 
@@ -138,7 +144,7 @@ GEM = function(X, delta) {
       }
 
       print(mutualInformation)
-      if (max(mutualInformation) >= 0) {
+      if (any(is.na(mutualInformation)) || max(mutualInformation) >= 0) {
         break
       }
     }
