@@ -54,16 +54,21 @@ EM = function(X, k, Theta, delta) {
       # Calculating P(x)
       Px = 0
       for (j in 1:k) {
+        print (sprintf("DEBUG: nrow(X) = %d,   i = %d", nrow(X), i));
+        print (Theta$Mean[,1:5])
+        print (j)
+        print (k)
         Px = Px + Theta$W[j] * Phi(X[i,], Theta, j)
       }
+      print (sprintf("DEBUGGG: Px = %d", Px));
 
       for (j in 1:k) {
         g[i, j] = Theta$W[j] * Phi(X[i,], Theta, j) / Px
       }
     }
 
-    plot(X, col='blue', pch=19)
-    points(Theta$Mean, pch=10, col=1:k, cex=10)
+    #plot(X, col='blue', pch=19)
+    #points(Theta$Mean, pch=10, col=1:k, cex=10)
 
     # M-step
     Theta$W = apply(t(g), 1, sum) / nrow(X)
@@ -150,6 +155,7 @@ GEM = function(X, delta) {
     }
 
     dens = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
+    print(dens) # add dens is NAN need to fix.
     minIndex = which.min(dens)
 
     # Update Theta
