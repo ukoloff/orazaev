@@ -54,13 +54,13 @@ EM = function(X, k, Theta, delta) {
       # Calculating P(x)
       Px = 0
       for (j in 1:k) {
-        print (sprintf("DEBUG: nrow(X) = %d,   i = %d", nrow(X), i));
-        print (Theta$Mean[,1:5])
-        print (j)
-        print (k)
+        #print (sprintf("DEBUG: nrow(X) = %d,   i = %d", nrow(X), i));
+        #print (Theta$Mean[,1:4])
+        #print (j)
+        #print (k)
         Px = Px + Theta$W[j] * Phi(X[i,], Theta, j)
       }
-      print (sprintf("DEBUGGG: Px = %d", Px));
+      #print (sprintf("DEBUGGG: Px = %f", Px));
 
       for (j in 1:k) {
         g[i, j] = Theta$W[j] * Phi(X[i,], Theta, j) / Px
@@ -86,6 +86,12 @@ EM = function(X, k, Theta, delta) {
     print(sprintf("EM(%d): chages mean=%f, sigma=%f", k,
         max(abs(old_mean - Theta$Mean)),
         max(abs(old_sigma - Theta$Sigma))))
+    # print(Theta$Mean)
+    # print(Theta$Sigma)
+
+    if (any(is.na(old_mean -Theta$Mean)) ||
+        any(is.na(old_sigma - Theta$Sigma)) ||
+        any(is.na(old_w - Theta$W))) break
 
     if (max(abs(old_mean - Theta$Mean)) < delta &&
         max(abs(old_sigma - Theta$Sigma)) < delta &&
@@ -157,6 +163,7 @@ GEM = function(X, delta) {
     dens = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
     print(dens) # add dens is NAN need to fix.
     minIndex = which.min(dens)
+    if (is.na(minIndex)) break
 
     # Update Theta
     oldTheta = Theta

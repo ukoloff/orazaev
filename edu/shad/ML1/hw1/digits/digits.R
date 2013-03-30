@@ -1,25 +1,46 @@
 set.seed(42)
 #digitsData = datasets::iris
 #names(digitsData) = c("f1", "f2", "f3", "f4", "y")
-digitsData = read.csv('train.csv')
+load('digits_train_data.RData')
 
+#TRAIN_PERCENT = 0.001
 TRAIN_PERCENT = 0.001
 
 source('em.R')
 
 testDigitsData = data.frame()
 
+GetNormalizer = function(X) {
+  normalizer = list()
+
+  means = colMeans(X)
+  vars = sqrt(apply(t(X), 1, var))
+
+  normalizer$Function = function(x) { return((x - means) / vars) }
+  normalizer$NonZeroVars = vars != 0
+
+  return (normalizer)
+}
+
 GetClassifier = function(X) {
   classifier = list()
+  classifier$Thetas = list()
 
-  for (currentLabel in unique(X$y)) {
+  y = X[,ncol(X)]
+  X = X[, -ncol(X)]
+  
+  normalizer = GetNormalizer(X)
+  X = t(apply(X, 1, normalizer$Function))[, normalizer$NonZeroVars]
+  classifier$Normalizer = normalizer
+
+  for (currentLabel in unique(y)) {
     print(sprintf("Train classifier for label %s", currentLabel))
-    labelData = X[X$y == currentLabel, ]
+    labelData = X[y == currentLabel, ]
 
-    classifier[[length(classifier) + 1]] =
-        GEM(as.matrix(labelData[, -ncol(labelData)]), 0.001)
+    classifier$Thetas[[length(classifier$Thetas) + 1]] =
+        GEM(as.matrix(labelData), 0.001)
 
-    classifier[[length(classifier)]]$Label = currentLabel
+    classifier$Thetas[[length(classifier$Thetas)]]$Label = currentLabel
   }
 
   return(classifier)
@@ -27,18 +48,23 @@ GetClassifier = function(X) {
 
 Classify = function(classifier, X) {
   X = as.matrix(X)
+
+  # Normalization
+  normalizer = classifier$Normalizer
+  X = t(apply(X, 1, normalizer$Function))[, normalizer$NonZeroVars]
+
   Den = NA
-  for (Theta in classifier) {
+  for (Theta in classifier$Thetas) {
     current = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
 
-    if (is.na(Den)) {
+    if (any(is.na(Den))) {
       Den = current
     } else {
       Den = rbind(Den, current)
     }
   }
 
-  return (apply(t(Den), 1, function(x) { return (classifier[[which.max(x)]]$Label) }))
+  return (apply(t(Den), 1, function(x) { return (classifier$Thetas[[which.max(x)]]$Label) }))
 }
 
 trainData = data.frame();
