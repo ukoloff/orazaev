@@ -21,15 +21,18 @@ Phi = function(x, Theta, i) {
   # very slow box implementation
   # return (dmvnorm(x, Theta$Mean[i,], diag(Theta$Sigma[i,])))
   dim = nrow(Theta$Mean)
-  sigma = Theta$Sigma[i,]
-  mu = Theta$Mean[i,]
-  return (exp(-0.5 * (x - mu) %*% diag(sigma^(-1)) %*% (x - mu)) /
+  sigma = as.vector(Theta$Sigma[i,])
+  #mu = as.vector(Theta$Mean[i,])[sigma != 0]
+  #x = as.vector(x)[sigma != 0]
+  #sigma = sigma[sigma != 0]
+  mu = as.vector(Theta$Mean[i,])
+  return (exp(-0.5 * sum((x - mu)^2 * sigma^(-1))) /
       ((2 * pi) ^ (dim / 2) * sqrt(prod(sigma))))
 }
 
 
 
-CalcDencity = function(x, Theta) {
+CalcDensity = function(x, Theta) {
   dencity = 0
   for (i in 1:nrow(Theta$Mean)) {
     dencity = dencity + Theta$W[i] * Phi(x, Theta, i)
@@ -54,21 +57,22 @@ EM = function(X, k, Theta, delta) {
       # Calculating P(x)
       Px = 0
       for (j in 1:k) {
-        #print (sprintf("DEBUG: nrow(X) = %d,   i = %d", nrow(X), i));
-        #print (Theta$Mean[,1:4])
-        #print (j)
-        #print (k)
         Px = Px + Theta$W[j] * Phi(X[i,], Theta, j)
       }
-      #print (sprintf("DEBUGGG: Px = %f", Px));
 
+      #print(Px)
       for (j in 1:k) {
+        if (Px == 0) {
+            g[i, j] = 0
+            next
+        }
         g[i, j] = Theta$W[j] * Phi(X[i,], Theta, j) / Px
       }
     }
 
     #plot(X, col='blue', pch=19)
     #points(Theta$Mean, pch=10, col=1:k, cex=10)
+
 
     # M-step
     Theta$W = apply(t(g), 1, sum) / nrow(X)
@@ -105,10 +109,11 @@ EM = function(X, k, Theta, delta) {
 
 GetInitialMeans = function(X, k=1) {
   if (k == 1) {
+    return (matrix(X[sample(1:nrow(X), 1),], nrow=k))
     return (matrix(colMeans(X), nrow=k))
   }
 
-  return (X[sample(1:nrow(X), k), ])
+  return (as.matrix(X[sample(1:nrow(X), k), ]))
 }
 
 GetInitialVars = function(X, k=1) {
@@ -120,7 +125,6 @@ GetInitialVars = function(X, k=1) {
 }
 
 GetInitialWeights = function(X, k=1) {
-  print(k)
   return (rep(1 / k, k))
 }
 
@@ -130,11 +134,16 @@ GetInitialTheta = function(X, k=1) {
       GetInitialVars(X, k)))
 }
 
-GEM = function(X, delta) {
+GEM = function(X, delta, minK=0) {
   k = 1
   Theta = GetInitialTheta(X)
+  if (minK != 0) {
+    Theta = GetInitialTheta(X, minK - 1)
+    k = minK - 1
+  }
   oldTheta = NULL
 
+  #print(Theta)
   repeat {
     pct = proc.time()
 
@@ -142,7 +151,7 @@ GEM = function(X, delta) {
     # http://en.wikipedia.org/wiki/Mutual_information
     # http://www.google.ru/url?sa=t&rct=j&q=&esrc=s&source=web&cd=1&ved=0CDEQFjAA&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.109.8192%26rep%3Drep1%26type%3Dpdf&ei=oXtTUeqCBcaS4ATEyoB4&usg=AFQjCNFXjHdfDggeWS7WSAB5EAB731oluw&bvm=bv.44342787,d.bGE&cad=rjt
     #
-    if (k != 1) {
+    if (!is.null(oldTheta)) {
       mutualInformation = matrix(-Inf, nrow=k, ncol=k)
       for (i in 1:(k - 1)) {
       for (j in (i + 1):k) {
@@ -155,23 +164,29 @@ GEM = function(X, delta) {
       }
 
       print(mutualInformation)
-      if (any(is.na(mutualInformation)) || max(mutualInformation) >= 0) {
+      if (any(is.na(mutualInformation)) || (max(mutualInformation) >= 7 || k >= 7)) {
         break
       }
     }
 
-    dens = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
-    print(dens) # add dens is NAN need to fix.
+    dens = apply(X, 1, function(x) { return (CalcDensity(x, Theta)) })
+    #print(dens) # dens is NAN need to fix.
+    if (any(is.na(dens))) break
     minIndex = which.min(dens)
-    if (is.na(minIndex)) break
 
     # Update Theta
     oldTheta = Theta
     k = k + 1
-    Theta$Mean = rbind(Theta$Mean, X[minIndex,])
-    Theta$Sigma = rbind(Theta$Sigma, rep(1, ncol(X)))
-    Theta$W = Theta$W * (1 - 1 / k)
-    Theta$W = c(Theta$W, 1 / k)
+    U = dens < sort(dens)[0.3 * length(dens)]
+    t = GetInitialTheta(X[U,])
+    #print(apply(X, 1, function(x) { return (Phi(x, Theta, 1)) }))
+    #print(apply(X, 1, function(x) { return (Phi(x, t, 1)) }))
+    #Theta$Mean = rbind(Theta$Mean, X[minIndex,])
+    #Theta$Sigma = rbind(Theta$Sigma, rep(0.25, ncol(X)))
+    Theta$Mean = rbind(Theta$Mean , t$Mean)
+    Theta$Sigma = rbind(Theta$Sigma, t$Sigma)
+    Theta$W = Theta$W * (1 - 1 / sum(U))
+    Theta$W = c(Theta$W, 1 / sum(U))
 
     print("Time to calculate initial theta: ")
     print(proc.time() - pct)
@@ -181,6 +196,5 @@ GEM = function(X, delta) {
     print(proc.time() - pct)
   }
 
-  print(oldTheta)
   return (oldTheta)
 }

@@ -1,10 +1,13 @@
 set.seed(42)
+
+source('common.R')
+
 #digitsData = datasets::iris
 #names(digitsData) = c("f1", "f2", "f3", "f4", "y")
 load('digits_train_data.RData')
 
 #TRAIN_PERCENT = 0.001
-TRAIN_PERCENT = 0.001
+TRAIN_PERCENT = 1
 
 source('em.R')
 
@@ -13,11 +16,11 @@ testDigitsData = data.frame()
 GetNormalizer = function(X) {
   normalizer = list()
 
-  means = colMeans(X)
-  vars = sqrt(apply(t(X), 1, var))
+  means = as.vector(colMeans(X))
+  vars = sqrt(as.vector(colVars(X)))
 
   normalizer$Function = function(x) { return((x - means) / vars) }
-  normalizer$NonZeroVars = vars != 0
+  normalizer$NonZeroVars = vars > 0.001 ^ 2
 
   return (normalizer)
 }
@@ -28,18 +31,24 @@ GetClassifier = function(X) {
 
   y = X[,ncol(X)]
   X = X[, -ncol(X)]
-  
-  normalizer = GetNormalizer(X)
-  X = t(apply(X, 1, normalizer$Function))[, normalizer$NonZeroVars]
-  classifier$Normalizer = normalizer
 
   for (currentLabel in unique(y)) {
     print(sprintf("Train classifier for label %s", currentLabel))
     labelData = X[y == currentLabel, ]
 
-    classifier$Thetas[[length(classifier$Thetas) + 1]] =
-        GEM(as.matrix(labelData), 0.001)
+    #normalizer = GetNormalizer(labelData)
+    #labelData = t(apply(labelData, 1, normalizer$Function))[, normalizer$NonZeroVars]
+    preprocessing = getPreprocessing(labelData)
+    labelData = preprocessing$Do(labelData)
 
+    numClusters = 10
+    if (currentLabel == 2 || currentLabel == 3) {
+        numClusters = 0
+    }
+    classifier$Thetas[[length(classifier$Thetas) + 1]] =
+        GEM(as.matrix(labelData), 0.005)
+
+    classifier$Thetas[[length(classifier$Thetas)]]$Preprocessing = preprocessing
     classifier$Thetas[[length(classifier$Thetas)]]$Label = currentLabel
   }
 
@@ -50,12 +59,15 @@ Classify = function(classifier, X) {
   X = as.matrix(X)
 
   # Normalization
-  normalizer = classifier$Normalizer
-  X = t(apply(X, 1, normalizer$Function))[, normalizer$NonZeroVars]
+  #normalizer = classifier$Normalizer
+  #X = t(apply(X, 1, normalizer$Function))[, normalizer$NonZeroVars]
 
   Den = NA
   for (Theta in classifier$Thetas) {
-    current = apply(X, 1, function(x) { return (CalcDencity(x, Theta)) })
+    #curX = t(apply(X, 1, Theta$Normalizer$Function))[,Theta$Normalizer$NonZeroVars]
+    curX = Theta$Preprocessing$Do(X)
+
+    current = apply(curX, 1, function(x) { return (CalcDensity(x, Theta)) })
 
     if (any(is.na(Den))) {
       Den = current
@@ -82,6 +94,7 @@ for (currentLabel in unique(digitsData$y)) {
 
 
 classifier = GetClassifier(trainData)
-save(classifier, file="classifier.RData")
+#save(classifier, file="classifier.RData")
+testData = read.csv('test.csv')
 
 res = Classify(classifier, testData[, -ncol(testData)])
