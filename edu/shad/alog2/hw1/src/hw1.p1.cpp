@@ -4,20 +4,17 @@
  *
  *  Copyright 2013 Aman Orazaev
  */
-
-#include <cstdlib>
-
 #include <string>
 #include <iostream>
 #include <vector>
 
 
 template <typename T>
-void PrintVector(T begin, T end, std::ostream* out = &std::cout) {
+void PrintElements(T begin, T end, std::ostream* out = &std::cout) {
     while (begin != end) {
-        *out << *begin++ << (begin + 1 == end ? "" : " ");
+        *out << *begin++ << " ";
     }
-    std::cout << "\n";
+    *out << "\n";
 }
 
 
@@ -25,14 +22,14 @@ void PrintVector(T begin, T end, std::ostream* out = &std::cout) {
 std::vector<size_t> GetPrefixFunction(const std::string& string) {
     std::vector<size_t> prefixFunction(string.size(), 0);
 
-    for (size_t curent = 1; curent < string.size(); ++curent) {
-        size_t prefixEnd = prefixFunction[curent - 1];
-        while (prefixEnd != 0 && string[curent] != string[prefixEnd]) {
-            prefixEnd = prefixFunction[prefixEnd - 1];
+    for (size_t index = 1; index < string.size(); ++index) {
+        size_t prefixSize = prefixFunction[index - 1];
+        while (prefixSize != 0 && string[index] != string[prefixSize]) {
+            prefixSize = prefixFunction[prefixSize - 1];
         }
 
-        if (string[curent] == string[prefixEnd]) {
-            prefixFunction[curent] = prefixEnd + 1;
+        if (string[index] == string[prefixSize]) {
+            prefixFunction[index] = prefixSize + 1;
         }
     }
 
@@ -40,16 +37,14 @@ std::vector<size_t> GetPrefixFunction(const std::string& string) {
 }
 
 
-// #include "hw1.p1.testing.h"
 
 
 int main() {
     std::string input;
     std::cin >> input;
 
-    std::vector<size_t> pref = GetPrefixFunction(input);
-    PrintVector(pref.begin(), pref.end());
+    std::vector<size_t> result = GetPrefixFunction(input);
+    PrintElements(result.begin(), result.end());
 
-    // return RunTests();
     return 0;
 }

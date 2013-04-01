@@ -1,9 +1,10 @@
 #pragma once
+#include <cstdlib>
 #include <cppunit/MiniCppUnit.hxx>
 
 template <typename T>
 std::ostream& operator<<(std::ostream& out, std::vector<T> vec) {
-    PrintVector(vec.begin(), vec.end(), &out);
+    PrintElements(vec.begin(), vec.end(), &out);
     return out;
 }
 
