@@ -1,3 +1,5 @@
+library('MASS')
+
 NORMALIZE_THREASHOLD = 0.001 ^ 2
 
 colVars = function(X) {
@@ -107,11 +109,112 @@ getPreprocessing = function(X, reduced.dim=60) {
             (rep(1, nrow(X)) %*% t(sqrt(vars))))
 
         X = make.matrix(pca$Reduce(X, reduced.dim))
-        X = (X - rep(1, nrow(X)) %*% t(new.means)) /
-            (rep(1, nrow(X)) %*% t(sqrt(new.vars)))
 
         return(X)
     }
 
     return (preprocessing)
+}
+
+shuffle = function(X) {
+    return (X[sample(1:nrow(X), nrow(X)), ])
+}
+
+prepareData = function(X, train.factor=0.6) {
+    y = X[, ncol(X)]
+
+    data = list()
+    data$train = data.frame()
+    data$test = data.frame()
+
+    for (label in unique(y)) {
+        curLabelData = X[y == label, ]
+        curSize = nrow(curLabelData)
+        lastTestIndex = train.factor * curSize
+
+        data$train = rbind(data$train, curLabelData[1:lastTestIndex, ])
+        data$test = rbind(data$test, curLabelData[(lastTestIndex + 1):curSize, ])
+    }
+
+    return (data)
+}
+
+trainLda = function(X) {
+    lda = list()
+
+    y = X[, ncol(X)]
+    X = X[, -ncol(X)]
+    X = as.matrix(X)
+
+    trainSize = nrow(X)
+
+    vars = colVars(X)
+    lda$non.zero.vars = vars > NORMALIZE_THREASHOLD
+    X = X[, lda$non.zero.vars]
+
+    normalize.means = colMeans(X)
+    normalize.vars = colVars(X)
+    normalize = function(x) {
+        return (
+            (x - normalize.means) / sqrt(normalize.vars)
+        )
+    }
+    X = t(apply(X, 1, normalize))
+    pca = getPca(X)
+    X = pca$Reduce(X, 279)
+
+
+    lda$means = list()
+    lda$prob = list()
+    lda$label = c()
+    lda$Sigma = matrix(0, nrow=ncol(X), ncol=ncol(X))
+
+    for (label in unique(y)) {
+        curLabelData = X[y == label, ]
+        lda$means[[length(lda$means) + 1]] = colMeans(curLabelData)
+        lda$prob[[length(lda$prob) + 1]] = nrow(curLabelData) / trainSize
+        lda$label = c(lda$label, label)
+    }
+
+    for (i in 1:trainSize) {
+        index = which(lda$label == y[i])
+
+        centred = X[i, ] - lda$means[[index]]
+        lda$Sigma = lda$Sigma + (as.matrix(centred) %*%
+                    t(as.matrix(centred))) / trainSize
+
+        print(sprintf("Training [%.2f%%]", i * 100 / trainSize))
+    }
+
+    lda$SigmaInv = ginv(lda$Sigma)
+    lda$aTerm == list()
+    lda$bTerm = list()
+
+    for (index in 1:length(lda$label)) {
+        lda$bTerm[[index]] = log(lda$prob[[index]]) - (make.matrix(lda$means[[index]]) %*%
+                             lda$SigmaInv %*% as.matrix(lda$means[[index]]))
+        lda$aTerm[[index]] = lda$SigmaInv %*% as.matrix(lda$means[[index]])
+    }
+
+    lda$Classify = function(Z) {
+        Z = make.matrix(Z);
+        Z = make.matrix(Z[, lda$non.zero.vars])
+        Z = make.matrix(t(apply(Z, 1, normalize)))
+        Z = pca$Reduce(Z, 279)
+        Score = data.frame();
+
+        for (index in 1:length(lda$label)) {
+            F = function(x) {
+                return (
+                    t(as.matrix(x)) %*% lda$aTerm[[index]] + lda$bTerm[[index]]
+                )
+            }
+
+            Score = rbind(Score, apply(Z, 1, F))
+        }
+
+        return (lda$label[apply(t(Score), 1, which.max)])
+    }
+
+    return (lda)
 }
