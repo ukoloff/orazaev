@@ -87,13 +87,21 @@ vector<size_t> KMeans(const Points& data, size_t K) {
             size_t d = di % dimensions;
             centroids[clusters[i]][d] += data[i][d];
         }
-        for (size_t i = 0; i < K; ++i) {
-            if (clusters_sizes[i] != 0) {
-                for (size_t d = 0; d < dimensions; ++d) {
+
+        {
+            for (size_t di = 0; di < K * dimensions; ++di) {
+                size_t i = di / dimensions;
+
+                if (clusters_sizes[i] != 0) {
+                    size_t d = di % dimensions;
                     centroids[i][d] /= clusters_sizes[i];
                 }
-            } else {
-                centroids[i] = GetRandomPosition(centroids);
+            }
+
+            for (size_t i = 0; i < K ; ++i) {
+                if (clusters_sizes[i] == 0) {
+                    centroids[i] = GetRandomPosition(centroids);
+                }
             }
         }
     }
