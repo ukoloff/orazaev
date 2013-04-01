@@ -82,10 +82,10 @@ vector<size_t> KMeans(const Points& data, size_t K) {
         }
 
         centroids.assign(K, Point(dimensions));
-        for (size_t i = 0; i < data_size; ++i) {
-            for (size_t d = 0; d < dimensions; ++d) {
-                centroids[clusters[i]][d] += data[i][d];
-            }
+        for (size_t di = 0; di < data_size * dimensions; ++di) {
+            size_t i = di / dimensions;
+            size_t d = di % dimensions;
+            centroids[clusters[i]][d] += data[i][d];
         }
         for (size_t i = 0; i < K; ++i) {
             if (clusters_sizes[i] != 0) {
