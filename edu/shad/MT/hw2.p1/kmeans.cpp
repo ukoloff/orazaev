@@ -3,6 +3,7 @@
 #include <fstream>
 #include <stdlib.h>
 #include <vector>
+#include <omp.h>
 
 using namespace std;
 
@@ -66,6 +67,7 @@ vector<size_t> KMeans(const Points& data, size_t K) {
 
     bool converged = false;
     while (!converged) {
+        vector<size_t> clusters_sizes(K);
         converged = true;
         for (size_t i = 0; i < data_size; ++i) {
             size_t nearest_cluster = FindNearestCentroid(centroids, data[i]);
@@ -73,18 +75,17 @@ vector<size_t> KMeans(const Points& data, size_t K) {
                 clusters[i] = nearest_cluster;
                 converged = false;
             }
+            ++clusters_sizes[clusters[i]];
         }
         if (converged) {
             break;
         }
 
-        vector<size_t> clusters_sizes(K);
         centroids.assign(K, Point(dimensions));
         for (size_t i = 0; i < data_size; ++i) {
             for (size_t d = 0; d < dimensions; ++d) {
                 centroids[clusters[i]][d] += data[i][d];
             }
-            ++clusters_sizes[clusters[i]];
         }
         for (size_t i = 0; i < K; ++i) {
             if (clusters_sizes[i] != 0) {
