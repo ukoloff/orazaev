@@ -1,0 +1,179 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[russian]{babel} %comment it for english!
+\usepackage{amsfonts,longtable,amssymb,amsmath,array}
+\usepackage{graphicx}
+\usepackage{euscript}
+\newtheorem{vkTheorem}{Theorem}[section]
+\newtheorem{vkLemma}[vkTheorem]{Lemma}
+\newenvironment{vkProof}%
+   {\par\noindent{\bf Proof.\par\nopagebreak}}%
+   {\hfill$\scriptstyle\blacksquare$\par\medskip}
+%\textwidth=450pt%%
+%\textheight=650pt
+%\oddsidemargin=0pt
+%\hoffset=0pt
+%\voffset=0pt
+%\topmargin=0pt
+%\headheight=0pt
+%\headsep=0pt
+\newcommand{\suml}[0]{\sum\limits}
+\begin{document}
+
+
+\section{Домашнее задание}
+
+\subsection*{Задача 1}
+Показать, что оценка:
+$$
+    \hat{\Sigma} = \frac{1}{l - |Y|} \sum_{i=1}^{l}(x_i - \hat{\mu}_{y_i}) (x_i - \hat{\mu}_{y_i})^{T}
+$$
+является несмещенной оценкой общей ковариационной матрицы классов $\Sigma$  при условии, что средние
+$\hat{\mu_y}, y \in Y$ оцениваются по той же выборке.
+
+\subsubsection*{План доказательства}
+Без ограничения общности мы можем доказать, что оценка:
+$$
+    \hat{cov}(a, b) = \frac{1}{l - |Y|} \sum_{i=1}^{l}(a_i - \hat{\mu}_{a_{y_i}}) (b_i - \hat{\mu}_{b_{y_i}})
+$$
+ковариации признаков $a$ и $b$ является несмещенной.
+
+\subsubsection*{Доказательство}
+Проведем цепочку рассуждений:
+\begin{align*}
+    E\left[\sum_{i = 1}^{l}(a_i - \hat{\mu}_{a_{y_i}}) (b_i - \hat{\mu}_{b_{y_i}})\right] = 
+    E\left[\sum_{y \in Y} \sum_{i:y_i = y} (a_i - \hat{\mu}_{a_{y_i}})(b_i - \hat{\mu}_{b_{y_i}})\right] = \\ =
+    \sum_{y \in Y} E\left[\sum_{i:y_i = y}(a_i b_i) - |X_y| \hat{\mu}_{a_y} \hat{\mu}_{b_y}\right] =
+    \sum_{y \in Y} \left(\sum_{i:y_i = y}E[a_i b_i] - |X_y| E[\hat{\mu}_{a_y} \hat{\mu}_{b_y}]\right) =
+\end{align*}
+Где $ |X_y| $ -- число объектов принадлежащих классу $ y $. Далее заметим, что:
+\begin{align*}
+    E(a_{i} b_{i}) = cov(a_i, b_i) + \mu_a \mu_b \\
+\end{align*}
+\begin{align*}
+    E(\hat{\mu}_{a_y} \hat{\mu}_{b_y}) = cov(\hat{\mu}_{a_y}, \hat{\mu}_{b_y}) + \mu_a \mu_b = 
+    cov\left(\frac{1}{|X_y|}\sum_{i:y_i = y} a_i, \frac{1}{|X_y|}\sum_{i:y_i = y} b_i\right) + \mu_a \mu_b = \\ =
+    \frac{1}{|X_y|^2} \sum_{i:y_i = y} \sum_{j:y_j = y} a_i b_j + \mu_a \mu_b = 
+    \frac{1}{|X_y|^2} \sum_{i:y_i = y} a_i b_i + \mu_a \mu_b =
+    \frac{1}{|X_y|} cov(a, b) + \mu_a \mu_b
+\end{align*}
+
+Подставим полученное в проведенные выше рассуждения:
+\begin{align*}
+    \sum_{y \in Y} \left(|X_y| cov(a, b) + |X_y| \mu_a \mu_b - |X_y| \mu_a \mu_b - cov(a, b)\right) = \\
+    cov(a,b) \left(\sum_{y \in Y}|X_y| - \sum_{y \in Y} 1\right) = (l - |Y|) cov(a, b)
+\end{align*}
+
+Собираем все вместе:
+\begin{align*}
+    (l - |Y|) cov(a, b) = E\left[\sum_{i = 1}^{l}(a_i - \hat{\mu}_{a_{y_i}}) (b_i - \hat{\mu}_{b_{y_i}})\right] \Rightarrow \\
+    \Rightarrow cov(a, b) = E\left[\frac{1}{(l - |Y|)} \sum_{i = 1}^{l}(a_i - \hat{\mu}_{a_{y_i}}) (b_i - \hat{\mu}_{b_{y_i}})\right] \Rightarrow \\
+    \Rightarrow \hat{cov}(a, b) = \frac{1}{l - |Y|} \sum_{i = 1}^{l}(a_i - \hat{\mu}_{a_{y_i}}) (b_i - \hat{\mu}_{b_{y_i}})
+\end{align*}
+Оценка является несмещенной
+
+\subsubsection*{Доказано~$\hat{\Sigma} = \frac{1}{l - |Y|} \sum_{i=1}^{l}(x_i - \hat{\mu}_{y_i}) (x_i - \hat{\mu}_{y_i})^{T}$ является несмещенной оценкой}
+
+\subsection*{Задача 2}
+Привести примеры ядра $ K $ и метрики $ \rho $ в формулах:
+$$
+    \hat{p}_h(x) = \frac{1}{m}\sum_{i = 1}^{m} \prod_{j = 1}^{n} \frac{1}{h_j} K\left(\frac{f_j(x) - f_j(x_i)}{h_j}\right)
+$$
+$$
+    \hat{p}_h(x) = \frac{1}{m V(h)}\sum_{i = 1}^{m} K\left(\frac{\rho(x,x_i)}{h}\right)
+$$
+такие, чтобы они определяли одну и ту же оценку плотности. Чему при этом равно V(h)?
+
+\subsubsection*{План доказательства}
+Возьмем взвешенную евклидову метрику и гауссовское ядро.
+$$
+    K(x) = \sqrt{2 \pi} e^{\frac{1}{2} x^2}; \mbox{        }
+    \rho(x, y) = \left(\sum_{j = 1}^{m} w_j |f_j(x) - f_j(y)|^2\right)^{-\frac{1}{2}}
+$$
+
+
+\subsubsection*{Доказательство}
+Проведем цепочку рассуждений:
+\begin{align*}
+    \frac{1}{m V(h)} \cdot \sum_{i = 1}^{m} K\left(\frac{\rho(x,x_i)}{h}\right) =
+    \frac{\sqrt{2 \pi}}{m V(h)} \cdot \sum_{i = 1}^{m} e^{-\frac{1}{2}\sum_{j = 1}^{n}\frac{|f_j(x) - f_j(x_i)|^2}{h / w_j}} = \\ =
+    \frac{\sqrt{2 \pi}}{m V(h)} \cdot \sum_{i = 1}^{m} \prod_{j = 1}^{n} e^{-\frac{1}{2}\frac{|f_j(x) - f_j(x_i)|^2}{h / w_j}} =
+    \frac{1}{m V(h)} \frac{1}{(2 \pi)^{\frac{n - 1}{2}}} \cdot \sum_{i = 1}^{m} \prod_{j = 1}^{n} K\left(\frac{f_j(x) - f_j(x_i)}{\sqrt{h / w_j}}\right)
+\end{align*}
+
+Положим $ h_j = \sqrt{h / w_j} $. Тогда:
+\begin{align*}
+    \frac{1}{m V(h)} \frac{1}{(2 \pi)^{\frac{n - 1}{2}}} \cdot \sum_{i = 1}^{m} \prod_{j = 1}^{n} K\left(\frac{f_j(x) - f_j(x_i)}{h_j}\right) = \\ =
+    \frac{1}{m V(h)} \frac{\prod_{j = 1}^{n} h_j}{(2 \pi)^{\frac{n - 1}{2}}} \cdot \sum_{i = 1}^{m} \prod_{j = 1}^{n} \frac{1}{h_j} K\left(\frac{f_j(x) - f_j(x_i)}{h_j}\right)
+\end{align*}
+
+Если взять интеграл $ V(h) $, то мы получим $ \frac{(2 \pi)^{\frac{n - 1}{2}}}{\prod_{j=1}^{n} h_j} $. В итоге подставим и получим:
+$$
+    \frac{1}{m}\sum_{i = 1}^{m} \prod_{j = 1}^{n} \frac{1}{h_j} K\left(\frac{f_j(x) - f_j(x_i)}{h_j}\right)
+$$
+
+\subsubsection*{Показано,~ что формулы эквивалентны, если, к примеру, выбрать гауссовское ядро и взвешенную евклидову метрику.}
+
+\subsection*{Задача 3}
+Пусть $ X = \mathbb{R}^2 $, $ Y = \{0, 1\} $, $ \ln\lambda_i P_i = C_i $, функции
+распределения гауссовские $ \mu_0 = \left( \begin{array}{c} a \\ b \end{array} \right) $,
+$ \mu_1 = \left( \begin{array}{c} -a \\ -b \end{array} \right) $, с ковариационными
+матрицами $ \Sigma = \left( \begin{array}{cc} 1 & 0 \\ 0 & S \end{array} \right) $.
+Выписать байесовский алгоритм классификации и уравнение разделяющей поверхности.
+
+\subsubsection*{План решения}
+По формуле байесовского классификатора выписать алгоритм, далее прировнять
+выражения под $ \operatorname{arg\,max} $ друг к другу и вывести уравнение разделяющей поверхности.
+
+\subsubsection*{Решение}
+Для начала выпишем алгоритм классификации:
+\begin{align*}
+    a(x) = \operatorname*{arg\,max}_{i \in \{0, 1\}} C_i - \frac{1}{2} (x - \mu_i)^T\Sigma^{-1}(x - \mu_i)
+\end{align*}
+
+Приравняем друг к другу выражения под $ \operatorname{arg\,max} $ для классов $ 0 $ и $ 1 $:
+\begin{align*}
+    C_0 - \frac{1}{2} (x - \mu_0)^T\Sigma^{-1}(x - \mu_0) =
+    C_1 - \frac{1}{2} (x - \mu_1)^T\Sigma^{-1}(x - \mu_1) \Rightarrow \\ \Rightarrow
+    C_0 - \frac{1}{2} \left((x_1 - a)^2 + (x_2 - b)^2 / S \right) = C_1 - \frac{1}{2} \left((x_1 + a)^2 + (x_2 + b)^2 / S \right) \Rightarrow \\ \Rightarrow
+    C_0 + 2 a x_1 + 2 b x_2 / S = C_1 \Rightarrow
+    x_1 = \frac{C_1 - C_0}{2a} - \frac{b}{S a} x_2
+\end{align*}
+
+Уравнение разделяющей поверхности:
+$$
+    x_1 = -\frac{b}{S a} x_2 + \frac{C_1 - C_0}{2a}
+$$
+
+\subsection*{Задача 6}
+Дана смесь двух одномерных гауссовских распределений:
+$$
+    p(x) = w_1 N(x,\mu_1, \sigma_1^2) + w_2 N(x,\mu_1, \sigma_1^2)
+$$
+
+Объекты обучающей выборки расположены в точках 1, 5, 6, 7. Ниже приведены
+три графика. Из них один соответствует инициализации параметров компонент смеси
+перед началом работы EM-алгоритма, другой -- значениям параметров после одной
+итерации ЕМ-алгоритма, а третий график лишний. Указать, какие из рисунков a),
+b), c) соответствуют начальному приближению и первой итерации.
+\begin{center}
+    \fbox{\includegraphics[width=400px]{mixtures.png}}
+\end{center}
+
+Сплошной линией изображена первая компонента смеси, пунктирной -- вторая.
+
+\subsubsection*{Решение}
+\begin{itemize}
+\item a) Инициализация параметров компонент смеси перед началом работы ЕM-aлгоритма.
+\item b) Лишний график.
+\item c) Значения параметров после одной итерации EM-алгоритма.
+\end{itemize}
+
+Как видно из графика a). На E-шаге для точки 1 определится небольшая вероятность
+принадлежать второй компоненте, и нулевая вероятность принадлежать первой
+компоненте. В таком случае, на M-шаге, первая компонента сместится к
+"своим" точкам, чтобы максимизировать произведение плотностей у них, а вторая
+компонента, которая охватывает все точки на графике, "расползется"
+с целью максимизировать произведение плотностей во всех точках.
+
+\end{document}

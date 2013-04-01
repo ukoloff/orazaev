@@ -6,7 +6,6 @@ source('common.R')
 #names(digitsData) = c("f1", "f2", "f3", "f4", "y")
 load('digits_train_data.RData')
 
-#TRAIN_PERCENT = 0.001
 TRAIN_PERCENT = 1
 
 source('em.R')

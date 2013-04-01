@@ -25,7 +25,7 @@ data = GenerateData(1000, Mu, Var)
 plot(data[, c("X1", "X2")], col=data$component)
 
 separationSurface = function(x) {
-    return ((s / b) * (log(C[2] / C[1]) / 4 - a * x))
+    return ((s / b) * (log(C[2] / C[1]) / 2 - a * x))
 }
 
 lines(c(-1000, 1000), separationSurface(c(-1000, 1000)))
