@@ -5,7 +5,12 @@ obj_list := $(notdir $(src:.cpp=.o))
 
 obj_dir := obj
 
-CC := ccache g++-4.6 -std=c++0x
+CCACHE := $(shell if which ccache >/dev/null 2>&1; then echo "ccache"; fi)
+GXX := $(shell  if which g++-4.7 >/dev/null 2>&1; then echo "g++-4.7 -std=c++0x"; else \
+		if which g++-4.6 >/dev/null 2>&1; then echo "g++-4.6 -std=c++0x"; else \
+		echo "g++"; fi; fi)
+
+CC := $(CCACHE) $(GXX)
 CCFLAGS := -fopenmp -Wall
 CCFLAGS += -I./src
 
