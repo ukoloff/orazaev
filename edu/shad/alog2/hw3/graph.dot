@@ -1,0 +1,22 @@
+digraph G  {
+    graph [fontname="Helvetica", rankdir="LR"];
+    node [fontname = "Helvetica", shape=circle, width=0.1, label="", fixedsize=true];
+    edge [fontname = "Helvetica", arrowsize=0.6, K=10, rotate=90];
+
+    /*
+    subgraph {
+        root1 [color=red];
+        root1 -> alphabetta [label = "&#945;&#946;"];
+        root1 -> other1 [label = "..." ];
+    }
+    */
+
+    subgraph {
+        root [color=red];
+        alpha [label="v", width=0.2];
+        root -> alpha [label = "&#945;"];
+        alpha -> betta [label = "&#946;" ];
+        alpha -> X [label = "x"];
+        root -> other [label = "..." ];
+    }
+}
