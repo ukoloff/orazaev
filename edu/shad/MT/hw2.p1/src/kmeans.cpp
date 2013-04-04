@@ -69,12 +69,14 @@ vector<size_t> KMeans(const Points& data, size_t K) {
     while (!converged) {
         vector<size_t> clusters_sizes(K);
         converged = true;
+        #pragma omp parallel for
         for (size_t i = 0; i < data_size; ++i) {
             size_t nearest_cluster = FindNearestCentroid(centroids, data[i]);
             if (clusters[i] != nearest_cluster) {
                 clusters[i] = nearest_cluster;
                 converged = false;
             }
+            #pragma omp atomic
             ++clusters_sizes[clusters[i]];
         }
         if (converged) {
@@ -82,13 +84,17 @@ vector<size_t> KMeans(const Points& data, size_t K) {
         }
 
         centroids.assign(K, Point(dimensions));
+        #pragma omp parallel for
         for (size_t di = 0; di < data_size * dimensions; ++di) {
             size_t i = di / dimensions;
             size_t d = di % dimensions;
+            #pragma omp atomic
             centroids[clusters[i]][d] += data[i][d];
         }
 
+        #pragma omp parallel
         {
+            #pragma omp for nowait
             for (size_t di = 0; di < K * dimensions; ++di) {
                 size_t i = di / dimensions;
 
@@ -98,6 +104,7 @@ vector<size_t> KMeans(const Points& data, size_t K) {
                 }
             }
 
+            #pragma omp for ordered
             for (size_t i = 0; i < K ; ++i) {
                 if (clusters_sizes[i] == 0) {
                     centroids[i] = GetRandomPosition(centroids);
