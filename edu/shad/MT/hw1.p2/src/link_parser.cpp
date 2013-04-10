@@ -123,7 +123,7 @@ std::string TUrlProcess::NormalizeUrl(const std::string& url) {
     result = boost::regex_replace(result, checkIsHashTag, "");
     result = boost::regex_replace(result, checkIsSeveralSlashes, "/");
 
-    result = boost::regex_replace(result, checkIsJsQuery, "");
+    //result = boost::regex_replace(result, checkIsJsQuery, "");
 
     result = boost::regex_replace(result, checkIsSlashEnded, "");
 
