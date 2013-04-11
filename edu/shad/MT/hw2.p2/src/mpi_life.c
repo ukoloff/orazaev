@@ -36,6 +36,20 @@ void inspect_args(int argc, char** argv) {
     }
 }
 
+void read_file(char const * const file_name, char* const data, int N) {
+    FILE* input = fopen(file_name, "rb");
+    if (input == 0) {
+        fprintf(stderr, "ERROR: can't open file '%s' with mode 'rb'.\n", file_name);
+        exit(1);
+    }
+
+    for (int i = 0; i < N; ++i) {
+        fscanf(input, "%s", data + i * N);
+    }
+
+    fclose(input);
+}
+
 int main(int argc, char** argv) {
     inspect_args(argc, argv);
 
@@ -62,16 +76,7 @@ int main(int argc, char** argv) {
     char* result = (char*) malloc(dim[0] * dim[1] * sizeof(char));
 
     if (cur_process == root_process) {
-        FILE* input = fopen(argv[2], "r");
-        if (input == 0) {
-            fprintf(stderr, "ERROR: can't open file '%s'\n", argv[2]);
-            exit(1);
-        }
-        for (int i = 0; i < dim[1]; ++i) {
-            fscanf(input, "%s", data + i * dim[1]);
-        }
-
-        fclose(input);
+        read_file(argv[2], data, dim[1]);
     }
 
     char* work_data = data + N;
