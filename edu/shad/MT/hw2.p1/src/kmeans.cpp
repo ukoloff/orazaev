@@ -41,17 +41,16 @@ size_t FindNearestCentroid(const Points& centroids, const Point& point) {
 }
 
 // Calculates new centroid position as mean of positions of 3 random centroids
-Point GetRandomPosition(const Points& centroids) {
+void GetRandomPosition(const Points& centroids, Point * const new_position) {
     size_t K = centroids.size();
     int c1 = rand() % K;
     int c2 = rand() % K;
     int c3 = rand() % K;
     size_t dimensions = centroids[0].size();
-    Point new_position(dimensions);
+    //Point new_position(dimensions);
     for (size_t d = 0; d < dimensions; ++d) {
-        new_position[d] = (centroids[c1][d] + centroids[c2][d] + centroids[c3][d]) / 3;
+        (*new_position)[d] = (centroids[c1][d] + centroids[c2][d] + centroids[c3][d]) / 3;
     }
-    return new_position;
 }
 
 vector<size_t> KMeans(const Points& data, size_t K) {
@@ -104,10 +103,10 @@ vector<size_t> KMeans(const Points& data, size_t K) {
                 }
             }
 
-            #pragma omp for ordered
+            #pragma omp parallel
             for (size_t i = 0; i < K ; ++i) {
                 if (clusters_sizes[i] == 0) {
-                    centroids[i] = GetRandomPosition(centroids);
+                    GetRandomPosition(centroids, &centroids[i]);
                 }
             }
         }

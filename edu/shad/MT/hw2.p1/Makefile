@@ -11,7 +11,7 @@ GXX := $(shell  if which g++-4.7 >/dev/null 2>&1; then echo "g++-4.7 -std=c++0x"
 		echo "g++"; fi; fi)
 
 CC := $(CCACHE) $(GXX)
-CCFLAGS := -fopenmp -Wall
+CCFLAGS := -fopenmp -Wall -g
 CCFLAGS += -I./src
 
 outfile = a.out
