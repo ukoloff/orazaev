@@ -20,6 +20,8 @@ function Compiling() {
 }
 
 function GenerateRandomData() {
+    mkdir -p ./data
+
     DATA_DIM=$((RANDOM % 50 + 1))
     ITER_NUMBER=$((RANDOM % 50 + 1))
     echo "Generating random grid with N = $DATA_DIM."
@@ -37,9 +39,8 @@ function CalcCanonicResult() {
 
 function Cleanup() {
     echo "Cleanup."
-    rm ./bin/*
-    rmdir bin
-    # rm ./data/*
+    rm -rf ./bin
+    rm -rf ./data
 }
 
 
