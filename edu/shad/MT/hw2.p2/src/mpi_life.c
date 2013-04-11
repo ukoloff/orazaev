@@ -51,12 +51,12 @@ int main(int argc, char** argv) {
 
     int nrow = N + (num_processes - N % num_processes) *
           (N % num_processes != 0 ? 1 : 0);
-    int ncol = N;
 
-    char* data = (char*) malloc((nrow + 2) * ncol * sizeof(char));
-    char* buff = (char*) malloc(ncol * 4 * sizeof(char));
+    char* data = (char*) malloc((nrow + 2) * N * sizeof(char));
+    char* buff = (char*) malloc(N * 4 * sizeof(char));
+
     dim[0] = nrow / num_processes; /* nrow on one processor */
-    dim[1] = ncol; /* ncol on one processor */
+    dim[1] = N; /* ncol on one processor */
     char* result = (char*) malloc(dim[0] * dim[1] * sizeof(char));
 
     if (cur_process == root_process) {
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     }
 
     char* work_data = data + N;
-    int count = nrow * ncol / num_processes;
+    int count = dim[0] * dim[1];
     MPI_Scatter(data, count, MPI_CHAR,
                 result, count, MPI_CHAR,
                 root_process, MPI_COMM_WORLD);
