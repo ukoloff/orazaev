@@ -37,7 +37,6 @@ int main(int argc, char** argv) {
     int cur_process;
     int root_process = 0;
     int dim[2];
-    int i, j;
 
     if (argc < 5) {
         fprintf(stderr, "Usage: %s [N] [input file] [number of iterations] [output file]\n", argv[0]);
@@ -66,7 +65,7 @@ int main(int argc, char** argv) {
             fprintf(stderr, "ERROR: can't open file '%s'\n", argv[2]);
             exit(1);
         }
-        for (i = 0; i < dim[1]; ++i) {
+        for (int i = 0; i < dim[1]; ++i) {
             fscanf(input, "%s", data + i * dim[1]);
         }
 
@@ -114,16 +113,13 @@ int main(int argc, char** argv) {
                   MPI_COMM_WORLD, &req[1]);
 
         memset(result, '.', dim[0] * dim[1]);
-        for (i = 1; i < (cur_bottom_row - cur_top_row); ++i) {
-            //fprintf(stderr, "[%d] %d %c%c\n", cur_process, i,
-            //        *(work_data + i * dim[1]),
-            //        *(work_data + i * dim[1] + 1));
+        for (int i = 1; i < (cur_bottom_row - cur_top_row); ++i) {
             process_row(work_data + i * dim[1], result + i * dim[1], dim[1]);
         }
 
         int complete;
         MPI_Waitany(2, req, &complete, MPI_STATUS_IGNORE);
-        for (i = 0; i < 2; ++i) {
+        for (int i = 0; i < 2; ++i) {
             if (i == 1) {
                 MPI_Wait(&req[complete], MPI_STATUS_IGNORE);
             }
@@ -147,13 +143,6 @@ int main(int argc, char** argv) {
         MPI_Waitall(2, req + 2, MPI_STATUS_IGNORE);
 
         memcpy(work_data, result, dim[0] * dim[1]);
-
-        //for (i = 0; i <= (cur_bottom_row - cur_top_row); ++i) {
-        //    printf("[%d] ", cur_process);
-        //    for (j = 0; j < dim[1]; ++j)
-        //        printf("%c", *(result + i * dim[1] + j));
-        //    printf("\n");
-        //}
     }
 
 
@@ -167,8 +156,8 @@ int main(int argc, char** argv) {
             fprintf(stderr, "ERROR: can't open file '%s' with mode 'wb'\n", argv[4]);
             exit(1);
         }
-        for (i = 0; i < N; ++i) {
-        for (j = 0; j < N; ++j) {
+        for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
             fprintf(output, "%c", data[i * N + j]);
         }
             fprintf(output, "\n");
