@@ -50,6 +50,23 @@ void read_file(char const * const file_name, char* const data, int N) {
     fclose(input);
 }
 
+void write_to_file(char const * const file_name, char* const data, int N) {
+    FILE* output = fopen(file_name, "wb");
+    if (output == 0) {
+        fprintf(stderr, "ERROR: can't open file '%s' with mode 'wb'\n", file_name);
+        exit(1);
+    }
+
+    for (int i = 0; i < N; ++i) {
+        for (int j = 0; j < N; ++j) {
+            fprintf(output, "%c", data[i * N + j]);
+        }
+        fprintf(output, "\n");
+    }
+
+    fclose(output);
+}
+
 int main(int argc, char** argv) {
     inspect_args(argc, argv);
 
@@ -158,18 +175,7 @@ int main(int argc, char** argv) {
                root_process, MPI_COMM_WORLD);
 
     if (cur_process == root_process) {
-        FILE* output = fopen(argv[4], "wb");
-        if (output == 0) {
-            fprintf(stderr, "ERROR: can't open file '%s' with mode 'wb'\n", argv[4]);
-            exit(1);
-        }
-        for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            fprintf(output, "%c", data[i * N + j]);
-        }
-            fprintf(output, "\n");
-        }
-        fclose(output);
+        write_to_file(argv[4], data, N);
     }
 
     free(result);
