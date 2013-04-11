@@ -79,11 +79,11 @@ int main(int argc, char** argv) {
         read_file(argv[2], data, dim[1]);
     }
 
-    char* work_data = data + N;
-    int count = dim[0] * dim[1];
-    MPI_Scatter(data, count, MPI_CHAR,
-                result, count, MPI_CHAR,
+    MPI_Scatter(data, dim[0] * dim[1], MPI_CHAR,
+                result, dim[0] * dim[1], MPI_CHAR,
                 root_process, MPI_COMM_WORLD);
+
+    char* work_data = data + N;
     memcpy(work_data, result, dim[1] * dim[0]);
 
     MPI_Request req[4];
@@ -153,8 +153,8 @@ int main(int argc, char** argv) {
     }
 
 
-    MPI_Gather(result, count, MPI_CHAR,
-               data, count, MPI_CHAR,
+    MPI_Gather(result, dim[0] * dim[1], MPI_CHAR,
+               data, dim[0] * dim[1], MPI_CHAR,
                root_process, MPI_COMM_WORLD);
 
     if (cur_process == root_process) {
