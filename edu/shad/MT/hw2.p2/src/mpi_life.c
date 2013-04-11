@@ -29,21 +29,23 @@ void process_row(char const * const cur_grid, char * const result, int N) {
     }
 }
 
-
-int main(int argc, char** argv) {
-    int N;
-    int num_iters;
-    int num_processes;
-    int cur_process;
-    int root_process = 0;
-    int dim[2];
-
+void inspect_args(int argc, char** argv) {
     if (argc < 5) {
         fprintf(stderr, "Usage: %s [N] [input file] [number of iterations] [output file]\n", argv[0]);
         exit(1);
     }
-    N = atoi(argv[1]);
-    num_iters = atoi(argv[3]);
+}
+
+int main(int argc, char** argv) {
+    inspect_args(argc, argv);
+
+    int N = atoi(argv[1]);
+    int num_iters = atoi(argv[3]);
+
+    int num_processes;
+    int cur_process;
+    int root_process = 0;
+    int dim[2];
 
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &cur_process);
