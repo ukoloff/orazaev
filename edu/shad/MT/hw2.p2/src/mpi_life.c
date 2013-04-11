@@ -69,7 +69,6 @@ int main(int argc, char** argv) {
         for (i = 0; i < dim[1]; ++i) {
             fscanf(input, "%s", data + i * dim[1]);
         }
-        fprintf(stderr, "ERROR: can't open file '%s'\n", argv[2]);
 
         fclose(input);
     }
@@ -116,9 +115,9 @@ int main(int argc, char** argv) {
 
         memset(result, '.', dim[0] * dim[1]);
         for (i = 1; i < (cur_bottom_row - cur_top_row); ++i) {
-            fprintf(stderr, "[%d] %d %c%c\n", cur_process, i,
-                    *(work_data + i * dim[1]),
-                    *(work_data + i * dim[1] + 1));
+            //fprintf(stderr, "[%d] %d %c%c\n", cur_process, i,
+            //        *(work_data + i * dim[1]),
+            //        *(work_data + i * dim[1] + 1));
             process_row(work_data + i * dim[1], result + i * dim[1], dim[1]);
         }
 
