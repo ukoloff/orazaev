@@ -157,8 +157,8 @@ function Timing() {
         I=$((I - 1))
     done
 
-    for nnodes in 1 2 3; do
-    for nproc in 2 3; do
+    for nnodes in 1 2 3 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19; do
+    for nproc in 1 2 3 4 5 6 7 8 9 10 11 12; do
         I=$repeats
         while [ $I -gt 0 ]; do
             CalcMpiLife $nnodes $nproc
