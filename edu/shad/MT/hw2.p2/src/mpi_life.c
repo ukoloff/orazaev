@@ -73,21 +73,25 @@ void process_data(char * work_data,
         int num_iters,
         int cur_process)
 {
-    char* buff = (char*) malloc(dim[1] * 4 * sizeof(char));
-    MPI_Request req[4];
-    for (int iter = 0; iter < num_iters; ++iter) {
-        int cur_top_row = cur_process * dim[0];
-        int cur_bottom_row = cur_top_row + dim[0] - 1;
-        int neighbour_from_top, neighbour_from_bottom;
-        if (cur_bottom_row >= dim[1]) {
-            cur_bottom_row = dim[1] - 1;
-        }
-
-        neighbour_from_bottom = ((cur_bottom_row + 1) % dim[1]) / dim[0];
-        neighbour_from_top = cur_top_row - 1 < 0 ?
+    /* Calc current process parameters */
+    int cur_top_row = cur_process * dim[0];
+    int cur_bottom_row = cur_top_row + dim[0] - 1;
+    if (cur_bottom_row >= dim[1]) {
+        cur_bottom_row = dim[1] - 1;
+    }
+    int neighbour_from_bottom = ((cur_bottom_row + 1) % dim[1]) / dim[0];
+    int neighbour_from_top = cur_top_row - 1 < 0 ?
                              dim[1] / dim[0] + (dim[1] % dim[0] != 0 ? 0 : -1) :
                              (cur_top_row - 1) / dim[0];
 
+
+    /* Initialize current process resources */
+    char* buff = (char*) malloc(dim[1] * 4 * sizeof(char));
+    MPI_Request req[4];
+    memset(result, '.', dim[0] * dim[1]);
+
+    /* Iterations cycle */
+    for (int iter = 0; iter < num_iters; ++iter) {
         if (cur_top_row >= dim[1]) {
             break;
         }
@@ -107,11 +111,12 @@ void process_data(char * work_data,
                   dim[1], MPI_CHAR, neighbour_from_bottom, 0,
                   MPI_COMM_WORLD, &req[1]);
 
-        memset(result, '.', dim[0] * dim[1]);
+        /* Process inner rows */
         for (int i = 1; i < (cur_bottom_row - cur_top_row); ++i) {
             process_row(work_data + i * dim[1], result + i * dim[1], dim[1]);
         }
 
+        /* Process top and bottom rows when received neighbours rows */
         int complete;
         MPI_Waitany(2, req, &complete, MPI_STATUS_IGNORE);
         for (int i = 0; i < 2; ++i) {
@@ -143,7 +148,7 @@ void process_data(char * work_data,
     free(buff);
 }
 
-int main(int argc, char** argv) {
+void mpi_life(int argc, char** argv) {
     inspect_args(argc, argv);
 
     int N = atoi(argv[1]);
@@ -174,10 +179,9 @@ int main(int argc, char** argv) {
     MPI_Scatter(data, dim[0] * dim[1], MPI_CHAR,
                 result, dim[0] * dim[1], MPI_CHAR,
                 root_process, MPI_COMM_WORLD);
-    char* work_data = data + N;
-    memcpy(work_data, result, dim[1] * dim[0]);
+    memcpy(data + N, result, dim[1] * dim[0]);
 
-    process_data(work_data, result, dim, num_iters, cur_process);
+    process_data(data + N, result, dim, num_iters, cur_process);
 
     MPI_Gather(result, dim[0] * dim[1], MPI_CHAR,
                data, dim[0] * dim[1], MPI_CHAR,
@@ -190,5 +194,9 @@ int main(int argc, char** argv) {
     free(result);
     free(data);
     MPI_Finalize();
+}
+
+int main(int argc, char** argv) {
+    mpi_life(argc, argv);
     return 0;
 }
