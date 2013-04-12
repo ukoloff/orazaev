@@ -67,57 +67,28 @@ void write_to_file(char const * const file_name, char* const data, int N) {
     fclose(output);
 }
 
-int main(int argc, char** argv) {
-    inspect_args(argc, argv);
-
-    int N = atoi(argv[1]);
-    int num_iters = atoi(argv[3]);
-
-    int num_processes;
-    int cur_process;
-    int root_process = 0;
-    int dim[2];
-
-    MPI_Init(&argc, &argv);
-    MPI_Comm_rank(MPI_COMM_WORLD, &cur_process);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
-
-    int nrow = N + (num_processes - N % num_processes) *
-          (N % num_processes != 0 ? 1 : 0);
-
-    char* data = (char*) malloc((nrow + 2) * N * sizeof(char));
-    char* buff = (char*) malloc(N * 4 * sizeof(char));
-
-    dim[0] = nrow / num_processes; /* nrow on one processor */
-    dim[1] = N; /* ncol on one processor */
-    char* result = (char*) malloc(dim[0] * dim[1] * sizeof(char));
-
-    if (cur_process == root_process) {
-        read_file(argv[2], data, dim[1]);
-    }
-
-    MPI_Scatter(data, dim[0] * dim[1], MPI_CHAR,
-                result, dim[0] * dim[1], MPI_CHAR,
-                root_process, MPI_COMM_WORLD);
-
-    char* work_data = data + N;
-    memcpy(work_data, result, dim[1] * dim[0]);
-
+void process_data(char * work_data,
+        char * result,
+        int * dim,
+        int num_iters,
+        int cur_process)
+{
+    char* buff = (char*) malloc(dim[1] * 4 * sizeof(char));
     MPI_Request req[4];
     for (int iter = 0; iter < num_iters; ++iter) {
         int cur_top_row = cur_process * dim[0];
         int cur_bottom_row = cur_top_row + dim[0] - 1;
         int neighbour_from_top, neighbour_from_bottom;
-        if (cur_bottom_row >= N) {
-            cur_bottom_row = N - 1;
+        if (cur_bottom_row >= dim[1]) {
+            cur_bottom_row = dim[1] - 1;
         }
 
-        neighbour_from_bottom = ((cur_bottom_row + 1) % N) / dim[0];
+        neighbour_from_bottom = ((cur_bottom_row + 1) % dim[1]) / dim[0];
         neighbour_from_top = cur_top_row - 1 < 0 ?
-                             N / dim[0] + (N % dim[0] != 0 ? 0 : -1) :
+                             dim[1] / dim[0] + (dim[1] % dim[0] != 0 ? 0 : -1) :
                              (cur_top_row - 1) / dim[0];
 
-        if (cur_top_row >= N) {
+        if (cur_top_row >= dim[1]) {
             break;
         }
 
@@ -169,6 +140,44 @@ int main(int argc, char** argv) {
         memcpy(work_data, result, dim[0] * dim[1]);
     }
 
+    free(buff);
+}
+
+int main(int argc, char** argv) {
+    inspect_args(argc, argv);
+
+    int N = atoi(argv[1]);
+    int num_iters = atoi(argv[3]);
+
+    int num_processes;
+    int cur_process;
+    int root_process = 0;
+    int dim[2];
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &cur_process);
+    MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+
+    int nrow = N + (num_processes - N % num_processes) *
+          (N % num_processes != 0 ? 1 : 0);
+
+    char* data = (char*) malloc((nrow + 2) * N * sizeof(char));
+
+    dim[0] = nrow / num_processes; /* nrow on one processor */
+    dim[1] = N; /* ncol on one processor */
+    char* result = (char*) malloc(dim[0] * dim[1] * sizeof(char));
+
+    if (cur_process == root_process) {
+        read_file(argv[2], data, dim[1]);
+    }
+
+    MPI_Scatter(data, dim[0] * dim[1], MPI_CHAR,
+                result, dim[0] * dim[1], MPI_CHAR,
+                root_process, MPI_COMM_WORLD);
+    char* work_data = data + N;
+    memcpy(work_data, result, dim[1] * dim[0]);
+
+    process_data(work_data, result, dim, num_iters, cur_process);
 
     MPI_Gather(result, dim[0] * dim[1], MPI_CHAR,
                data, dim[0] * dim[1], MPI_CHAR,
@@ -179,7 +188,6 @@ int main(int argc, char** argv) {
     }
 
     free(result);
-    free(buff);
     free(data);
     MPI_Finalize();
     return 0;
