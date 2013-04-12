@@ -10,6 +10,14 @@ CUR_RESULT="$PWD/data/result.grid"
 DATA_DIM=""
 ITER_NUMBER=""
 
+function GetTime() {
+    python -c "import time; print time.time();"
+}
+
+function DiffTime() {
+    python -c "print $1 - $2"
+}
+
 function Compiling() {
     echo "Compiling."
     mkdir -p bin
@@ -32,6 +40,19 @@ function GenerateRandomData() {
     echo "$ITER_NUMBER" > ./data/iterations.var
 }
 
+function GenerateBigRandomData() {
+    mkdir -p ./data
+
+    DATA_DIM=2000
+    ITER_NUMBER=$((RANDOM % 50 + 1))
+    echo "Generating random grid with N = $DATA_DIM."
+
+    $DATA_GEN $DATA_DIM $INPUT_FILE
+
+    echo "$DATA_DIM" > ./data/dim.var
+    echo "$ITER_NUMBER" > ./data/iterations.var
+}
+
 function CalcCanonicResult() {
     echo "Calculating canonic grid using $LIFE2, iterations = $ITER_NUMBER."
     $LIFE2 $DATA_DIM $INPUT_FILE $ITER_NUMBER $CANONIC_RESULT
@@ -45,13 +66,19 @@ function Cleanup() {
 
 
 function CalcMpiLife() {
+    local NODES=2
+    local PPN=2
+    if [ $# -gt 0 ]; then
+        NODES=$1
+        PPN=$2
+    fi
     echo "Starting mpi calculation."
     local try=0
 
     while [ $try -lt 3 ]; do
         local ok="TRUE"
 
-        local ID=`qsub -l nodes=2:ppn=2 ./start_mpi_life.sh`
+        local ID=`qsub -l nodes=$NODES:ppn=$PPN ./start_mpi_life.sh`
         number=`echo $ID | sed 's/\..*//g'`
         local err=start_mpi_life.sh.e$number
         local out=start_mpi_life.sh.o$number
@@ -75,8 +102,11 @@ function CalcMpiLife() {
 
         if diff $CANONIC_RESULT $CUR_RESULT > /dev/null; then
             echo "Result: [PASS]"
+            local TIMING=`cat $out`
+            printf "csv_data: $NODES,$PPN,$TIMING\n"
         else
             echo "Result: [CKSUM]"
+            printf "csv_data: $NODES,$PPN,NA\n"
         fi
 
         rm -f $err
@@ -104,6 +134,37 @@ function Test() {
         CalcMpiLife
 
         repeats=$((repeats - 1))
+    done
+}
+
+function Timing() {
+    local repeats=1
+    if [ $# -gt 0 ]; then
+        repeats=$1
+    fi
+
+    Compiling
+    GenerateBigRandomData
+    printf "csv_data: NumNodes,NumProcessors,Time\n"
+
+    local I=$repeats
+    while [ $I -gt 0 ]; do
+        local startTime=`GetTime`
+        CalcCanonicResult > /dev/null
+        local endTime=`GetTime`
+        printf "csv_data: 1,1,`DiffTime $endTime $startTime`\n"
+
+        I=$((I - 1))
+    done
+
+    for nnodes in 1 2 3; do
+    for nproc in 2 3; do
+        I=$repeats
+        while [ $I -gt 0 ]; do
+            CalcMpiLife $nnodes $nproc
+            I=$((I -1))
+        done
+    done
     done
 }
 

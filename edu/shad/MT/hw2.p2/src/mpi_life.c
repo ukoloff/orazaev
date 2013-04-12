@@ -104,8 +104,8 @@ void process_data(char * work_data,
         MPI_Isend(buff + 2 * dim[1], dim[1], MPI_CHAR, neighbour_from_top,
                   0, MPI_COMM_WORLD, &req[2]);
         MPI_Isend(buff + 3 * dim[1], dim[1], MPI_CHAR,
-                  neighbour_from_bottom, 0, MPI_COMM_WORLD, &req[3]);
-        MPI_Irecv(buff, dim[1], MPI_CHAR, neighbour_from_top, 0,
+                  neighbour_from_bottom, 1, MPI_COMM_WORLD, &req[3]);
+        MPI_Irecv(buff, dim[1], MPI_CHAR, neighbour_from_top, 1,
                   MPI_COMM_WORLD, &req[0]);
         MPI_Irecv(buff + dim[1],
                   dim[1], MPI_CHAR, neighbour_from_bottom, 0,
@@ -162,6 +162,7 @@ void mpi_life(int argc, char** argv) {
     MPI_Init(&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &cur_process);
     MPI_Comm_size(MPI_COMM_WORLD, &num_processes);
+    double start_time = MPI_Wtime();
 
     int nrow = N + (num_processes - N % num_processes) *
           (N % num_processes != 0 ? 1 : 0);
@@ -193,6 +194,10 @@ void mpi_life(int argc, char** argv) {
 
     free(result);
     free(data);
+
+    if (cur_process == root_process) {
+        fprintf(stdout, "%f", MPI_Wtime() - start_time);
+    }
     MPI_Finalize();
 }
 
