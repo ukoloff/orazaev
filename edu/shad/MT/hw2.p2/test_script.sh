@@ -43,7 +43,7 @@ function GenerateRandomData() {
 function GenerateBigRandomData() {
     mkdir -p ./data
 
-    DATA_DIM=2000
+    DATA_DIM=5000
     ITER_NUMBER=$((RANDOM % 50 + 1))
     echo "Generating random grid with N = $DATA_DIM."
 
