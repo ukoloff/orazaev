@@ -103,7 +103,7 @@ vector<size_t> KMeans(const Points& data, size_t K) {
                 }
             }
 
-            #pragma omp parallel
+            #pragma omp for
             for (size_t i = 0; i < K ; ++i) {
                 if (clusters_sizes[i] == 0) {
                     GetRandomPosition(centroids, &centroids[i]);
