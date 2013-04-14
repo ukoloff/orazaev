@@ -19,6 +19,18 @@ plot(threads[!is.na(time_mean)] , time_mean[!is.na(time_mean)], type='l', xlab='
 lines(threads[!is.na(time_mean)], time_min[!is.na(time_mean)], col='red')
 dev.off()
 
+png('acceleration.png')
+plot(threads[!is.na(time_mean)] , time_mean[1] / time_mean[!is.na(time_mean)], type='l', xlab='число потоков', ylab='ускорение', col='blue')
+lines(threads[!is.na(time_mean)], time_min[!is.na(time_mean)] ^ -1 * time_min[1], col='red')
+dev.off()
+
+cur_threads = threads[!is.na(time_mean)]
+cur_threads[1] = 1
+png('efficiency.png')
+plot(threads[!is.na(time_mean)] , time_mean[1] / (time_mean[!is.na(time_mean)] * cur_threads), type='l', xlab='число потоков', ylab='эффективность', col='blue')
+lines(threads[!is.na(time_mean)], time_min[!is.na(time_mean)] ^ -1 * time_min[1] / cur_threads, col='red')
+dev.off()
+
 cut_first = function(x, n=30) {
     return (x[n:length(x)])
 }
