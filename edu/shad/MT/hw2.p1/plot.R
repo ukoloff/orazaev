@@ -16,6 +16,17 @@ plot(threads, time_mean, type='l', xlab='число потоков', ylab='вр�
 lines(threads, time_min, col='red')
 dev.off()
 
+one_thread_time = time_min[1]
+png('acceleration.png')
+plot(threads, time_min ^ -1 * one_thread_time, type='l', xlab='число потоков', ylab='ускорение', col='red')
+lines(threads, time_mean ^ -1 * time_mean[1], type='l', col='blue')
+dev.off()
+
+png('efficiency.png')
+plot(threads, time_min ^ -1 * one_thread_time / 1:length(time_min), type='l', xlab='число потоков', ylab='эффективность', col='red', ylim=c(0,1.4))
+lines(threads, time_mean ^ -1 * time_mean[1] / 1:length(time_mean), type='l', col='blue')
+dev.off()
+
 
 cut_first = function(x, n=10) {
     return (x[n:length(x)])
