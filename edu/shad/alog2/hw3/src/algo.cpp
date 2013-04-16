@@ -36,26 +36,33 @@ public:
         return edgeLabelEnd - edgeLabelBegin;
     }
 
-    inline bool IsLeaf() const { return children.size() == 0; }
-
     inline void SetSuffixLink(const TNodePtr& link) { suffixLink = link; }
     inline void SetEdgeLabelEnd(size_t newEnd) { edgeLabelEnd = newEnd; }
     inline void SetEdgeLabelBegin(size_t newBegin) {
         edgeLabelBegin = newBegin;
     }
 
-    /**
-        @brief Get child node index in nodes vector.
-        @return child node index if has and TNode::NONE otherwise.
-    */
+    inline bool IsLeaf() const { return children.size() == 0; }
     TNodePtr GetChild(char edgeFirstChar) const;
-    static const size_t NONE = static_cast<size_t>(-1);
-
+    void AddChild(char edgeFirstChar, const TNodePtr& child);
     inline bool HasChild(char edgeFirstChar) const {
         return GetChild(edgeFirstChar) == 0;
     }
 
-    void AddChild(char edgeFirstChar, const TNodePtr& child);
+    char GetEdgeChar(const std::string& text,
+            char firstEdgeChar,
+            size_t position)
+    {
+        if (!HasChild(firstEdgeChar)) {
+            return 0;
+        }
+
+        return text[GetChild(firstEdgeChar)->GetEdgeLabelBegin() + position];
+    }
+
+
+public:
+    static const size_t NONE = static_cast<size_t>(-1);
 
 private:
     TNodePtr suffixLink;
@@ -127,64 +134,66 @@ std::vector<size_t> Calc(std::string&& text) {
     TSuffixTree suffixTree;
     TNodePtr root = suffixTree.GetRoot();
 
-    TNodePtr currentNode = root;
-    size_t currentLength = 0;
-    char currentSymbol = 0;
+    TNodePtr node = root;
+    size_t length = 0;
+    char character = 0;
 
     for (size_t i = 0; i < text.size(); ++i) {
         /* Add new child to current node */
-        if (currentLength == 0 && !currentNode->HasChild(text[i])) {
-            for (TNodePtr node = currentNode;
-                !node->HasChild(text[i]);
-                node = node->GetSuffixLink())
+        if (character == 0 && !node->HasChild(text[i])) {
+            for (TNodePtr n = node;
+                !n->HasChild(text[i]);
+                n = n->GetSuffixLink())
             {
-                node->AddChild(text[i], suffixTree.CreateLeaf(i, root));
+                n->AddChild(text[i], suffixTree.CreateLeaf(i, root));
             }
             continue;
         }
 
-        if (currentLength == 0 && currentNode->HasChild(text[i])) {
-            ++currentLength;
-            currentSymbol = text[i];
+        if (character == 0 && node->HasChild(text[i])) {
+            ++length;
+            character = text[i];
         }
 
-        TNodePtr currentEdge = currentNode->GetChild(currentSymbol);
+        TNodePtr child = node->GetChild(character);
 
-        /* Is edge was ended? Switch currentNodeIndex if true. */
-        if (!currentEdge->IsLeaf() &&
-            currentEdge->GetEdgeSize() >= currentLength)
+        /* Is edge was ended? Switch node to child if true. */
+        if (!child->IsLeaf() &&
+            child->GetEdgeSize() >= length)
         {
-            currentNode = currentNode->GetChild(text[i]);
-            currentLength = 0;
-            currentSymbol = 0;
+            node = child;
+            length = 0;
+            character = 0;
             i -= 1;
             continue;
         }
 
-        char nextEdgeSymbol =
-            text[currentEdge->GetEdgeLabelBegin() + currentLength];
+        char nextEdgeSymbol = node->GetEdgeChar(text,
+                character, length);
 
         /* Is nextEdgeSymbol equal to text[i]? Add node if false. */
         if (nextEdgeSymbol == text[i]) {
-            ++currentLength;
+            ++length;
             continue;
         }
 
-        /* assert(nextEdgeSymbol != text[i]) */
-        TNodePtr currentEdgeIndex = currentNode->GetChild(currentSymbol);
-        TNodePtr newNode =
-                suffixTree.CreateNode(currentEdge->GetEdgeLabelBegin(),
-                currentEdge->GetEdgeLabelBegin() + currentLength,
-                currentNode->GetDepth() + currentLength, root);
+        while (/* ! already have symbol */) {
+            /* Create new node on edge */
+            TNodePtr newNode =
+                    suffixTree.CreateNode(child->GetEdgeLabelBegin(),
+                    child->GetEdgeLabelBegin() + length,
+                    node->GetDepth() + length, root);
 
-        currentEdge->SetEdgeLabelBegin(newNode->GetEdgeLabelEnd());
-        newNode->AddChild(nextEdgeSymbol,
-                currentNode->GetChild(nextEdgeSymbol));
+            child->SetEdgeLabelBegin(newNode->GetEdgeLabelEnd());
+            newNode->AddChild(nextEdgeSymbol,
+                    node->GetChild(nextEdgeSymbol));
+            newNode->AddChild(text[i], suffixTree.CreateLeaf(i, root));
 
-        currentNode->AddChild(text[newNode->GetEdgeLabelBegin()],
-                newNode);
+            node->AddChild(text[newNode->GetEdgeLabelBegin()],
+                    newNode);
 
-        /* add leaf here, and suffix jump */
+        }
+
 
     }
 
