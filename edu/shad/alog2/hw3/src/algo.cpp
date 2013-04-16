@@ -1,7 +1,12 @@
+#include <cassert>
+
 #include <iostream>
 #include <vector>
-#include <cassert>
 #include <unordered_map>
+#include <memory>
+
+class TNode;
+typedef std::shared_ptr<TNode> TNodePtr;
 
 class TNode {
 public:
@@ -12,14 +17,18 @@ public:
         , depth(0)
     { }
 
-    TNode(size_t edgeLabelBegin, size_t edgeLabelEnd, size_t depth)
-        : suffixLink(0)
+    TNode(size_t edgeLabelBegin,
+        size_t edgeLabelEnd,
+        size_t depth,
+        const TNodePtr& suffixLink)
+        : suffixLink(suffixLink)
         , edgeLabelBegin(edgeLabelBegin)
         , edgeLabelEnd(edgeLabelEnd)
         , depth(depth)
     { }
 
-    inline size_t GetSuffixLink() const { return suffixLink; }
+public:
+    inline TNodePtr GetSuffixLink() const { return suffixLink; }
     inline size_t GetEdgeLabelBegin() const { return edgeLabelBegin; }
     inline size_t GetEdgeLabelEnd() const { return edgeLabelEnd; }
     inline size_t GetDepth() const { return depth; }
@@ -27,76 +36,85 @@ public:
         return edgeLabelEnd - edgeLabelBegin;
     }
 
-    inline bool IsLeaf() const { return GetDepth() == NONE; }
+    inline bool IsLeaf() const { return children.size() == 0; }
 
-    inline void SetSuffixLink(size_t link) { suffixLink = link; }
+    inline void SetSuffixLink(const TNodePtr& link) { suffixLink = link; }
     inline void SetEdgeLabelEnd(size_t newEnd) { edgeLabelEnd = newEnd; }
     inline void SetEdgeLabelBegin(size_t newBegin) {
-        edgeLabelBebin = newBegin;
+        edgeLabelBegin = newBegin;
     }
 
     /**
         @brief Get child node index in nodes vector.
         @return child node index if has and TNode::NONE otherwise.
     */
-    size_t GetChild(char edgeFirstChar) const;
+    TNodePtr GetChild(char edgeFirstChar) const;
     static const size_t NONE = static_cast<size_t>(-1);
 
     inline bool HasChild(char edgeFirstChar) const {
-        return GetChild(edgeFirstChar) != TNode::NONE;
+        return GetChild(edgeFirstChar) == 0;
     }
 
-    void AddChild(char edgeFirstChar, size_t childIndex);
+    void AddChild(char edgeFirstChar, const TNodePtr& child);
 
 private:
-    size_t suffixLink;
+    TNodePtr suffixLink;
     size_t edgeLabelBegin;
     size_t edgeLabelEnd;
     size_t depth;
-    std::unordered_map<char, size_t> children;
+    std::unordered_map<char, TNodePtr> children;
 };
 
-size_t TNode::GetChild(char edgeFirstChar) const {
+TNodePtr TNode::GetChild(char edgeFirstChar) const {
     auto iter = children.find(edgeFirstChar);
     if (iter == children.end()) {
-        return TNode::NONE;
+        return 0;
     }
 
     return iter->second;
 }
 
-void TNode::AddChild(char edgeFirstChar, size_t childIndex) {
-    children[edgeFirstChar] = childIndex;
+void TNode::AddChild(char edgeFirstChar, const TNodePtr& child) {
+    children[edgeFirstChar] = child;
 }
 
 
 
-class TTree {
+class TSuffixTree {
 public:
-    TTree() { }
-
-    TNode& operator[] (size_t index) { return nodes[index]; }
-    const TNode& operator[] (size_t index) const { return nodes[index]; }
-
-    size_t CreateNode() {
-        nodes.push_back(TNode());
-        return nodes.size() - 1;
-    }
-
-    size_t CreateNode(size_t edgeLabelBegin,
-            size_t edgeLabelEnd,
-            size_t depth)
+    TSuffixTree()
+        : root(CreateNode())
     {
-        nodes.push_back(TNode(edgeLabelBegin, edgeLabelEnd, depth));
-        return nodes.size() - 1;
+        root->SetSuffixLink(root);
     }
 
-    size_t CreateLeaf(size_t edgeLabelBegin) {
-        nodes.push_back(TNode(edgeLabelBegin, TNode::NONE, TNode::NONE));
-        return nodes.size() - 1;
+    TNodePtr GetRoot() {
+        return root;
     }
+
+public:
+    static TNodePtr CreateNode() {
+        return TNodePtr(new TNode());
+    }
+
+    static TNodePtr CreateNode(size_t edgeLabelBegin,
+            size_t edgeLabelEnd,
+            size_t depth,
+            const TNodePtr& suffixLink )
+    {
+        return TNodePtr(new TNode(edgeLabelBegin, edgeLabelEnd,
+                depth, suffixLink));
+    }
+
+    static TNodePtr CreateLeaf(size_t edgeLabelBegin,
+            const TNodePtr& suffixLink) {
+        return TNodePtr(new TNode(edgeLabelBegin, TNode::NONE,
+                TNode::NONE, suffixLink));
+    }
+
 private:
     std::vector<TNode> nodes;
+    TNodePtr root;
 };
 
 
@@ -106,39 +124,37 @@ std::vector<size_t> Calc(std::string&& text) {
     text += '$';
     std::vector<size_t> result(text.size(), 0);
 
-    TTree suffixTree;
-    size_t root = suffixTree.CreateNode();
+    TSuffixTree suffixTree;
+    TNodePtr root = suffixTree.GetRoot();
 
-    size_t currentNodeIndex = root;
+    TNodePtr currentNode = root;
     size_t currentLength = 0;
     char currentSymbol = 0;
 
-    for (int i = 0; i < text.size(); ++i) {
-        TNode& currentNode = suffixTree[currentNodeIndex];
-
+    for (size_t i = 0; i < text.size(); ++i) {
         /* Add new child to current node */
-        if (currentLength == 0 && !currentNode.HasChild(text[i])) {
-            for (TNode& node = currentNode;
-                !node.HasChild(text[i]);
-                node = suffixTree[node.GetSuffixLink()])
+        if (currentLength == 0 && !currentNode->HasChild(text[i])) {
+            for (TNodePtr node = currentNode;
+                !node->HasChild(text[i]);
+                node = node->GetSuffixLink())
             {
-                node.AddChild(text[i], suffixTree.CreateLeaf(i));
+                node->AddChild(text[i], suffixTree.CreateLeaf(i, root));
             }
             continue;
         }
 
-        if (currentLength == 0 && currentNode.HasChild(text[i])) {
+        if (currentLength == 0 && currentNode->HasChild(text[i])) {
             ++currentLength;
             currentSymbol = text[i];
         }
 
-        TNode& currentEdge = suffixTree[currentNode.GetChild(currentSymbol)]
+        TNodePtr currentEdge = currentNode->GetChild(currentSymbol);
 
         /* Is edge was ended? Switch currentNodeIndex if true. */
-        if (!IsLeaf(currentEdge) &&
-            currentEdge.GetEdgeSize() >= currentLength)
+        if (!currentEdge->IsLeaf() &&
+            currentEdge->GetEdgeSize() >= currentLength)
         {
-            currentNodeIndex = currentNode.GetChild(text[i]);
+            currentNode = currentNode->GetChild(text[i]);
             currentLength = 0;
             currentSymbol = 0;
             i -= 1;
@@ -146,7 +162,7 @@ std::vector<size_t> Calc(std::string&& text) {
         }
 
         char nextEdgeSymbol =
-            text[currentEdge.GetEdgeLabelBegin() + currentLength];
+            text[currentEdge->GetEdgeLabelBegin() + currentLength];
 
         /* Is nextEdgeSymbol equal to text[i]? Add node if false. */
         if (nextEdgeSymbol == text[i]) {
@@ -155,18 +171,18 @@ std::vector<size_t> Calc(std::string&& text) {
         }
 
         /* assert(nextEdgeSymbol != text[i]) */
-        size_t currentEdgeIndex = currentNode.GetChild(currentSymbol);
-        size_t newNodeIndex =
-                suffixTree.CreateNode(currentEdge.GetEdgeLabelBegin,
-                currentEdge.GetEdgeLabelBegin() + currentLength,
-                currentNode.GetDepth() + currentLength);
-        TNode& newNode = suffixTree[newNodeIndex];
+        TNodePtr currentEdgeIndex = currentNode->GetChild(currentSymbol);
+        TNodePtr newNode =
+                suffixTree.CreateNode(currentEdge->GetEdgeLabelBegin(),
+                currentEdge->GetEdgeLabelBegin() + currentLength,
+                currentNode->GetDepth() + currentLength, root);
 
-        currentEdge.SetEdgeLabelBegin(newNode.GetEdgeLabelEnd());
-        newNode.AddChild(nextEdgeSymbol, currentNode.GetChild(nextEdgeSymbol))
+        currentEdge->SetEdgeLabelBegin(newNode->GetEdgeLabelEnd());
+        newNode->AddChild(nextEdgeSymbol,
+                currentNode->GetChild(nextEdgeSymbol));
 
-        currentNode.AddChild(text[newNode.GetEdgeLabelBegin()],
-                newNodeIndex);
+        currentNode->AddChild(text[newNode->GetEdgeLabelBegin()],
+                newNode);
 
         /* add leaf here, and suffix jump */
 
