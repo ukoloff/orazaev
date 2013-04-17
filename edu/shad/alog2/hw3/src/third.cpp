@@ -132,10 +132,10 @@ private:
 std::vector<size_t> CalcSolution(std::string& text) {
     text += '$';
     std::vector<size_t> result(text.size(), 0);
-    
+
     TSuffixTree tree(text);
     TNodePtr root = tree.GetRoot();
-    
+
     // TODO: Fill reminder
 
 
@@ -143,7 +143,7 @@ std::vector<size_t> CalcSolution(std::string& text) {
     for (size_t i = 0; i < text.size(); ++i) {
         // TODO: character == 0:
             // TODO: Add node if hasn't, switch reminder.character, continue
-        
+
 
         // TODO: Can we pass the way on edge?
             // TODO: If so, ++length,
@@ -155,13 +155,13 @@ std::vector<size_t> CalcSolution(std::string& text) {
         // the edge
 
         // TODO: Create new edge, new node
-        // TODO: Split edge 
+        // TODO: Split edge
         // TODO: Pass through suffix link;
         // TODO: Pass the way on nodeByLink and add new suffix link
         // TODO: Caclulate new reminder values (node, character, length)
     }
 
-    
+
     result.pop_back();
     return result;
 }
