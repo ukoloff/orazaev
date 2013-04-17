@@ -51,15 +51,14 @@ public:
 
     char GetEdgeChar(const std::string& text,
             char firstEdgeChar,
-            size_t position)
-    {
-        if (!HasChild(firstEdgeChar)) {
-            return 0;
-        }
+            size_t position);
 
-        return text[GetChild(firstEdgeChar)->GetEdgeLabelBegin() + position];
-    }
+    char GetCharOnEdge(const std::string& text, size_t position) const;
 
+    static TNodePtr PassTheEdges(TNodePtr node,
+            size_t fullDepth,
+            const std::string& text,
+            size_t i);
 
 public:
     static const size_t NONE = static_cast<size_t>(-1);
@@ -85,6 +84,45 @@ void TNode::AddChild(char edgeFirstChar, const TNodePtr& child) {
     children[edgeFirstChar] = child;
 }
 
+char TNode::GetCharOnEdge(const std::string& text, size_t position) const {
+    return text[GetEdgeLabelBegin() + position];
+}
+
+char TNode::GetEdgeChar(const std::string& text,
+        char firstEdgeChar,
+        size_t position)
+{
+    if (!HasChild(firstEdgeChar)) {
+        return 0;
+    }
+
+    return text[GetChild(firstEdgeChar)->GetEdgeLabelBegin() + position];
+}
+
+static TNodePtr TNode::PassTheEdges(TNodePtr node,
+        size_t fullDepth,
+        const std::string& text,
+        size_t i)
+{
+    size_t pos = i - (fullDepth - node.GetDepth());
+    if (!HasChild(text[pos])) {
+        return node;
+    }
+
+    for (TNodePtr child = node->GetChild(text[pos]);
+         child->GetDepth() < fullDepth();
+         child = child->GetChild(text[pos]))
+    {
+        node = child;
+        pos = i - (fullDepth - node.GetDepth());
+
+        if (!HasChild(text[pos])) {
+            return node;
+        }
+    }
+
+    return node;
+}
 
 
 class TSuffixTree {
@@ -153,6 +191,7 @@ std::vector<size_t> Calc(std::string&& text) {
         if (character == 0 && node->HasChild(text[i])) {
             ++length;
             character = text[i];
+            continue;
         }
 
         TNodePtr child = node->GetChild(character);
@@ -168,8 +207,7 @@ std::vector<size_t> Calc(std::string&& text) {
             continue;
         }
 
-        char nextEdgeSymbol = node->GetEdgeChar(text,
-                character, length);
+        char nextEdgeSymbol = child.GetCharOnEdge(text, length);
 
         /* Is nextEdgeSymbol equal to text[i]? Add node if false. */
         if (nextEdgeSymbol == text[i]) {
@@ -177,7 +215,9 @@ std::vector<size_t> Calc(std::string&& text) {
             continue;
         }
 
-        while (/* ! already have symbol */) {
+        /// Need tot use full depth instead of length on current edge.
+        /// That hint simplify code.
+        while (child.GetCharOnEdge(text, length) != text[i]) {
             /* Create new node on edge */
             TNodePtr newNode =
                     suffixTree.CreateNode(child->GetEdgeLabelBegin(),
@@ -189,12 +229,22 @@ std::vector<size_t> Calc(std::string&& text) {
                     node->GetChild(nextEdgeSymbol));
             newNode->AddChild(text[i], suffixTree.CreateLeaf(i, root));
 
-            node->AddChild(text[newNode->GetEdgeLabelBegin()],
-                    newNode);
+            node->AddChild(newNode->GetCharOnEdge(text, 0), newNode);
 
+            TNodePtr nodeByLink = node->GetSuffixLink();
+            --length;
+            TNodePtr nodeByLink = TNode::PassTheEdges(nodeByLink,
+                    node.GetDepth() + length, text, i);
+            i - nodeByLink.GetDepth();
+
+            length = node.GetDepth() + length - nodeByLink->GetDepth();
+            character = text[i - length];
+
+            character = text[i - (newNode->GetDepth() -
+                    nodeByLink->GetDepth() - 1)];
+            character = [i - (newNode->GetDepth - 1)]
+            newNode->SetSuffixLink(nodeByLink);
         }
-
-
     }
 
     return result;
