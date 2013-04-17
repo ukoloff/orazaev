@@ -30,7 +30,16 @@ au BufEnter,FileType .vimrc call clearmatches()
 
 " Recover position and folding in file
 if has("autocmd")
-    set viewoptions=cursor,folds
+    " set viewoptions=cursor,folds
+    set viewoptions=cursor
     au BufWinLeave * mkview
     au BufWinEnter * silent loadview
 endif
+
+" For xterm
+" set background=dark
+
+map <F4> [I:let nr = input("Which one: ")<Bar>exe "normal " . nr ."[\t"<CR>
+
+set autoindent
+au FileType cpp set cindent
