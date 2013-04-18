@@ -26,7 +26,7 @@ public:
 
 public:
     inline void SetSuffixLink(const TNodePtr& link) { suffixLink = link; }
-    inline void SetDepth(size_t newDepth)           { depth = newDepth; }
+    // inline void SetDepth(size_t newDepth)           { depth = newDepth; }
     inline void SetAncestor(const TNodePtr& node) { ancestor = node; }
     inline void SetEdge(char firstChar, const TEdgePtr& edge) {
         edges[firstChar] = edge;
@@ -90,8 +90,15 @@ public:
 
 public:
     inline void SetBegin(size_t value)       { begin = value; }
-    inline void SetEnd(size_t value)         { end = value; }
-    inline void SetNode(const TNodePtr& ptr) { edgeNode = ptr; }
+    // inline void SetEnd(size_t value)         { end = value; }
+    // inline void SetNode(const TNodePtr& ptr) { edgeNode = ptr; }
+    inline void SetAncestor(const TNodePtr& ancestor) {
+        if (IsEndless()) {
+            edgeNode = ancestor;
+        } else {
+            edgeNode->SetAncestor(ancestor);
+        }
+    }
 
 public:
     static const size_t ENDLESS = static_cast<size_t>(-1);
@@ -149,9 +156,7 @@ public:
 
         /// Reduce old edge
         edge->SetBegin(edge->GetBegin() + reminder.length);
-        if (!edge->IsEndless()) {
-            edge->GetNode()->SetAncestor(newNode);
-        }
+        edge->SetAncestor(newNode);
         /// Attach old edge to new node
         newNode->SetEdge(edge->GetChar(0), edge);
         /// Rebind edge for ancestor
@@ -289,5 +294,5 @@ std::vector<size_t> CalcSolution(std::string& text) {
 #include "hw3.p4.testing.h"
 
 int main() {
-    return 0;
+    return RunTests();
 }
