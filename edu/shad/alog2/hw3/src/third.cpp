@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <memory>
@@ -39,29 +40,7 @@ public:
 
     TEdgePtr GetEdge(char character) const {
         return edges.find(character) != edges.end() ?
-               edges[character] : 0;
-    }
-
-public:
-    TEdgePtr PassString(const std::string& text,
-            size_t begin,
-            size_t end) const
-    {
-        if (begin >= end) {
-            return 0;
-        }
-
-        TEdgePtr edge = GetEdge(text[begin]);
-        do {
-            begin = begin + edge->GetSize();
-            if (edge->IsEndless() || begin >= end) {
-                break;
-            }
-
-            edge = edge->GetNode()->GetEdge(text[begin]);
-        } while (begin < end);
-
-        return edge;
+                edges.find(character)->second : 0;
     }
 
 private:
@@ -166,7 +145,7 @@ public:
         TNodePtr newNode = ConstructNode(reminder.node->GetDepth() +
                 reminder.length, root, reminder.node);
         TEdgePtr newEdge = ConstructEdge(edge->GetBegin(),
-                edge->GetBegin() + reminder.length, newNode)
+                edge->GetBegin() + reminder.length, newNode);
 
         /// Reduce old edge
         edge->SetBegin(edge->GetBegin() + reminder.length);
@@ -179,7 +158,8 @@ public:
         reminder.node->SetEdge(newEdge->GetChar(0), newEdge);
 
         /// Add endless edge to newNode
-        newNode->SetEdge(text[i], ConstructEdge(i, reminder->node));
+        newNode->SetEdge(text[textPosition],
+                ConstructEdge(textPosition, reminder.node));
 
         return newNode;
     }
@@ -189,7 +169,7 @@ public:
         @return TNodePtr to last node on the string way
     */
     TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
-        assert(begint <= end)
+        assert(begin <= end);
         do {
             TEdgePtr edge = node->GetEdge(text[begin]);
             begin = begin + edge->GetSize();
@@ -201,6 +181,35 @@ public:
         } while (begin < end);
 
         return node;
+    }
+
+    /**
+        @brief Do suffix link jump from newNode using ancestor suffix link.
+        @return TNodePtr to suffix jump destenation node.
+    */
+    TNodePtr DoSuffixLinkJump(TReminder * const reminder,
+            const TNodePtr newNode,
+            size_t position)
+    {
+        reminder->node = ApplyString(reminder->node->GetSuffixLink(),
+                position - (newNode->GetDepth() - 1), position);
+
+        /// Update reminder values
+        reminder->length =
+                (newNode->GetDepth() - 1) - reminder->node->GetDepth();
+        TEdgePtr nextEdge =
+                reminder->node->GetEdge(text[position - reminder->length]);
+        reminder->character =
+                reminder->length == 0 ? 0 : nextEdge->GetChar(0);
+
+        /// Boundary case: length is equal to nextEdge size
+        if (reminder->length == nextEdge->GetSize()) {
+            reminder->node = nextEdge->GetNode();
+            reminder->length = 0;
+            reminder->character = 0;
+        }
+
+        return reminder->node;
     }
 public:
     TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor);
@@ -233,7 +242,7 @@ std::vector<size_t> CalcSolution(std::string& text) {
         if (reminder.character == 0 && edge == 0) {
             TEdgePtr newEdge = tree.ConstructEdge(i, reminder.node);
             reminder.node->SetEdge(text[i], newEdge);
-            reminder.character = tree[i];
+            reminder.character = text[i];
 
             /// Suffix jump
             reminder.node = reminder.node->GetSuffixLink();
@@ -252,36 +261,15 @@ std::vector<size_t> CalcSolution(std::string& text) {
         }
 
         /**
-            ASSERT: we can't pass the way on edge and we should slice
+            ASSERT: we can't pass the way on edge and we should split
             the edge
         */
 
         /// Split edge and pass through suffix link
         TNodePtr newNode = tree.SplitEdge(reminder, i);
 
-        // TODO: take out suffix jump to the separate function.
-        // funciton tree.SuffixJump(Reminder, newNode, i)
-        {
-        reminder->node = tree.ApplyString(reminder->node->GetSuffixLink(),
-                i - (newNode->GetDepth() - 1), i);
-
-        /// Update reminder values
-        reminder->length =
-                (newNode->GetDepth() - 1) - reminder->node->GetDepth();
-        reminder->character =
-                reminder->length == 0 ? 0 : nextEdge.GetChar(0);
-        TEdgePtr nextEdge =
-                reminder->node->GetEdge(text[i - reminder->length]);
-        /// Boundary case: length is equal to nextEdge size
-        if (reminder->length == nextEdge->GetSize()) {
-            reminder->node = nextEdge->GetNode();
-            reminder->length = 0;
-            reminder->character = 0;
-        }
-        }
-        /// Set suffixLink for newNode
-        newNode->SetSuffixLink(reminder->node);
-        --i;
+        /// Set suffixLink for newNode and update reminder
+        newNode->SetSuffixLink(tree.DoSuffixLinkJump(&reminder, newNode, i--));
     }
 
 
