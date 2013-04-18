@@ -119,7 +119,7 @@ void Assert::assertTrue(char* strExpression, bool expression,
 	}
 }
 
-void Assert::assertTrueMissatge(char* strExpression, bool expression,
+void Assert::assertTrueMissatge(const char* strExpression, bool expression,
 		const char* missatge, const char* file, int linia)
 {
 	if (!expression)

@@ -206,7 +206,7 @@ public:
 	static void assertTrue(char* strExpression, bool expression,
 			const char* file="", int linia=0);
 
-	static void assertTrueMissatge(char* strExpression, bool expression, 
+	static void assertTrueMissatge(const char* strExpression, bool expression, 
 			const char* missatge, const char* file="", int linia=0);
 
 	static void assertEquals( const char * expected, const char * result,
