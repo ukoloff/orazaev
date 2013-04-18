@@ -286,6 +286,8 @@ std::vector<size_t> CalcSolution(std::string& text) {
     return result;
 }
 
+#include "hw3.p4.testing.h"
+
 int main() {
     return 0;
 }
