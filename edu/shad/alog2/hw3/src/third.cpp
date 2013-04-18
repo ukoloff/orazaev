@@ -155,7 +155,9 @@ public:
 public:
     inline TNodePtr GetRoot() const { return root; }
 
-    /** @return TNodePtr for new node on sliced edge. */
+    /**
+        @return TNodePtr for new node on sliced edge.
+    */
     TNodePtr SplitEdge(const TReminder& reminder, size_t textPosition) {
         TEdgePtr edge = reminder.node->GetEdge(
                 text[textPosition - reminder.length]);
@@ -174,7 +176,7 @@ public:
         /// Attach old edge to new node
         newNode->SetEdge(edge->GetChar(0), edge);
         /// Rebind edge for ancestor
-        reminder.node.SetEdge(newEdge->GetChar(0), newEdge);
+        reminder.node->SetEdge(newEdge->GetChar(0), newEdge);
 
         /// Add endless edge to newNode
         newNode->SetEdge(text[i], ConstructEdge(i, reminder->node));
@@ -182,6 +184,24 @@ public:
         return newNode;
     }
 
+    /**
+        @brief apply string text[begin:end] to suffix tree node
+        @return TNodePtr to last node on the string way
+    */
+    TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
+        assert(begint <= end)
+        do {
+            TEdgePtr edge = node->GetEdge(text[begin]);
+            begin = begin + edge->GetSize();
+            if (edge->IsEndless() || begin >= end) {
+                break;
+            }
+
+            node = edge->GetNode();
+        } while (begin < end);
+
+        return node;
+    }
 public:
     TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor);
     TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node);
@@ -240,33 +260,28 @@ std::vector<size_t> CalcSolution(std::string& text) {
         TNodePtr newNode = tree.SplitEdge(reminder, i);
 
         // TODO: take out suffix jump to the separate function.
-        reminder->node = reminder->node->GetSuffixLink();
-        TEdgePtr nextEdge = reminder->node->PassString(text,
+        // funciton tree.SuffixJump(Reminder, newNode, i)
+        {
+        reminder->node = tree.ApplyString(reminder->node->GetSuffixLink(),
                 i - (newNode->GetDepth() - 1), i);
-        --i;
 
-        /// Boundary case: pass empty string
-        if (nextEdge == 0) {
-            reminder->length = 0;
-            reminder->character = 0;
-            newNode->SetSuffixLink(reminder->node);
-            continue;
-        }
-
-        reminder->node = nextEdge->GetAncestor();
-        reminder->length = (newNode->GetDepth() - 1) -
-                reminder->node->GetDepth();
-        reminder->character = reminder->length == 0 ? 0 :
-                nextEdge.GetChar(0);
-
+        /// Update reminder values
+        reminder->length =
+                (newNode->GetDepth() - 1) - reminder->node->GetDepth();
+        reminder->character =
+                reminder->length == 0 ? 0 : nextEdge.GetChar(0);
+        TEdgePtr nextEdge =
+                reminder->node->GetEdge(text[i - reminder->length]);
         /// Boundary case: length is equal to nextEdge size
         if (reminder->length == nextEdge->GetSize()) {
             reminder->node = nextEdge->GetNode();
             reminder->length = 0;
             reminder->character = 0;
         }
+        }
         /// Set suffixLink for newNode
         newNode->SetSuffixLink(reminder->node);
+        --i;
     }
 
 
