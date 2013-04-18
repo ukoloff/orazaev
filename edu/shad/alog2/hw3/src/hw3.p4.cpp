@@ -43,6 +43,16 @@ public:
                 edges.find(character)->second : 0;
     }
 
+public:
+    /// For debugging:
+    typedef std::unordered_map<char, TEdgePtr>::const_iterator const_iterator;
+    inline const_iterator begin() {
+        return edges.begin();
+    }
+    inline const_iterator end() {
+        return edges.end();
+    }
+
 private:
     std::unordered_map<char, TEdgePtr> edges;
     size_t depth;
@@ -131,15 +141,18 @@ struct TReminder {
 */
 class TSuffixTree {
 public:
-    TSuffixTree(const std::string& text)
-        : text(text)
+    TSuffixTree()
+        : text("")
         , root(ConstructNode(0, 0, 0))
     {
         root->SetSuffixLink(root);
     }
 
 public:
-    inline TNodePtr GetRoot() const { return root; }
+    inline TNodePtr GetRoot() const          { return root; }
+    void SetText(const std::string& newText) { text = newText; }
+
+    std::vector<size_t> ConstructTreeAndCalcSolution(const std::string& text);
 
     /**
         @return TNodePtr for new node on sliced edge.
@@ -147,7 +160,7 @@ public:
     TNodePtr SplitEdge(const TReminder& reminder, size_t textPosition) {
         TEdgePtr edge = reminder.node->GetEdge(
                 text[textPosition - reminder.length]);
-        assert(edge->GetChar(reminder.length) == text[textPosition]);
+        assert(edge->GetChar(reminder.length) != text[textPosition]);
 
         TNodePtr newNode = ConstructNode(reminder.node->GetDepth() +
                 reminder.length, root, reminder.node);
@@ -175,6 +188,11 @@ public:
     */
     TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
         assert(begin <= end);
+
+        if (begin >= end) {
+            return node;
+        }
+
         do {
             TEdgePtr edge = node->GetEdge(text[begin]);
             begin = begin + edge->GetSize();
@@ -208,7 +226,7 @@ public:
                 reminder->length == 0 ? 0 : nextEdge->GetChar(0);
 
         /// Boundary case: length is equal to nextEdge size
-        if (reminder->length == nextEdge->GetSize()) {
+        if (nextEdge && reminder->length == nextEdge->GetSize()) {
             reminder->node = nextEdge->GetNode();
             reminder->length = 0;
             reminder->character = 0;
@@ -216,6 +234,42 @@ public:
 
         return reminder->node;
     }
+
+    /// For debugging
+    void Print(const TNodePtr& node, int length = -1, size_t depth = 0) {
+        if (length == -1) {
+            length = text.size();
+        }
+        if (depth == 0) {
+            std::cout << "ROOT\n";
+        }
+        for (TNode::const_iterator iter = node->begin();
+             iter != node->end(); ++iter)
+        {
+            TEdgePtr edge = iter->second;
+            for (size_t i = 0; i < depth + 1; ++i) {
+                std::cout << (i == depth ? "|____" : "|    ");
+            }
+
+            if (edge->IsEndless()) {
+                for (size_t i = edge->GetBegin();
+                     i < text.size(); ++i) {
+                    std::cout << text[i];
+                }
+                std::cout << "\n";
+                continue;
+            }
+
+            for (size_t i = edge->GetBegin();
+                 i < edge->GetEnd(); ++i) {
+                std::cout << text[i];
+            }
+            std::cout << "\n";
+
+            Print(edge->GetNode(), length, depth + 1);
+        }
+    }
+
 public:
     TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) {
         return TEdgePtr(new TEdge(begin, text, ancestor));
@@ -234,19 +288,22 @@ public:
     static const char SENTINEL = '$';
 
 private:
-    const std::string& text;
+    std::string text;
     TNodePtr root;
 };
 
 
-std::vector<size_t> CalcSolution(std::string& text) {
-    text += TSuffixTree::SENTINEL;
+std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
+        const std::string& input_text)
+{
+    SetText(input_text + TSuffixTree::SENTINEL);
     std::vector<size_t> result(text.size(), 0);
 
-    TSuffixTree tree(text);
-    TNodePtr root = tree.GetRoot();
+    root = ConstructNode(0, 0, 0);
+    root->SetSuffixLink(root);
 
     TReminder reminder(root, 0, 0);
+    TNodePtr suffixLinkNeed = 0;
 
     /// Main cycle
     for (size_t i = 0; i < text.size(); ++i) {
@@ -254,19 +311,25 @@ std::vector<size_t> CalcSolution(std::string& text) {
 
         /// Add new edge if hasnt.
         if (reminder.character == 0 && edge == 0) {
-            TEdgePtr newEdge = tree.ConstructEdge(i, reminder.node);
+            TEdgePtr newEdge = ConstructEdge(i, reminder.node);
             reminder.node->SetEdge(text[i], newEdge);
-            reminder.character = text[i];
 
-            /// Suffix jump
-            reminder.node = reminder.node->GetSuffixLink();
-            --i;
+            if (suffixLinkNeed != 0) {
+                suffixLinkNeed->SetSuffixLink(reminder.node);
+                suffixLinkNeed = 0;
+            }
+
+            if (reminder.node != GetRoot()) {
+                reminder.node = reminder.node->GetSuffixLink();
+                --i;
+                //--reminder.length;
+            }
             continue;
         }
 
         /// Update reminder if we can pass the edge.
         if (edge->GetChar(reminder.length) == text[i]) {
-            if (edge->GetSize() >= ++reminder.length) {
+            if (edge->GetSize() <= ++reminder.length) {
                 reminder.node = edge->GetNode();
                 reminder.length = 0;
                 reminder.character = 0;
@@ -274,16 +337,16 @@ std::vector<size_t> CalcSolution(std::string& text) {
             continue;
         }
 
-        /**
-            ASSERT: we can't pass the way on edge and we should split
-            the edge
-        */
-
         /// Split edge and pass through suffix link
-        TNodePtr newNode = tree.SplitEdge(reminder, i);
+        TNodePtr newNode = SplitEdge(reminder, i);
 
-        /// Set suffixLink for newNode and update reminder
-        newNode->SetSuffixLink(tree.DoSuffixLinkJump(&reminder, newNode, i--));
+        /// Set suffixLink for previous split-node
+        if (suffixLinkNeed != 0) {
+            suffixLinkNeed->SetSuffixLink(newNode);
+        }
+        suffixLinkNeed = newNode;
+
+        DoSuffixLinkJump(&reminder, newNode, i--);
     }
 
 
@@ -294,5 +357,7 @@ std::vector<size_t> CalcSolution(std::string& text) {
 #include "hw3.p4.testing.h"
 
 int main() {
+    TSuffixTree().ConstructTreeAndCalcSolution("abxabyabz");
+    //return 0;
     return RunTests();
 }

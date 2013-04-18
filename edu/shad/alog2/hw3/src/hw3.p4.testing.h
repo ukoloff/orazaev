@@ -9,12 +9,17 @@ public:
         /** List of all test cases to run. */
         TEST_CASE(TestTrivialOperations);
         TEST_CASE(TestApplyString);
+        TEST_CASE(TestTrivialConstruction);
+        TEST_CASE(TestMinimalConstruction);
+        TEST_CASE(TestMinimalSplittedConstruction);
+        TEST_CASE(TestSplittedConstruction);
     }
 
     virtual void setUp() {
         /** Run this code before each test. */
         text = "abcbxabx";
-        tree = TTreePtr(new TSuffixTree(text));
+        tree = TTreePtr(new TSuffixTree());
+        tree->SetText(text);
 
         TNodePtr node = tree->ConstructNode(2, 0, tree->GetRoot());
         /// root -> ab
@@ -35,7 +40,7 @@ public:
     }
 
     void TestTrivialOperations() {
-        tree = TTreePtr(new TSuffixTree(""));
+        tree = TTreePtr(new TSuffixTree());
         ASSERT_EQUALS(true, tree->GetRoot()->IsLeaf());
 
         tree->GetRoot()->SetEdge(text[0],
@@ -73,6 +78,83 @@ public:
         /// Apply "abcde"
         node = tree->ApplyString(tree->GetRoot(), 0, 5);
         ASSERT_EQUALS(expectedNode, node);
+    }
+
+    void TestTrivialConstruction() {
+        tree->ConstructTreeAndCalcSolution("");
+        ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
+
+        TEdgePtr edge = tree->GetRoot()->GetEdge('$');
+        ASSERT_MESSAGE(edge != 0, "root->GetEdge('$') equals to 0.");
+        ASSERT_EQUALS(true, edge->IsEndless());
+        ASSERT_EQUALS('$', edge->GetChar(0));
+    }
+
+    void TestMinimalConstruction() {
+        tree->ConstructTreeAndCalcSolution("abcd");
+        ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
+
+        for (auto c : std::string("abcd$")) {
+            TEdgePtr edge = tree->GetRoot()->GetEdge(c);
+            ASSERT_MESSAGE(edge != 0, (std::string("root->GetEdge('") +
+                        c + "') equals to 0.").c_str());
+            ASSERT_EQUALS(true, edge->IsEndless());
+            ASSERT_EQUALS(c, edge->GetChar(0));
+        }
+    }
+
+    void TestMinimalSplittedConstruction() {
+        tree->ConstructTreeAndCalcSolution("aab");
+        ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
+
+        for (auto c : std::string("b$")) {
+            TEdgePtr edge = tree->GetRoot()->GetEdge(c);
+            ASSERT_MESSAGE(edge != 0, (std::string("root->GetEdge('") + c +
+                        "') equals to 0.").c_str());
+            ASSERT_EQUALS(true, edge->IsEndless());
+            ASSERT_EQUALS(c, edge->GetChar(0));
+        }
+
+        TEdgePtr edge = tree->GetRoot()->GetEdge('a');
+        ASSERT_MESSAGE(edge != 0, "root->GetEdge(SENTINEL) equals to 0.");
+        ASSERT_EQUALS(false, edge->IsEndless());
+        ASSERT_EQUALS('a', edge->GetChar(0));
+
+        TNodePtr node = edge->GetNode();
+        ASSERT_MESSAGE(tree->GetRoot() != node, "Split-node is equal to root");
+        ASSERT_EQUALS(size_t(1), edge->GetNode()->GetDepth());
+
+        ASSERT_EQUALS(node, tree->ApplyString(tree->GetRoot(), 1, 3));
+        ASSERT_EQUALS(node, tree->ApplyString(tree->GetRoot(), 0, 3));
+
+        for (auto c : std::string("ab")) {
+            TEdgePtr edge = node->GetEdge(c);
+            ASSERT_MESSAGE(edge != 0, (std::string("Split-node->GetEdge('")
+                        + c + "') equals to 0.").c_str());
+            ASSERT_EQUALS(true, edge->IsEndless());
+            ASSERT_EQUALS(c, edge->GetChar(0));
+        }
+    }
+
+    void TestSplittedConstruction() {
+        ApplyAllSuffixes("abxbyabyabz");
+        //ApplyAllSuffixes("adbcbxadbxadbz");
+        //ApplyAllSuffixes("aaax");
+        //ApplyAllSuffixes("abxabyabz");
+    }
+
+    void ApplyAllSuffixes(const std::string& text) {
+        tree->ConstructTreeAndCalcSolution(text);
+        std::cout << "TREE for text: " << text << std::endl;
+        tree->Print(tree->GetRoot());
+
+        for (size_t i = 0; i < text.size(); ++i) {
+            TNodePtr node = tree->ApplyString(tree->GetRoot(), i, text.size());
+            TEdgePtr edge = node->GetEdge(text[i + node->GetDepth()]);
+            if (!edge->IsEndless()) {
+                ASSERT_EQUALS(text.size() - i - node->GetDepth(), edge->GetSize());
+            }
+        }
     }
 
 private:
