@@ -124,7 +124,7 @@ struct TReminder {
 */
 class TSuffixTree {
 public:
-    TSuffixTree(const std::string& text /* args */)
+    TSuffixTree(const std::string& text)
         : text(text)
         , root(ConstructNode(0, 0, 0))
     {
@@ -212,11 +212,21 @@ public:
         return reminder->node;
     }
 public:
-    TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor);
-    TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node);
+    TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) {
+        return TEdgePtr(new TEdge(begin, text, ancestor));
+    }
+    TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node) {
+        return TEdgePtr(new TEdge(begin, end, text, node));
+    }
     static TNodePtr ConstructNode(size_t depth,
             const TNodePtr& suffixLink,
-            const TNodePtr& ancestor);
+            const TNodePtr& ancestor)
+    {
+        return TNodePtr(new TNode(depth, suffixLink, ancestor));
+    }
+
+public:
+    static const char SENTINEL = '$';
 
 private:
     const std::string& text;
@@ -225,7 +235,7 @@ private:
 
 
 std::vector<size_t> CalcSolution(std::string& text) {
-    text += '$';
+    text += TSuffixTree::SENTINEL;
     std::vector<size_t> result(text.size(), 0);
 
     TSuffixTree tree(text);
@@ -233,7 +243,6 @@ std::vector<size_t> CalcSolution(std::string& text) {
 
     TReminder reminder(root, 0, 0);
 
-    /* -------------- BUILD TREE AND CALCULATE HERE ------------------ */
     /// Main cycle
     for (size_t i = 0; i < text.size(); ++i) {
         TEdgePtr edge = reminder.node->GetEdge(text[i - reminder.length]);
@@ -275,4 +284,8 @@ std::vector<size_t> CalcSolution(std::string& text) {
 
     result.pop_back();
     return result;
+}
+
+int main() {
+    return 0;
 }
