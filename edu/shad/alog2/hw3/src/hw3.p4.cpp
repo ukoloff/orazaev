@@ -4,7 +4,6 @@
 #include <memory>
 #include <unordered_map>
 
-#define VERBOSE_OUTPUT
 
 
 class TNode;
@@ -296,6 +295,11 @@ public:
         }
     }
 
+    void PrintMe() {
+        static int i = 3;
+        Print(GetRoot());
+    }
+
 public:
     TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) {
         return TEdgePtr(new TEdge(begin, text, ancestor));
@@ -353,18 +357,21 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
 
             if (reminder.node != GetRoot()) {
                 assert(reminder.node->GetAncestor() != 0);
+                reminder.length += reminder.node->GetDepth() - 1;
                 if (reminder.length == 0) {
-                    reminder.length = reminder.node->GetDepth() -
-                        reminder.node->GetAncestor()->GetDepth() - 1;
+                    //reminder.length = reminder.node->GetDepth() -
+                    //    reminder.node->GetAncestor()->GetDepth() - 1;
                     reminder.character = text[i - reminder.length];
                 } else {
-                    --reminder.length;
+                    //--reminder.length;
                 }
                 --i;
                 reminder.node = reminder.node->GetSuffixLink();
+                // FIXME: new length calcualtion
+                reminder.length -= reminder.node->GetDepth();
             }
 #ifdef VERBOSE_OUTPUT
-            Print(GetRoot());
+            PrintMe();
 #endif // VERBOSE_OUTPUT
             continue;
         }
@@ -379,7 +386,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
                 assert(reminder.node->GetAncestor() != 0);
             }
 #ifdef VERBOSE_OUTPUT
-            Print(GetRoot());
+            PrintMe();
 #endif // VERBOSE_OUTPUT
             continue;
         }
@@ -391,17 +398,21 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
         /// Set suffixLink for previous split-node
         if (suffixLinkNeed != 0) {
             suffixLinkNeed->SetSuffixLink(newNode);
+            assert(suffixLinkNeed->GetDepth() == newNode->GetDepth() + 1 ||
+                   suffixLinkNeed == GetRoot());
         }
         suffixLinkNeed = newNode;
 
         DoSuffixLinkJump(&reminder, newNode, i--);
         if (reminder.length == 0) {
             suffixLinkNeed->SetSuffixLink(reminder.node);
+            assert(suffixLinkNeed->GetDepth() == reminder.node->GetDepth() +
+                   1 || suffixLinkNeed == GetRoot());
             suffixLinkNeed = 0;
             reminder.character = 0;
         }
 #ifdef VERBOSE_OUTPUT
-        Print(GetRoot());
+        PrintMe();
 #endif // VERBOSE_OUTPUT
     }
 

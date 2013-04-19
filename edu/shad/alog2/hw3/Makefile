@@ -11,7 +11,7 @@ $(info $(obj_list))
 
 obj_dir := obj
 
-CC := ccache g++-4.6 --std=c++0x
+CC := ccache g++-4.6 --std=c++0x -O0 -fno-inline-small-functions
 CCFLAGS := -Wall -g
 CCFLAGS += -I$(ROOT_DIR)
 

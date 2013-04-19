@@ -13,7 +13,7 @@ public:
         //TEST_CASE(TestMinimalConstruction);
         //TEST_CASE(TestMinimalSplittedConstruction);
         TEST_CASE(TestSplittedConstruction);
-        //TEST_CASE(TestRandomStringsConstruction);
+        TEST_CASE(TestRandomStringsConstruction);
     }
 
     virtual void setUp() {
@@ -139,26 +139,24 @@ public:
 
     void TestSplittedConstruction() {
         ApplyAllSuffixes("ababbbab");
-        //ApplyAllSuffixes("aeeadbedbbbdbc");
-        //ApplyAllSuffixes("abxbyabyabz");
-        //ApplyAllSuffixes("adbcbxadbxadbz");
-        //ApplyAllSuffixes("aaax");
-        //ApplyAllSuffixes("abxabyabz");
-        //ApplyAllSuffixes("abxabyabzabwabh");
-        //ApplyAllSuffixes("abxabyabzabwabhtrutritrotrabutrabw");
-        //ApplyAllSuffixes("abwabhtrutrabtrabw");
-        //ApplyAllSuffixes("abxabycdecdmaby");
-        //ApplyAllSuffixes("abxabycaby");
-        //ApplyAllSuffixes("");
-        //ApplyAllSuffixes("abbabb");
+        ApplyAllSuffixes("aeeadbedbbbdbc");
+        ApplyAllSuffixes("abxbyabyabz");
+        ApplyAllSuffixes("adbcbxadbxadbz");
+        ApplyAllSuffixes("aaax");
+        ApplyAllSuffixes("abxabyabz");
+        ApplyAllSuffixes("abxabyabzabwabh");
+        ApplyAllSuffixes("abxabyabzabwabhtrutritrotrabutrabw");
+        ApplyAllSuffixes("abwabhtrutrabtrabw");
+        ApplyAllSuffixes("abxabycdecdmaby");
+        ApplyAllSuffixes("abxabycaby");
+        ApplyAllSuffixes("");
+        ApplyAllSuffixes("abbabb");
     }
 
     void TestRandomStringsConstruction() {
         srand(13);
-        for (int i = 0; i < 2000; ++i) {
-            std::string str = GetRandomString(10, 26);
-            std::cerr << i << std::endl;
-            ApplyAllSuffixes(GetRandomString(20, 26));
+        for (int i = 0; i < 20; ++i) {
+            ApplyAllSuffixes(GetRandomString(20000, 26));
             std::cerr << i << std::endl;
         }
     }
