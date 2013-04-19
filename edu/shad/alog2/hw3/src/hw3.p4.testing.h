@@ -7,12 +7,13 @@ class TTestNode : public TestFixture<TTestNode> {
 public:
     TEST_FIXTURE(TTestNode) {
         /** List of all test cases to run. */
-        TEST_CASE(TestTrivialOperations);
-        TEST_CASE(TestApplyString);
-        TEST_CASE(TestTrivialConstruction);
-        TEST_CASE(TestMinimalConstruction);
-        TEST_CASE(TestMinimalSplittedConstruction);
+        //TEST_CASE(TestTrivialOperations);
+        //TEST_CASE(TestApplyString);
+        //TEST_CASE(TestTrivialConstruction);
+        //TEST_CASE(TestMinimalConstruction);
+        //TEST_CASE(TestMinimalSplittedConstruction);
         TEST_CASE(TestSplittedConstruction);
+        //TEST_CASE(TestRandomStringsConstruction);
     }
 
     virtual void setUp() {
@@ -137,16 +138,37 @@ public:
     }
 
     void TestSplittedConstruction() {
-        ApplyAllSuffixes("abxbyabyabz");
+        ApplyAllSuffixes("ababbbab");
+        //ApplyAllSuffixes("aeeadbedbbbdbc");
+        //ApplyAllSuffixes("abxbyabyabz");
         //ApplyAllSuffixes("adbcbxadbxadbz");
         //ApplyAllSuffixes("aaax");
         //ApplyAllSuffixes("abxabyabz");
+        //ApplyAllSuffixes("abxabyabzabwabh");
+        //ApplyAllSuffixes("abxabyabzabwabhtrutritrotrabutrabw");
+        //ApplyAllSuffixes("abwabhtrutrabtrabw");
+        //ApplyAllSuffixes("abxabycdecdmaby");
+        //ApplyAllSuffixes("abxabycaby");
+        //ApplyAllSuffixes("");
+        //ApplyAllSuffixes("abbabb");
+    }
+
+    void TestRandomStringsConstruction() {
+        srand(13);
+        for (int i = 0; i < 2000; ++i) {
+            std::string str = GetRandomString(10, 26);
+            std::cerr << i << std::endl;
+            ApplyAllSuffixes(GetRandomString(20, 26));
+            std::cerr << i << std::endl;
+        }
     }
 
     void ApplyAllSuffixes(const std::string& text) {
         tree->ConstructTreeAndCalcSolution(text);
+#ifdef VERBOSE_OUTPUT
         std::cout << "TREE for text: " << text << std::endl;
         tree->Print(tree->GetRoot());
+#endif
 
         for (size_t i = 0; i < text.size(); ++i) {
             TNodePtr node = tree->ApplyString(tree->GetRoot(), i, text.size());
@@ -155,6 +177,19 @@ public:
                 ASSERT_EQUALS(text.size() - i - node->GetDepth(), edge->GetSize());
             }
         }
+    }
+
+    std::string GetRandomString(int maxLength, int maxAlphabetSize) {
+        int length = rand() % maxLength + 1;
+        int aSize = rand() % maxAlphabetSize + 1;
+
+        std::string result = "";
+
+        for (int i = 0; i < length; ++i) {
+            result += 'a' + (rand() % aSize);
+        }
+
+        return result;
     }
 
 private:

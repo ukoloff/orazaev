@@ -4,6 +4,8 @@
 #include <memory>
 #include <unordered_map>
 
+#define VERBOSE_OUTPUT
+
 
 class TNode;
 class TEdge;
@@ -16,6 +18,7 @@ public:
     TNode(size_t depth, const TNodePtr& suffixLink, const TNodePtr& ancestor)
         : depth(depth)
         , suffixLink(suffixLink)
+        , ancestor(ancestor)
     { }
 
     TNode()
@@ -163,7 +166,8 @@ public:
         assert(edge->GetChar(reminder.length) != text[textPosition]);
 
         TNodePtr newNode = ConstructNode(reminder.node->GetDepth() +
-                reminder.length, root, reminder.node);
+                reminder.length, 0, reminder.node);
+        assert(newNode->GetAncestor() != 0);
         TEdgePtr newEdge = ConstructEdge(edge->GetBegin(),
                 edge->GetBegin() + reminder.length, newNode);
 
@@ -188,6 +192,13 @@ public:
     */
     TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
         assert(begin <= end);
+#ifdef VERBOSE_OUTPUT
+        std::cout << "APPLYING STRING: ";
+        for (size_t i = begin; i < end; ++i)
+            std::cout << text[i];
+        std::cout << "\n";
+        Print(node);
+#endif // VERBOSE_OUTPUT
 
         if (begin >= end) {
             return node;
@@ -214,8 +225,18 @@ public:
             const TNodePtr newNode,
             size_t position)
     {
-        reminder->node = ApplyString(reminder->node->GetSuffixLink(),
-                position - (newNode->GetDepth() - 1), position);
+#ifdef VERBOSE_OUTPUT
+        std::cout << "NEWNODE_DEPTH  = " << newNode->GetDepth() << std::endl;
+        std::cout << "REMINDER_DEPTH = " << reminder->node->GetDepth() << std::endl;
+#endif // VERBOSE_OUTPUT
+        if (reminder->node == GetRoot()) {
+            reminder->node = ApplyString(reminder->node->GetSuffixLink(),
+                    position - (newNode->GetDepth() - 1), position);
+        } else {
+            reminder->node = ApplyString(reminder->node->GetSuffixLink(),
+                    position - (newNode->GetDepth() -
+                    reminder->node->GetDepth()), position);
+        }
 
         /// Update reminder values
         reminder->length =
@@ -231,6 +252,11 @@ public:
             reminder->length = 0;
             reminder->character = 0;
         }
+
+#ifdef VERBOSE_OUTPUT
+        std::cout << "ApplyingResult:\n";
+        Print(reminder->node);
+#endif // VERBOSE_OUTPUT
 
         return reminder->node;
     }
@@ -308,37 +334,59 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
     /// Main cycle
     for (size_t i = 0; i < text.size(); ++i) {
         TEdgePtr edge = reminder.node->GetEdge(text[i - reminder.length]);
+#ifdef VERBOSE_OUTPUT
+        // TEdgePtr edge = reminder.node->GetEdge(reminder.character);
+        std::cout << text[i] << " (" << std::string("") + reminder.character << ", "
+                  << reminder.length << ")" << std::endl;
+        if (reminder.node == GetRoot()) {
+            std::cout << "IN_ROOT\n";
+        }
+#endif // VERBOSE_OUTPUT
 
         /// Add new edge if hasnt.
-        if (reminder.character == 0 && edge == 0) {
+        if (edge == 0) {
+#ifdef VERBOSE_OUTPUT
+            std::cout << "DEBUG: NO EDGE!\n";
+#endif // VERBOSE_OUTPUT
             TEdgePtr newEdge = ConstructEdge(i, reminder.node);
             reminder.node->SetEdge(text[i], newEdge);
 
-            if (suffixLinkNeed != 0) {
-                suffixLinkNeed->SetSuffixLink(reminder.node);
-                suffixLinkNeed = 0;
-            }
-
             if (reminder.node != GetRoot()) {
-                reminder.node = reminder.node->GetSuffixLink();
+                assert(reminder.node->GetAncestor() != 0);
+                if (reminder.length == 0) {
+                    reminder.length = reminder.node->GetDepth() -
+                        reminder.node->GetAncestor()->GetDepth() - 1;
+                    reminder.character = text[i - reminder.length];
+                } else {
+                    --reminder.length;
+                }
                 --i;
-                //--reminder.length;
+                reminder.node = reminder.node->GetSuffixLink();
             }
+#ifdef VERBOSE_OUTPUT
+            Print(GetRoot());
+#endif // VERBOSE_OUTPUT
             continue;
         }
 
         /// Update reminder if we can pass the edge.
         if (edge->GetChar(reminder.length) == text[i]) {
+            reminder.character = edge->GetChar(0);
             if (edge->GetSize() <= ++reminder.length) {
                 reminder.node = edge->GetNode();
                 reminder.length = 0;
                 reminder.character = 0;
+                assert(reminder.node->GetAncestor() != 0);
             }
+#ifdef VERBOSE_OUTPUT
+            Print(GetRoot());
+#endif // VERBOSE_OUTPUT
             continue;
         }
 
         /// Split edge and pass through suffix link
         TNodePtr newNode = SplitEdge(reminder, i);
+        assert(newNode->GetAncestor() != 0);
 
         /// Set suffixLink for previous split-node
         if (suffixLinkNeed != 0) {
@@ -347,8 +395,17 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
         suffixLinkNeed = newNode;
 
         DoSuffixLinkJump(&reminder, newNode, i--);
+        if (reminder.length == 0) {
+            suffixLinkNeed->SetSuffixLink(reminder.node);
+            suffixLinkNeed = 0;
+            reminder.character = 0;
+        }
+#ifdef VERBOSE_OUTPUT
+        Print(GetRoot());
+#endif // VERBOSE_OUTPUT
     }
 
+    assert(reminder.length == 0);
 
     result.pop_back();
     return result;
@@ -357,7 +414,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
 #include "hw3.p4.testing.h"
 
 int main() {
-    TSuffixTree().ConstructTreeAndCalcSolution("abxabyabz");
+    //TSuffixTree().ConstructTreeAndCalcSolution("abxabyabz");
     //return 0;
     return RunTests();
 }
