@@ -1,5 +1,6 @@
 #pragma once
 #include <cppunit/MiniCppUnit.hxx>
+#include <util/timer/timer.h>
 
 typedef std::shared_ptr<TSuffixTree> TTreePtr;
 
@@ -14,6 +15,7 @@ public:
         //TEST_CASE(TestMinimalSplittedConstruction);
         TEST_CASE(TestSplittedConstruction);
         TEST_CASE(TestRandomStringsConstruction);
+        TEST_CASE(TestTiming);
     }
 
     virtual void setUp() {
@@ -155,9 +157,23 @@ public:
 
     void TestRandomStringsConstruction() {
         srand(13);
-        for (int i = 0; i < 20; ++i) {
-            ApplyAllSuffixes(GetRandomString(20000, 26));
-            std::cerr << i << std::endl;
+        for (int i = 0; i < 2000; ++i) {
+            ApplyAllSuffixes(GetRandomString(200, 26));
+        }
+    }
+
+    void TestTiming() {
+        double time = 0.5;
+        TTimer timer;
+
+        for (int i = 0; i < 100; ++i) {
+            std::string s = GetRandomString(100000);
+
+            timer.Start();
+            tree->ConstructTreeAndCalcSolution(s);
+            timer.Stop();
+
+            assert(timer.GetSeconds() < time);
         }
     }
 
@@ -177,6 +193,7 @@ public:
         }
     }
 
+
     std::string GetRandomString(int maxLength, int maxAlphabetSize) {
         int length = rand() % maxLength + 1;
         int aSize = rand() % maxAlphabetSize + 1;
@@ -185,6 +202,16 @@ public:
 
         for (int i = 0; i < length; ++i) {
             result += 'a' + (rand() % aSize);
+        }
+
+        return result;
+    }
+
+    std::string GetRandomString(int length) {
+        std::string result = "";
+
+        for (int i = 0; i < length; ++i) {
+            result += 'a' + (rand() % 25);
         }
 
         return result;
