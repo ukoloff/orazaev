@@ -28,7 +28,6 @@ public:
 
 public:
     inline void SetSuffixLink(const TNodePtr& link) { suffixLink = link; }
-    // inline void SetDepth(size_t newDepth)           { depth = newDepth; }
     inline void SetAncestor(const TNodePtr& node) { ancestor = node; }
     inline void SetEdge(char firstChar, const TEdgePtr& edge) {
         edges[firstChar] = edge;
@@ -102,8 +101,6 @@ public:
 
 public:
     inline void SetBegin(size_t value)       { begin = value; }
-    // inline void SetEnd(size_t value)         { end = value; }
-    // inline void SetNode(const TNodePtr& ptr) { edgeNode = ptr; }
     inline void SetAncestor(const TNodePtr& ancestor) {
         if (IsEndless()) {
             edgeNode = ancestor;
@@ -325,23 +322,23 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
     TNodePtr suffixLinkNeed = 0;
 
     /// Main cycle
-    for (size_t i = 0; i < text.size(); ++i) {
-        TEdgePtr edge = reminder.node->GetEdge(text[i - reminder.length]);
+    for (size_t pos = 0; pos < text.size(); ++pos) {
+        TEdgePtr edge = reminder.node->GetEdge(text[pos - reminder.length]);
 
         /// Add new edge if hasnt.
         if (edge == 0) {
-            TEdgePtr newEdge = ConstructEdge(i, reminder.node);
-            reminder.node->SetEdge(text[i], newEdge);
-            result[i - reminder.node->GetDepth()] =
+            TEdgePtr newEdge = ConstructEdge(pos, reminder.node);
+            reminder.node->SetEdge(text[pos], newEdge);
+            result[pos - reminder.node->GetDepth()] =
                     reminder.node->GetDepth();
 
             if (reminder.node != GetRoot()) {
                 assert(reminder.node->GetAncestor() != 0);
                 reminder.length += reminder.node->GetDepth() - 1;
                 if (reminder.length == 0) {
-                    reminder.character = text[i - reminder.length];
+                    reminder.character = text[pos - reminder.length];
                 }
-                --i;
+                --pos;
                 reminder.node = reminder.node->GetSuffixLink();
                 reminder.length -= reminder.node->GetDepth();
             }
@@ -349,7 +346,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
         }
 
         /// Update reminder if we can pass the edge.
-        if (edge->GetChar(reminder.length) == text[i]) {
+        if (edge->GetChar(reminder.length) == text[pos]) {
             reminder.character = edge->GetChar(0);
             if (edge->GetSize() <= ++reminder.length) {
                 reminder.node = edge->GetNode();
@@ -361,8 +358,8 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
         }
 
         /// Split edge and pass through suffix link
-        TNodePtr newNode = SplitEdge(reminder, i);
-        result[i - newNode->GetDepth()] = newNode->GetDepth();
+        TNodePtr newNode = SplitEdge(reminder, pos);
+        result[pos - newNode->GetDepth()] = newNode->GetDepth();
         assert(newNode->GetAncestor() != 0);
 
         /// Set suffixLink for previous split-node
@@ -373,7 +370,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
         }
         suffixLinkNeed = newNode;
 
-        DoSuffixLinkJump(&reminder, newNode, i--);
+        DoSuffixLinkJump(&reminder, newNode, pos--);
         if (reminder.length == 0) {
             suffixLinkNeed->SetSuffixLink(reminder.node);
             assert(suffixLinkNeed->GetDepth() == reminder.node->GetDepth() +
@@ -389,10 +386,20 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
     return result;
 }
 
-#include "hw3.p4.testing.h"
+/// Testing in proper file
+/// #include "hw3.p4.testing.h"
 
 int main() {
-    //TSuffixTree().ConstructTreeAndCalcSolution("abxabyabz");
-    //return 0;
-    return RunTests();
+    std::string input;
+    std::cin >> input;
+
+    std::vector<size_t> result =
+            TSuffixTree().ConstructTreeAndCalcSolution(input);
+
+    for (auto e : result) {
+        std::cout << e << "\n";
+    }
+
+    return 0;
+    // return RunTests();
 }
