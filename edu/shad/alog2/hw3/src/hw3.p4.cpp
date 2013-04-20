@@ -194,13 +194,6 @@ public:
     */
     TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
         assert(begin <= end);
-#ifdef VERBOSE_OUTPUT
-        std::cout << "APPLYING STRING: ";
-        for (size_t i = begin; i < end; ++i)
-            std::cout << text[i];
-        std::cout << "\n";
-        Print(node);
-#endif // VERBOSE_OUTPUT
 
         if (begin >= end) {
             return node;
@@ -227,10 +220,6 @@ public:
             const TNodePtr newNode,
             size_t position)
     {
-#ifdef VERBOSE_OUTPUT
-        std::cout << "NEWNODE_DEPTH  = " << newNode->GetDepth() << std::endl;
-        std::cout << "REMINDER_DEPTH = " << reminder->node->GetDepth() << std::endl;
-#endif // VERBOSE_OUTPUT
         if (reminder->node == GetRoot()) {
             reminder->node = ApplyString(reminder->node->GetSuffixLink(),
                     position - (newNode->GetDepth() - 1), position);
@@ -254,11 +243,6 @@ public:
             reminder->length = 0;
             reminder->character = 0;
         }
-
-#ifdef VERBOSE_OUTPUT
-        std::cout << "ApplyingResult:\n";
-        Print(reminder->node);
-#endif // VERBOSE_OUTPUT
 
         return reminder->node;
     }
@@ -343,20 +327,9 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
     /// Main cycle
     for (size_t i = 0; i < text.size(); ++i) {
         TEdgePtr edge = reminder.node->GetEdge(text[i - reminder.length]);
-#ifdef VERBOSE_OUTPUT
-        // TEdgePtr edge = reminder.node->GetEdge(reminder.character);
-        std::cout << text[i] << " (" << std::string("") + reminder.character
-                  << ", " << reminder.length << ")" << std::endl;
-        if (reminder.node == GetRoot()) {
-            std::cout << "IN_ROOT\n";
-        }
-#endif // VERBOSE_OUTPUT
 
         /// Add new edge if hasnt.
         if (edge == 0) {
-#ifdef VERBOSE_OUTPUT
-            std::cout << "DEBUG: NO EDGE!\n";
-#endif // VERBOSE_OUTPUT
             TEdgePtr newEdge = ConstructEdge(i, reminder.node);
             reminder.node->SetEdge(text[i], newEdge);
             result[i - reminder.node->GetDepth()] =
@@ -372,9 +345,6 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
                 reminder.node = reminder.node->GetSuffixLink();
                 reminder.length -= reminder.node->GetDepth();
             }
-#ifdef VERBOSE_OUTPUT
-            PrintMe();
-#endif // VERBOSE_OUTPUT
             continue;
         }
 
@@ -387,9 +357,6 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
                 reminder.character = 0;
                 assert(reminder.node->GetAncestor() != 0);
             }
-#ifdef VERBOSE_OUTPUT
-            PrintMe();
-#endif // VERBOSE_OUTPUT
             continue;
         }
 
@@ -414,9 +381,6 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
             suffixLinkNeed = 0;
             reminder.character = 0;
         }
-#ifdef VERBOSE_OUTPUT
-        PrintMe();
-#endif // VERBOSE_OUTPUT
     }
 
     assert(reminder.length == 0);
