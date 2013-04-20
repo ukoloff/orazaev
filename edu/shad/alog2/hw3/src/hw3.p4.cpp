@@ -125,14 +125,17 @@ private:
 
 struct TReminder {
     TReminder(const TNodePtr& node,
+            std::vector<size_t> * const result,
             char character,
             size_t length)
         : node(node)
+        , result(result)
         , character(character)
         , length(length)
     { }
 
     TNodePtr node;
+    std::vector<size_t> * const result;
     char character;
     size_t length;
 };
@@ -296,22 +299,24 @@ public:
     }
 
     void PrintMe() {
-        static int i = 3;
         Print(GetRoot());
     }
 
 public:
-    TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) {
+    TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) const {
         return TEdgePtr(new TEdge(begin, text, ancestor));
+        return std::make_shared<TEdge>(begin, text, ancestor);
     }
-    TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node) {
+    TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node) const {
         return TEdgePtr(new TEdge(begin, end, text, node));
+        return std::make_shared<TEdge>(begin, end, text, node);
     }
     static TNodePtr ConstructNode(size_t depth,
             const TNodePtr& suffixLink,
             const TNodePtr& ancestor)
     {
         return TNodePtr(new TNode(depth, suffixLink, ancestor));
+        return std::make_shared<TNode>(depth, suffixLink, ancestor);
     }
 
 public:
@@ -332,7 +337,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
     root = ConstructNode(0, 0, 0);
     root->SetSuffixLink(root);
 
-    TReminder reminder(root, 0, 0);
+    TReminder reminder(root, &result, 0, 0);
     TNodePtr suffixLinkNeed = 0;
 
     /// Main cycle
@@ -354,6 +359,8 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
 #endif // VERBOSE_OUTPUT
             TEdgePtr newEdge = ConstructEdge(i, reminder.node);
             reminder.node->SetEdge(text[i], newEdge);
+            result[i - reminder.node->GetDepth()] =
+                    reminder.node->GetDepth();
 
             if (reminder.node != GetRoot()) {
                 assert(reminder.node->GetAncestor() != 0);
@@ -388,6 +395,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
 
         /// Split edge and pass through suffix link
         TNodePtr newNode = SplitEdge(reminder, i);
+        result[i - newNode->GetDepth()] = newNode->GetDepth();
         assert(newNode->GetAncestor() != 0);
 
         /// Set suffixLink for previous split-node

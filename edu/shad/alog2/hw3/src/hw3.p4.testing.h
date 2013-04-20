@@ -4,18 +4,31 @@
 
 typedef std::shared_ptr<TSuffixTree> TTreePtr;
 
+std::ostream& operator<< (std::ostream& out, const std::vector<size_t>& v) {
+    out << "{ ";
+    for (auto e : v) {
+        out << e << " ";
+    }
+    out << "}";
+
+    return out;
+}
+
 class TTestNode : public TestFixture<TTestNode> {
 public:
     TEST_FIXTURE(TTestNode) {
         /** List of all test cases to run. */
-        //TEST_CASE(TestTrivialOperations);
-        //TEST_CASE(TestApplyString);
-        //TEST_CASE(TestTrivialConstruction);
-        //TEST_CASE(TestMinimalConstruction);
-        //TEST_CASE(TestMinimalSplittedConstruction);
+        TEST_CASE(TestTrivialOperations);
+        TEST_CASE(TestApplyString);
+        TEST_CASE(TestTrivialConstruction);
+        TEST_CASE(TestMinimalConstruction);
+        TEST_CASE(TestMinimalSplittedConstruction);
         TEST_CASE(TestSplittedConstruction);
         TEST_CASE(TestRandomStringsConstruction);
-        TEST_CASE(TestTiming);
+        //TEST_CASE(TestTiming);
+        //TEST_CASE(TestTimingWorstCase);
+        TEST_CASE(TestTrivialRepeatings);
+        TEST_CASE(TestStressRepeatings);
     }
 
     virtual void setUp() {
@@ -157,24 +170,82 @@ public:
 
     void TestRandomStringsConstruction() {
         srand(13);
-        for (int i = 0; i < 2000; ++i) {
+        for (int i = 0; i < 200; ++i) {
             ApplyAllSuffixes(GetRandomString(200, 26));
         }
     }
 
     void TestTiming() {
-        double time = 0.5;
+        srand(13);
+        double time = 1;
         TTimer timer;
 
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 10; ++i) {
             std::string s = GetRandomString(100000);
 
             timer.Start();
-            tree->ConstructTreeAndCalcSolution(s);
+            TSuffixTree().ConstructTreeAndCalcSolution(s);
             timer.Stop();
 
-            assert(timer.GetSeconds() < time);
+            ASSERT_MESSAGE(timer.GetSeconds() < time, "time limit exceeded");
         }
+    }
+
+    void TestTimingWorstCase() {
+        std::string s = "";
+        for (size_t i = 0; i < 100000; ++i) {
+            s += 'a';
+        }
+
+        TTimer timer;
+
+        timer.Start();
+        TSuffixTree().ConstructTreeAndCalcSolution(s);
+        timer.Stop();
+
+        std::cout << timer.GetSeconds() << std::endl;
+        ASSERT_MESSAGE(timer.GetSeconds() < 1, "time limit exceeded");
+    }
+
+    void TestTrivialRepeatings() {
+        const size_t SIZE = 2;
+        std::vector<size_t> expected[SIZE] = {
+            {0, 4, 3, 2, 1},
+            {0, 0, 3, 2, 1, 2, 1}
+        };
+        std::string input[SIZE] = {
+            "aaaaa",
+            "ababaab"
+        };
+        for (size_t i = 0; i < SIZE; ++i) {
+            ASSERT_EQUALS(expected[i],
+                    TSuffixTree().ConstructTreeAndCalcSolution(input[i]));
+        }
+    }
+
+    void TestStressRepeatings() {
+        for (size_t i = 0; i < 2000; ++i) {
+            std::string input = GetRandomString(30, 26);
+            ASSERT_EQUALS(CalcRepeatings(input),
+                    TSuffixTree().ConstructTreeAndCalcSolution(input));
+        }
+    }
+
+    std::vector<size_t> CalcRepeatings(const std::string input) {
+        std::vector<size_t> result(input.size(), 0);
+        for (size_t i = 0; i < input.size(); ++i) {
+            for (size_t j = 0; j < i; ++j) {
+                size_t k = 0;
+                while (input[i + k] == input[j + k]) {
+                    ++k;
+                    if (i + k == input.size())
+                        break;
+                }
+                result[i] = result[i] < k ? k : result[i];
+            }
+        }
+
+        return result;
     }
 
     void ApplyAllSuffixes(const std::string& text) {

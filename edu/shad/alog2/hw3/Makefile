@@ -11,8 +11,8 @@ $(info $(obj_list))
 
 obj_dir := obj
 
-CC := ccache g++-4.6 --std=c++0x -O0 -fno-inline-small-functions -lboost_date_time
-CCFLAGS := -Wall -g
+CC := ccache g++-4.6 --std=c++0x -lboost_date_time -g
+CCFLAGS := -Wall
 CCFLAGS += -I$(ROOT_DIR)
 
 outfile = a.out
