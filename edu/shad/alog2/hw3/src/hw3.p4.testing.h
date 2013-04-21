@@ -224,8 +224,9 @@ public:
     }
 
     void TestStressRepeatings() {
+        srand(13);
         for (size_t i = 0; i < 2000; ++i) {
-            std::string input = GetRandomString(30, 26);
+            std::string input = GetRandomString(30, 10);
             ASSERT_EQUALS(CalcRepeatings(input),
                     TSuffixTree().ConstructTreeAndCalcSolution(input));
         }

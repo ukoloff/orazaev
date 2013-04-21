@@ -14,6 +14,7 @@ obj_dir := obj
 CC := ccache g++-4.6 --std=c++0x -lboost_date_time -g
 CCFLAGS := -Wall
 CCFLAGS += -I$(ROOT_DIR)
+CCFLAGS += -DUNIT_TESTING
 
 outfile = a.out
 
@@ -24,6 +25,8 @@ all: $(obj_list)
 	$(info All targets complete.)
 	$(shell find . | grep -e '\.cpp$$' -e '\.h$$' | xargs ctags --extra=+q)
 	$(info ctags regenerated)
+	$(info Testing:)
+	./$(outfile) < /dev/null
 
 
 
