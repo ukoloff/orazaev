@@ -151,7 +151,7 @@ public:
     inline TNodePtr GetRoot() const          { return root; }
     void SetText(const std::string& newText) { text = newText; }
 
-    std::vector<size_t> ConstructTreeAndCalcSolution(const std::string& text);
+    std::vector<size_t> ConstructTreeAndCalcRepeatings(const std::string& text);
 
     /**
         @brief apply string text[begin:end] to suffix tree node
@@ -267,7 +267,7 @@ private:
 
 
 
-std::vector<size_t> TSuffixTree::ConstructTreeAndCalcSolution(
+std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
         const std::string& input_text)
 {
     SetText(input_text + TSuffixTree::SENTINEL);
@@ -355,7 +355,7 @@ int main() {
     std::cin >> input;
 
     std::vector<size_t> result =
-            TSuffixTree().ConstructTreeAndCalcSolution(input);
+            TSuffixTree().ConstructTreeAndCalcRepeatings(input);
 
     for (auto e : result) {
         std::cout << e << "\n";

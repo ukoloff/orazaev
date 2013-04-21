@@ -97,7 +97,7 @@ public:
     }
 
     void TestTrivialConstruction() {
-        tree->ConstructTreeAndCalcSolution("");
+        tree->ConstructTreeAndCalcRepeatings("");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
         TEdgePtr edge = tree->GetRoot()->GetEdge('$');
@@ -107,7 +107,7 @@ public:
     }
 
     void TestMinimalConstruction() {
-        tree->ConstructTreeAndCalcSolution("abcd");
+        tree->ConstructTreeAndCalcRepeatings("abcd");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
         for (auto c : std::string("abcd$")) {
@@ -120,7 +120,7 @@ public:
     }
 
     void TestMinimalSplittedConstruction() {
-        tree->ConstructTreeAndCalcSolution("aab");
+        tree->ConstructTreeAndCalcRepeatings("aab");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
         for (auto c : std::string("b$")) {
@@ -184,7 +184,7 @@ public:
             std::string s = GetRandomString(100000);
 
             timer.Start();
-            TSuffixTree().ConstructTreeAndCalcSolution(s);
+            TSuffixTree().ConstructTreeAndCalcRepeatings(s);
             timer.Stop();
 
             ASSERT_MESSAGE(timer.GetSeconds() < time, "time limit exceeded");
@@ -200,7 +200,7 @@ public:
         TTimer timer;
 
         timer.Start();
-        TSuffixTree().ConstructTreeAndCalcSolution(s);
+        TSuffixTree().ConstructTreeAndCalcRepeatings(s);
         timer.Stop();
 
         std::cout << timer.GetSeconds() << std::endl;
@@ -219,7 +219,7 @@ public:
         };
         for (size_t i = 0; i < SIZE; ++i) {
             ASSERT_EQUALS(expected[i],
-                    TSuffixTree().ConstructTreeAndCalcSolution(input[i]));
+                    TSuffixTree().ConstructTreeAndCalcRepeatings(input[i]));
         }
     }
 
@@ -228,7 +228,7 @@ public:
         for (size_t i = 0; i < 2000; ++i) {
             std::string input = GetRandomString(30, 10);
             ASSERT_EQUALS(CalcRepeatings(input),
-                    TSuffixTree().ConstructTreeAndCalcSolution(input));
+                    TSuffixTree().ConstructTreeAndCalcRepeatings(input));
         }
     }
 
@@ -250,7 +250,7 @@ public:
     }
 
     void ApplyAllSuffixes(const std::string& text) {
-        tree->ConstructTreeAndCalcSolution(text);
+        tree->ConstructTreeAndCalcRepeatings(text);
 #ifdef VERBOSE_OUTPUT
         std::cout << "TREE for text: " << text << std::endl;
         tree->Print(tree->GetRoot());
