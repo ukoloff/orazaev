@@ -260,6 +260,23 @@ protected:
         return reminder->node;
     }
 
+    void AddNewEdgeToReminderNode(TReminder * const reminder,
+            size_t * const pos,
+            std::vector<size_t> * const result)
+    {
+        TEdgePtr newEdge = ConstructEdge(*pos, reminder->node);
+        reminder->node->SetEdge(text[*pos], newEdge);
+        result->at(*pos - reminder->node->GetDepth()) =
+            reminder->node->GetDepth();
+
+        if (reminder->node != GetRoot()) {
+            assert(reminder->node->GetAncestor() != 0);
+            reminder->length += reminder->node->GetDepth() - 1;
+            --*pos;
+            reminder->node = reminder->node->GetSuffixLink();
+            reminder->length -= reminder->node->GetDepth();
+        }
+    }
 private:
     std::string text;
     TNodePtr root;
@@ -285,18 +302,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
 
         /// Add new edge if hasnt.
         if (edge == 0) {
-            TEdgePtr newEdge = ConstructEdge(pos, reminder.node);
-            reminder.node->SetEdge(text[pos], newEdge);
-            result[pos - reminder.node->GetDepth()] =
-                    reminder.node->GetDepth();
-
-            if (reminder.node != GetRoot()) {
-                assert(reminder.node->GetAncestor() != 0);
-                reminder.length += reminder.node->GetDepth() - 1;
-                --pos;
-                reminder.node = reminder.node->GetSuffixLink();
-                reminder.length -= reminder.node->GetDepth();
-            }
+            AddNewEdgeToReminderNode(&reminder, &pos, &result);
             continue;
         }
 
@@ -313,7 +319,6 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
         /// Split edge and pass through suffix link
         TNodePtr newNode = SplitEdge(reminder, pos);
         result[pos - newNode->GetDepth()] = newNode->GetDepth();
-        assert(newNode->GetAncestor() != 0);
 
         /// Set suffixLink for previous split-node
         if (suffixLinkNeed != 0) {
