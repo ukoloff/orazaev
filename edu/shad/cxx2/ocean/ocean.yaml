@@ -1,0 +1,38 @@
+%YAML 1.2
+---
+# Main window
+window:
+    size: [550, 480]
+
+# Ocean configuration
+ocean:
+    size: [100, 90]
+    color: [0, 7, 160]
+    num_victims: 50
+    num_predators: 30
+
+# Victim configuration
+victim:
+    colors:
+        head: [43, 62, 241]
+        body: [26, 36, 255]
+        gills: [72, 89, 255]
+        fins: [120, 126, 255]
+        eye: [255, 255, 255]
+    steps_to_spawn: 10
+    max_children: 5
+    lifetime: 100
+    starvation: -1
+
+# Predator configuration
+predator:
+    colors:
+        head: [43, 62, 241]
+        body: [26, 36, 255]
+        gills: [72, 89, 255]
+        fins: [120, 126, 255]
+        eye: [255, 255, 255]
+    steps_to_spawn: 15
+    max_children: 2
+    lifetime: 100
+    starvation: 10
