@@ -2,15 +2,16 @@
 ---
 # Main window
 window:
-    size: [550, 480]
+    size: [1000, 540]
 
 # Ocean configuration
 ocean:
-    size: [550, 480]
-    grid_size: [100, 90]
+    size: [1000, 540]
+    grid_size: [25, 22]
+    grid_color: [10, 10, 210]
     color: [0, 7, 160]
-    num_victims: 50
-    num_predators: 30
+    num_victims: 13
+    num_predators: 7
 
 # Victim configuration
 victim:
