@@ -6,7 +6,8 @@ window:
 
 # Ocean configuration
 ocean:
-    size: [100, 90]
+    size: [550, 480]
+    grid_size: [100, 90]
     color: [0, 7, 160]
     num_victims: 50
     num_predators: 30
@@ -27,11 +28,11 @@ victim:
 # Predator configuration
 predator:
     colors:
-        head: [43, 62, 241]
-        body: [26, 36, 255]
-        gills: [72, 89, 255]
-        fins: [120, 126, 255]
-        eye: [255, 255, 255]
+        head: [200, 19, 19]
+        body: [171, 0, 0]
+        gills: [210, 80, 80]
+        fins: [181, 67, 67]
+        eye: [0, 0, 0]
     steps_to_spawn: 15
     max_children: 2
     lifetime: 100
