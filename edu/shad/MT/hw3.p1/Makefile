@@ -1,5 +1,5 @@
-JARS = FollowersCount.jar
-JAVA = FollowersCount.java
+JAVA = ChainWordCount.java
+JARS = $(JAVA:.java=.jar)
 
 JAVAC = javac -classpath "lib/*"
 
