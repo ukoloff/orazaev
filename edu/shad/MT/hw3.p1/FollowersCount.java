@@ -20,19 +20,19 @@ import org.apache.hadoop.util.ToolRunner;
 public class FollowersCount extends Configured implements Tool {
 
     public static class CountFollowersMapper extends
-            Mapper<Text, Text, Text, IntWritable> {
+            Mapper<Text, Text, IntWritable, IntWritable> {
 
         private final static IntWritable one = new IntWritable(1);
 
         public void map(Text key, Text value, Context context)
                 throws IOException, InterruptedException {
-            context.write(key, one);
+            context.write(new IntWritable(Integer.parseInt(key.toString())), one);
         }
     }
 
     public static class IntSumReducer extends
-            Reducer<Text, IntWritable, Text, IntWritable> {
-        public void reduce(Text key, Iterable<IntWritable> values, Context context) 
+            Reducer<IntWritable, IntWritable, IntWritable, IntWritable> {
+        public void reduce(IntWritable key, Iterable<IntWritable> values, Context context) 
                 throws IOException, InterruptedException {
             int sum = 0;
             for (IntWritable val : values) {
@@ -51,15 +51,15 @@ public class FollowersCount extends Configured implements Tool {
 
         Job job = new Job(getConf());
         job.setJarByClass(FollowersCount.class);
-        job.setJobName("amazing_followers_count");
+        job.setJobName("FollowersCount");
 
         job.setMapperClass(CountFollowersMapper.class);
         job.setCombinerClass(IntSumReducer.class);
         job.setReducerClass(IntSumReducer.class);
 
-        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputKeyClass(IntWritable.class);
         job.setMapOutputValueClass(IntWritable.class);
-        job.setOutputKeyClass(Text.class);
+        job.setOutputKeyClass(IntWritable.class);
         job.setOutputValueClass(IntWritable.class);
 
         job.setInputFormatClass(KeyValueTextInputFormat.class);
