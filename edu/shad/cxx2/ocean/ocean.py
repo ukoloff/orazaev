@@ -5,6 +5,7 @@ import itertools
 from pygame.locals import *
 from operator import mul
 from random import randint
+from random import shuffle
 
 import sys
 
@@ -37,7 +38,7 @@ class CommonSprite(pygame.sprite.Sprite):
 
 
 class FishStrategy(object):
-    """Fish strategy in ocean."""
+    """Fish(Victim) behaviour strategy in ocean."""
 
     def __init__(self, fish):
         """(FishStrategy, fish) -> NoneType"""
@@ -62,38 +63,57 @@ class FishStrategy(object):
                             + self.speed[1] * quantum
 
     def updateMakeTurn(self, ocean):
-        """(FishStrategy, dict, dict) -> NoneType"""
+        """(FishStrategy, ocean) -> NoneType"""
 
         self.fish.position = self.destination
         self._normalizeImage()
+
+        if self._tryToDie(ocean):
+            return
+
+        if not self._tryToGetNewDestination(ocean):
+            return
+
+        del ocean.mapPositionToCreature[self.fish.position]
+
+        self._tryToKill(ocean)
+
+    def _tryToKill(self, ocean):
+        """(FishStrategy, Ocean) -> NoneType"""
+
+        if ocean.mapPositionToCreature.has_key(self.destination):
+            victim = ocean.mapPositionToCreature[self.destination]
+            victim.position = self.destination
+            victim.strategy._normalizeImage()
+
+            self.fish.kill(victim)
+            ocean.numVictims -= 1
+
+    def _tryToDie(self, ocean):
+        """(FishStrategy, Ocean) -> bool"""
 
         if self.fish.starvation != 0:
             self.fish.starvation -= 1
         else:
             self.fish.die()
             del ocean.mapPositionToCreature[self.fish.position]
-            return
+            if isinstance(self.fish, Predator):
+                ocean.numPredators -= 1
+            else:
+                ocean.numVictims -= 1
+            return True
 
-        self._changeDestination(ocean)
-        if self.speed == (0, 0):
-            return
+        return False
 
-        del ocean.mapPositionToCreature[self.fish.position]
-        if ocean.mapPositionToCreature.has_key(self.destination):
-            victim = ocean.mapPositionToCreature[self.destination]
-            victim.position = self.destination
-            victim.strategy._normalizeImage()
-            self.fish.kill(victim)
-
-    def _changeDestination(self, ocean):
-        """(FishStrategy, Ocean) -> NoneType"""
+    def _tryToGetNewDestination(self, ocean):
+        """(FishStrategy, Ocean) -> bool"""
 
         directions = self._getPossibleDirections(ocean)
 
         if not directions:
             ocean.nextMap[self.fish.position] = self.fish
             self.speed = (0, 0)
-            return
+            return False
 
         direction = self._chooseDirection(directions)
         self.destination = (self.fish.position[0] + direction[0],
@@ -107,6 +127,7 @@ class FishStrategy(object):
         self.speed = (direction[0] * self.fish.size[0] / float(self.quantumsPerTurn),
                       direction[1] * self.fish.size[1] / float(self.quantumsPerTurn))
 
+        return True
 
     def _getPossibleDirections(self, ocean):
         """(FishStrategy, dict, dict) -> list of (int, int)"""
@@ -162,38 +183,32 @@ class DiedFishStrategy(FishStrategy):
 
 
 class PredatorStrategy(FishStrategy):
-    """Predators strategy."""
+    """Predators behaviour strategy."""
 
     def _getPossibleDirections(self, ocean):
         """(FishStrategy, dict, dict) -> list of (int, int)"""
 
         directions = []
         foodNear = False
+
         for direction in itertools.product((1, 0, -1), (1, 0, -1)):
             newPosition = (self.fish.position[0] + direction[0],
                            self.fish.position[1] + direction[1])
 
             if not (0 <= newPosition[0] < ocean.gridSize[0]) \
                 or not (0 <= newPosition[1] < ocean.gridSize[1]) \
-                or direction == (0, 0):
+                or direction == (0, 0) \
+                or not ocean.mapPositionToCreature.has_key(newPosition):
                 continue
 
-            if ocean.mapPositionToCreature.has_key(newPosition) \
-                and ocean.mapPositionToCreature[newPosition].eatable \
-                and ocean.mapPositionToCreature[newPosition].alive:
-                if foodNear:
-                    directions = [direction]
-                else:
-                    directions.append(direction)
-                    foodNear = True
-                continue
+            something = ocean.mapPositionToCreature[newPosition]
+            if something.alive and something.eatable:
+                directions.append(direction)
 
-            if foodNear or ocean.nextMap.has_key(newPosition):
-                continue
+        if directions:
+            return directions
 
-            directions.append(direction)
-
-        return directions
+        return FishStrategy._getPossibleDirections(self, ocean)
 
 
 
@@ -355,11 +370,17 @@ class Ocean(CommonSprite):
         if self.currentQuantum == self.quantumsPerTurn:
             self._updateCreaturesDestinations()
             self.currentQuantum = 0
+            self.printInfo()
         else:
             self._moveCreatures()
 
         self.currentQuantum += 1
         self._updateImage()
+
+    def printInfo(self):
+        """(Ocean) -> NoneType"""
+
+        print "INFO: Victims:", self.numVictims, ", Predators", self.numPredators
 
     def _moveCreatures(self):
         """(Ocean) -> NoneType"""
@@ -372,15 +393,26 @@ class Ocean(CommonSprite):
 
         self.mapPositionToCreature = self.nextMap
         self.nextMap = {}
-        creatures = self.mapPositionToCreature.items()
+        items = self.mapPositionToCreature.items()
         self.creatures = self.mapPositionToCreature.values()
-        # Shuffle creatures here
 
-        for position, creature in creatures:
+        # Predators always turns first.
+        self._setPredatorsToBegin(items)
+
+        for position, creature in items:
             creature.updateTurn(self)
-            # del self.mapPositionToCreature[position]
-        #self.mapPositionToCreature = self.nextMap
 
+    def _setPredatorsToBegin(self, items):
+        """(Ocean, list of ((int, int), Fish)) -> NoneType"""
+
+        def cmp(x, y):
+            if type(x[1]) == type(y[1]):
+                return 0
+            elif isinstance(x[1], Predator):
+                return -1
+            return 1
+
+        items.sort(cmp)
 
     def _fillOcean(self):
         """(Ocean) -> NoneType"""
