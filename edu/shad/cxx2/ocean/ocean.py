@@ -52,7 +52,7 @@ class FishStrategy(object):
 
         return directions[randint(0, len(directions) - 1)]
 
-    def updateMoveToDestination(self, quantum):
+    def updateBetweenTurns(self, quantum):
         """(FishStrategy, int) -> NoneType"""
 
         assert quantum < self.quantumsPerTurn
@@ -61,7 +61,7 @@ class FishStrategy(object):
         self.fish.rect.top = self.fish.position[1] * self.fish.size[1] \
                             + self.speed[1] * quantum
 
-    def updateDirection(self, ocean):
+    def updateMakeTurn(self, ocean):
         """(FishStrategy, dict, dict) -> NoneType"""
 
         self.fish.position = self.destination
@@ -70,9 +70,23 @@ class FishStrategy(object):
         if self.fish.starvation != 0:
             self.fish.starvation -= 1
         else:
-            self.fish.alive = False
-            self.fish.strategy = DiedFishStrategy(self.fish)
+            self.fish.die()
+            del ocean.mapPositionToCreature[self.fish.position]
             return
+
+        self._changeDestination(ocean)
+        if self.speed == (0, 0):
+            return
+
+        del ocean.mapPositionToCreature[self.fish.position]
+        if ocean.mapPositionToCreature.has_key(self.destination):
+            victim = ocean.mapPositionToCreature[self.destination]
+            victim.position = self.destination
+            victim.strategy._normalizeImage()
+            self.fish.kill(victim)
+
+    def _changeDestination(self, ocean):
+        """(FishStrategy, Ocean) -> NoneType"""
 
         directions = self._getPossibleDirections(ocean)
 
@@ -92,6 +106,7 @@ class FishStrategy(object):
 
         self.speed = (direction[0] * self.fish.size[0] / float(self.quantumsPerTurn),
                       direction[1] * self.fish.size[1] / float(self.quantumsPerTurn))
+
 
     def _getPossibleDirections(self, ocean):
         """(FishStrategy, dict, dict) -> list of (int, int)"""
@@ -127,7 +142,7 @@ class DiedFishStrategy(FishStrategy):
         self.fish = fish
         self.quantumsPerTurn = self.fish.config['ocean']['quantums_per_turn']
 
-    def updateMoveToDestination(self, quantum):
+    def updateBetweenTurns(self, quantum):
         """(DiedFishStrategy, fish) -> NoneType"""
 
         for key in self.fish.colors.keys():
@@ -136,12 +151,49 @@ class DiedFishStrategy(FishStrategy):
                     self.fish.colors[key][2],
                     255 * (self.quantumsPerTurn - quantum - 1) / self.quantumsPerTurn)
         self.fish._fillSprite()
+        if self.fish.moveDirection < 0:
+            self.fish.image = pygame.transform.flip(self.fish.image, True, False)
 
-    def updateDirection(self, ocean):
+    def updateMakeTurn(self, ocean):
         """(DiedFishStrategy, dict, dict) -> NoneType"""
 
-        # remove itself from ocean
         pass
+
+
+
+class PredatorStrategy(FishStrategy):
+    """Predators strategy."""
+
+    def _getPossibleDirections(self, ocean):
+        """(FishStrategy, dict, dict) -> list of (int, int)"""
+
+        directions = []
+        foodNear = False
+        for direction in itertools.product((1, 0, -1), (1, 0, -1)):
+            newPosition = (self.fish.position[0] + direction[0],
+                           self.fish.position[1] + direction[1])
+
+            if not (0 <= newPosition[0] < ocean.gridSize[0]) \
+                or not (0 <= newPosition[1] < ocean.gridSize[1]) \
+                or direction == (0, 0):
+                continue
+
+            if ocean.mapPositionToCreature.has_key(newPosition) \
+                and ocean.mapPositionToCreature[newPosition].eatable \
+                and ocean.mapPositionToCreature[newPosition].alive:
+                if foodNear:
+                    directions = [direction]
+                else:
+                    directions.append(direction)
+                    foodNear = True
+                continue
+
+            if foodNear or ocean.nextMap.has_key(newPosition):
+                continue
+
+            directions.append(direction)
+
+        return directions
 
 
 
@@ -165,12 +217,18 @@ class Fish(CommonSprite):
     def updateTurn(self, ocean):
         """(Fish, dict, dict) -> NoneType"""
 
-        self.strategy.updateDirection(ocean)
+        self.strategy.updateMakeTurn(ocean)
 
     def update(self, quantum):
         """(Fish, int) -> NoneType"""
 
-        self.strategy.updateMoveToDestination(quantum)
+        self.strategy.updateBetweenTurns(quantum)
+
+    def die(self):
+        """(Fish) -> NoneType"""
+
+        self.alive = False
+        self.strategy = DiedFishStrategy(self)
 
     def _fillSprite(self):
         """(Fish) -> NoneType"""
@@ -196,8 +254,11 @@ class Fish(CommonSprite):
         pygame.draw.rect(self.image, self.colors['gills'], pygame.Rect(5 * zoom[0], 2 * zoom[1], 1 * zoom[0], 2 * zoom[1]))
         pygame.draw.rect(self.image, self.colors['gills'], pygame.Rect(6 * zoom[0], 4 * zoom[1], 1 * zoom[0], 1 * zoom[1]))
 
-        # Draw eye
-        pygame.draw.rect(self.image, self.colors['eye'], pygame.Rect(7 * zoom[0], 2 * zoom[1], 1 * zoom[0], 1 * zoom[1]))
+        if self.alive:
+            pygame.draw.rect(self.image, self.colors['eye'], pygame.Rect(7 * zoom[0], 2 * zoom[1], 1 * zoom[0], 1 * zoom[1]))
+        else:
+            pygame.draw.line(self.image, self.colors['eye'], (7 * zoom[0], 2 * zoom[1]), (8 * zoom[0], 3 * zoom[1]), 3)
+            pygame.draw.line(self.image, self.colors['eye'], (8 * zoom[0], 2 * zoom[1]), (7 * zoom[0], 3 * zoom[1]), 3)
 
 
 
@@ -209,7 +270,8 @@ class Victim(Fish):
 
         self.colors = config['victim']['colors']
         Fish.__init__(self, position, size, config)
-        self.starvation = config['victim']['starvation']
+        self.starvation = -1
+        self.eatable = True
 
 
 class Predator(Fish):
@@ -220,12 +282,14 @@ class Predator(Fish):
 
         self.colors = config['predator']['colors']
         Fish.__init__(self, position, size, config)
+        self.strategy = PredatorStrategy(self)
         self.starvation = config['predator']['starvation']
+        self.eatable = False
 
     def kill(self, other):
         """(Fish, Fish) -> NoneType"""
 
-        other.alive = False
+        other.die()
         self.starvation = self.config['predator']['starvation']
 
 
@@ -314,7 +378,7 @@ class Ocean(CommonSprite):
 
         for position, creature in creatures:
             creature.updateTurn(self)
-            del self.mapPositionToCreature[position]
+            # del self.mapPositionToCreature[position]
         #self.mapPositionToCreature = self.nextMap
 
 

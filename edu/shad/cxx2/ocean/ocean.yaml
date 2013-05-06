@@ -7,11 +7,11 @@ window:
 # Ocean configuration
 ocean:
     size: [1000, 540]
-    grid_size: [50, 45]
+    grid_size: [20, 20]
     grid_color: [10, 10, 210]
     color: [0, 7, 160]
-    num_victims: 50
-    num_predators: 20
+    num_victims: 25 # 50
+    num_predators: 4 #
     quantum: 40
     quantums_per_turn: 20
 
