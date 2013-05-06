@@ -47,7 +47,7 @@ class FishStrategy(object):
         self.destination = self.fish.position
         self.speed = (0, 0)
 
-    def chooseDirection(self, directions):
+    def _chooseDirection(self, directions):
         """(FishStrategy, list of (int, int)) -> (int, int)"""
 
         return directions[randint(0, len(directions) - 1)]
@@ -61,25 +61,30 @@ class FishStrategy(object):
         self.fish.rect.top = self.fish.position[1] * self.fish.size[1] \
                             + self.speed[1] * quantum
 
-
-    def updateDirection(self, currentMap, nextMap):
+    def updateDirection(self, ocean):
         """(FishStrategy, dict, dict) -> NoneType"""
 
         self.fish.position = self.destination
         self._normalizeImage()
 
-        directions = self._getPossibleDirections(currentMap, nextMap)
+        if self.fish.starvation != 0:
+            self.fish.starvation -= 1
+        else:
+            self.fish.alive = False
+            self.fish.strategy = DiedFishStrategy(self.fish)
+            return
+
+        directions = self._getPossibleDirections(ocean)
 
         if not directions:
-            nextMap[self.fish.position] = self.fish
+            ocean.nextMap[self.fish.position] = self.fish
             self.speed = (0, 0)
             return
 
-        direction = self.chooseDirection(directions)
+        direction = self._chooseDirection(directions)
         self.destination = (self.fish.position[0] + direction[0],
                     self.fish.position[1] + direction[1])
-        #self.fish.position = self.destination
-        nextMap[self.destination] = self.fish
+        ocean.nextMap[self.destination] = self.fish
 
         if direction[0] * self.fish.moveDirection < 0:
             self.fish.image = pygame.transform.flip(self.fish.image, True, False)
@@ -87,17 +92,16 @@ class FishStrategy(object):
 
         self.speed = (direction[0] * self.fish.size[0] / float(self.quantumsPerTurn),
                       direction[1] * self.fish.size[1] / float(self.quantumsPerTurn))
-        #self._normalizeImage()
 
-    def _getPossibleDirections(self, currentMap, nextMap):
+    def _getPossibleDirections(self, ocean):
         """(FishStrategy, dict, dict) -> list of (int, int)"""
 
         directions = []
         for direction in itertools.product((1, 0, -1), (1, 0, -1)):
             newPosition = (self.fish.position[0] + direction[0],
                            self.fish.position[1] + direction[1])
-            if currentMap.has_key(newPosition) \
-                or nextMap.has_key(newPosition) \
+            if ocean.mapPositionToCreature.has_key(newPosition) \
+                or ocean.nextMap.has_key(newPosition) \
                 or not (0 <= newPosition[0] < self.fish.config['ocean']['grid_size'][0]) \
                 or not (0 <= newPosition[1] < self.fish.config['ocean']['grid_size'][1]):
                 continue
@@ -113,6 +117,34 @@ class FishStrategy(object):
         self.fish.rect.top = self.fish.position[1] * self.fish.size[1]
 
 
+
+class DiedFishStrategy(FishStrategy):
+    """What to do if you are died fish? :)"""
+
+    def __init__(self, fish):
+        """(DiedFishStrategy, fish) -> NoneType"""
+
+        self.fish = fish
+        self.quantumsPerTurn = self.fish.config['ocean']['quantums_per_turn']
+
+    def updateMoveToDestination(self, quantum):
+        """(DiedFishStrategy, fish) -> NoneType"""
+
+        for key in self.fish.colors.keys():
+            self.fish.colors[key] = (self.fish.colors[key][0],
+                    self.fish.colors[key][1],
+                    self.fish.colors[key][2],
+                    255 * (self.quantumsPerTurn - quantum - 1) / self.quantumsPerTurn)
+        self.fish._fillSprite()
+
+    def updateDirection(self, ocean):
+        """(DiedFishStrategy, dict, dict) -> NoneType"""
+
+        # remove itself from ocean
+        pass
+
+
+
 class Fish(CommonSprite):
     """Fish in ocean."""
 
@@ -122,6 +154,7 @@ class Fish(CommonSprite):
         CommonSprite.__init__(self, (position[0] * size[0],
                 position[1] * size[1]), size)
 
+        self.alive = True
         self.position = position
         self.config = config
         self.moveDirection = 1
@@ -129,10 +162,10 @@ class Fish(CommonSprite):
 
         self._fillSprite()
 
-    def updateTurn(self, currentMap, nextMap):
+    def updateTurn(self, ocean):
         """(Fish, dict, dict) -> NoneType"""
 
-        self.strategy.updateDirection(currentMap, nextMap)
+        self.strategy.updateDirection(ocean)
 
     def update(self, quantum):
         """(Fish, int) -> NoneType"""
@@ -176,7 +209,7 @@ class Victim(Fish):
 
         self.colors = config['victim']['colors']
         Fish.__init__(self, position, size, config)
-
+        self.starvation = config['victim']['starvation']
 
 
 class Predator(Fish):
@@ -187,7 +220,13 @@ class Predator(Fish):
 
         self.colors = config['predator']['colors']
         Fish.__init__(self, position, size, config)
+        self.starvation = config['predator']['starvation']
 
+    def kill(self, other):
+        """(Fish, Fish) -> NoneType"""
+
+        other.alive = False
+        self.starvation = self.config['predator']['starvation']
 
 
 class Ocean(CommonSprite):
@@ -270,10 +309,11 @@ class Ocean(CommonSprite):
         self.mapPositionToCreature = self.nextMap
         self.nextMap = {}
         creatures = self.mapPositionToCreature.items()
+        self.creatures = self.mapPositionToCreature.values()
         # Shuffle creatures here
 
         for position, creature in creatures:
-            creature.updateTurn(self.mapPositionToCreature, self.nextMap)
+            creature.updateTurn(self)
             del self.mapPositionToCreature[position]
         #self.mapPositionToCreature = self.nextMap
 
