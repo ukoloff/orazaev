@@ -73,7 +73,7 @@ undersampling = function(data) {
   class.sizes = class.sizes[order(class.sizes$size, decreasing=F),]
 
   min.size = class.sizes$size[1]
-  data = rbind(data, data[data$y == class.sizes$y[1],])
+  balanced.data = rbind(balanced.data, data[data$y == class.sizes$y[1],])
 
   for (i in 2:nrow(class.sizes)) {
     cur.y = class.sizes$y[i]
@@ -89,7 +89,7 @@ undersampling = function(data) {
 
       print(sprintf("Run kmeans on %d elements, with %d clusters.", cur.size, rm.size))
       kmeans.result = kmeans(cur.class.data, rm.size, 4000, 5)
-      print(sprintf("New size = %d.", cur.size))
+      print(sprintf("Removing centroids nearest point for each cluster.", cur.size))
 
       # Remove one point for each cluster
       filtered.data = data.frame()
@@ -123,6 +123,28 @@ undersampling = function(data) {
   }
 
   return (balanced.data)
+}
+
+calc.balanced.data = function(data, factor=0.5) {
+  class.sizes = get.class.sizes(data)
+  class.sizes = class.sizes[order(class.sizes$size, decreasing=T),]
+
+  bigest.class = class.sizes$y[1]
+  pseudo.max.size = round(class.sizes$size[1] * factor)
+
+  if (pseudo.max.size < class.sizes$size[2]) {
+    pseudo.max.size = class.size$size[2]
+  }
+
+  hiden.indexes = c(1:nrow(data))[data$y == bigest.class]
+  hiden.indexes = hiden.indexes[1:(class.sizes$size[1] - pseudo.max.size)]
+
+  pseudo.data = data[-hiden.indexes,]
+  pseudo.data = oversampling(pseudo.data)
+  pseudo.data = rbind(pseudo.data, data[hiden.indexes,])
+  pseudo.data = undersampling(pseudo.data)
+
+  return(pseudo.data)
 }
 
 
