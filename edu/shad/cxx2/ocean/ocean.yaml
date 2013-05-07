@@ -2,17 +2,17 @@
 ---
 # Main window
 window:
-    size: [1000, 540]
+    size: [750, 405]
 
 # Ocean configuration
 ocean:
-    size: [1000, 540]
+    size: [750, 405]
     grid_size: [20, 20]
     grid_color: [10, 10, 210]
     color: [0, 7, 160]
-    num_victims: 25 # 50
+    num_victims: 50 # 50
     num_predators: 4 #
-    quantum: 40
+    quantum: 10 # 40
     quantums_per_turn: 20
 
 # Victim configuration
@@ -23,9 +23,9 @@ victim:
         gills: [72, 89, 255]
         fins: [120, 126, 255]
         eye: [255, 255, 255]
-    steps_to_spawn: 10
-    max_children: 5
-    lifetime: 100
+    steps_to_spawn: 13
+    max_children: 1
+    lifetime: 31
     starvation: -1
 
 # Predator configuration
@@ -37,6 +37,6 @@ predator:
         fins: [181, 67, 67]
         eye: [0, 0, 0]
     steps_to_spawn: 15
-    max_children: 2
-    lifetime: 100
-    starvation: 10
+    max_children: 1
+    lifetime: 31
+    starvation: 14

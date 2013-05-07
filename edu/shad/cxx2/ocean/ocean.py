@@ -66,9 +66,12 @@ class FishStrategy(object):
         """(FishStrategy, ocean) -> NoneType"""
 
         self.fish.position = self.destination
-        self._normalizeImage()
+        self.fish._normalizeImage()
 
         if self._tryToDie(ocean):
+            return
+
+        if self._tryToSpawn(ocean):
             return
 
         if not self._tryToGetNewDestination(ocean):
@@ -78,13 +81,49 @@ class FishStrategy(object):
 
         self._tryToKill(ocean)
 
+    def _tryToSpawn(self, ocean):
+        """(FishStrategy, Ocean) -> bool"""
+
+        if self.fish.spawnTimer != 0:
+            self.fish.spawnTimer -= 1
+            return False
+
+        self.fish.spawnTimer = self.fish.stepsToSpawn
+        self.destination = self.fish.position
+        self.speed = (0, 0)
+
+        directions = FishStrategy._getPossibleDirections(self, ocean)
+        count = randint(1, self.fish.maxSpawn)
+
+
+        shuffle(directions)
+        for direction in directions:
+            position = (self.fish.position[0] + direction[0],
+                       self.fish.position[1] + direction[1])
+
+            child = self.fish.spawn(position)
+            ocean.nextMap[position] = child
+            ocean.creatures.append(child)
+
+            if isinstance(self.fish, Victim):
+                ocean.numVictims += 1
+            else:
+                ocean.numPredators += 1
+
+            count -= 1
+            if count == 0:
+                break
+
+        ocean.nextMap[self.fish.position] = self.fish
+        return True
+
     def _tryToKill(self, ocean):
         """(FishStrategy, Ocean) -> NoneType"""
 
         if ocean.mapPositionToCreature.has_key(self.destination):
             victim = ocean.mapPositionToCreature[self.destination]
             victim.position = self.destination
-            victim.strategy._normalizeImage()
+            victim._normalizeImage()
 
             self.fish.kill(victim)
             ocean.numVictims -= 1
@@ -92,9 +131,7 @@ class FishStrategy(object):
     def _tryToDie(self, ocean):
         """(FishStrategy, Ocean) -> bool"""
 
-        if self.fish.starvation != 0:
-            self.fish.starvation -= 1
-        else:
+        if self.fish.lifetime <= 0 or self.fish.starvation == 0:
             self.fish.die()
             del ocean.mapPositionToCreature[self.fish.position]
             if isinstance(self.fish, Predator):
@@ -103,7 +140,11 @@ class FishStrategy(object):
                 ocean.numVictims -= 1
             return True
 
+        self.fish.starvation -= 1
+        self.fish.lifetime -= 1
         return False
+
+
 
     def _tryToGetNewDestination(self, ocean):
         """(FishStrategy, Ocean) -> bool"""
@@ -146,12 +187,6 @@ class FishStrategy(object):
 
         return directions
 
-    def _normalizeImage(self):
-        """(FishStrategy) -> NoneType"""
-
-        self.fish.rect.left = self.fish.position[0] * self.fish.size[0]
-        self.fish.rect.top = self.fish.position[1] * self.fish.size[1]
-
 
 
 class DiedFishStrategy(FishStrategy):
@@ -180,6 +215,42 @@ class DiedFishStrategy(FishStrategy):
 
         pass
 
+
+
+class SpawnedFishStrategy(FishStrategy):
+    """Spawned fish behaviour."""
+
+    def __init__(self, fish):
+        """(SpawnedFishStrategy, fish) -> NoneType"""
+
+        self.fish = fish
+        self.quantumsPerTurn = self.fish.config['ocean']['quantums_per_turn']
+
+    def updateBetweenTurns(self, quantum):
+        """(SpawnedFishStrategy, fish) -> NoneType"""
+
+        for key in self.fish.colors.keys():
+            self.fish.colors[key] = (self.fish.colors[key][0],
+                    self.fish.colors[key][1],
+                    self.fish.colors[key][2],
+                    255 * (quantum % self.quantumsPerTurn) / self.quantumsPerTurn)
+        self.fish._fillSprite()
+
+    def updateMakeTurn(self, ocean):
+        """(SpawnedFishStrategy, ocean) -> NoneType"""
+
+        for key in self.fish.colors.keys():
+            self.fish.colors[key] = (self.fish.colors[key][0],
+                    self.fish.colors[key][1],
+                    self.fish.colors[key][2], 255)
+        self.fish._fillSprite()
+
+        if isinstance(self.fish, Victim):
+            self.fish.strategy = FishStrategy(self.fish)
+        else:
+            self.fish.strategy = PredatorStrategy(self.fish)
+
+        self.fish.strategy.updateMakeTurn(ocean)
 
 
 class PredatorStrategy(FishStrategy):
@@ -275,18 +346,39 @@ class Fish(CommonSprite):
             pygame.draw.line(self.image, self.colors['eye'], (7 * zoom[0], 2 * zoom[1]), (8 * zoom[0], 3 * zoom[1]), 3)
             pygame.draw.line(self.image, self.colors['eye'], (8 * zoom[0], 2 * zoom[1]), (7 * zoom[0], 3 * zoom[1]), 3)
 
+    def _normalizeImage(self):
+        """(Fish) -> NoneType"""
+
+        self.rect.left = self.position[0] * self.size[0]
+        self.rect.top = self.position[1] * self.size[1]
 
 
 class Victim(Fish):
     """Victim in ocean."""
 
     def __init__(self, position, size, config):
-        """(Fish, (int, int), (int, int), dict) -> NoneType"""
+        """(Victim, (int, int), (int, int), dict) -> NoneType"""
 
         self.colors = config['victim']['colors']
         Fish.__init__(self, position, size, config)
+        self.strategy = FishStrategy(self)
+        self.stepsToSpawn = config['victim']['steps_to_spawn']
+        self.spawnTimer = config['victim']['steps_to_spawn']
+        self.maxSpawn = config['victim']['max_children']
+        self.lifetime = config['victim']['lifetime']
         self.starvation = -1
         self.eatable = True
+
+    def spawn(self, position):
+        """(Victim, (int, int)) -> Victim"""
+
+        child = Victim(position, self.size, self.config)
+        for key in child.colors.keys():
+            child.colors[key] = (child.colors[key][0], child.colors[key][1],
+                    child.colors[key][2], 0)
+        child._fillSprite()
+        child.strategy = SpawnedFishStrategy(child)
+        return child
 
 
 class Predator(Fish):
@@ -298,6 +390,10 @@ class Predator(Fish):
         self.colors = config['predator']['colors']
         Fish.__init__(self, position, size, config)
         self.strategy = PredatorStrategy(self)
+        self.stepsToSpawn = config['victim']['steps_to_spawn']
+        self.spawnTimer = config['predator']['steps_to_spawn']
+        self.maxSpawn = config['predator']['max_children']
+        self.lifetime = config['predator']['lifetime']
         self.starvation = config['predator']['starvation']
         self.eatable = False
 
@@ -306,6 +402,17 @@ class Predator(Fish):
 
         other.die()
         self.starvation = self.config['predator']['starvation']
+
+    def spawn(self, position):
+        """(Predator, (int, int)) -> Predator"""
+
+        child = Predator(position, self.size, self.config)
+        for key in child.colors.keys():
+            child.colors[key] = (child.colors[key][0], child.colors[key][1],
+                    child.colors[key][2], 0)
+        child._fillSprite()
+        child.strategy = SpawnedFishStrategy(child)
+        return child
 
 
 class Ocean(CommonSprite):
