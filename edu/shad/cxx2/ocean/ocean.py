@@ -56,7 +56,6 @@ class FishStrategy(object):
     def updateBetweenTurns(self, quantum):
         """(FishStrategy, int) -> NoneType"""
 
-        assert quantum < self.quantumsPerTurn
         self.fish.rect.left = self.fish.position[0] * self.fish.size[0] \
                             + self.speed[0] * quantum
         self.fish.rect.top = self.fish.position[1] * self.fish.size[1] \
@@ -179,8 +178,8 @@ class FishStrategy(object):
                            self.fish.position[1] + direction[1])
             if ocean.mapPositionToCreature.has_key(newPosition) \
                 or ocean.nextMap.has_key(newPosition) \
-                or not (0 <= newPosition[0] < self.fish.config['ocean']['grid_size'][0]) \
-                or not (0 <= newPosition[1] < self.fish.config['ocean']['grid_size'][1]):
+                or not (0 <= newPosition[0] < ocean.gridSize[0]) \
+                or not (0 <= newPosition[1] < ocean.gridSize[1]):
                 continue
 
             directions.append(direction)
