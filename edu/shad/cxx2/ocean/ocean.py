@@ -283,6 +283,47 @@ class PredatorStrategy(FishStrategy):
 
 
 
+class Stone(CommonSprite):
+    """Stone in ocean."""
+
+    def __init__(self, position, size, config):
+        """(Stone, (int, int), (int, int), dict) ->NoneType"""
+
+        CommonSprite.__init__(self, (position[0] * size[0],
+                position[1] * size[1]), size)
+
+        self.position = position
+        self.alive = False
+        self.eatable = False
+        self.colors = config['stone']['colors']
+
+        self._fillSprite()
+
+    def updateTurn(self, ocean):
+        """(Stone, Ocean) -> NoneType"""
+
+        ocean.nextMap[self.position] = self
+
+    def updateBetweenTurns(self, ocean):
+        """(Stone, Ocean) -> NoneType"""
+        pass
+
+    def _fillSprite(self):
+        """(Stone) -> NoneType"""
+
+        self.image.fill(self.colors['stone'])
+
+        for i in xrange(randint(15, 30)):
+            point = self._randomPoint()
+            side = randint(0, self.rect.width // 4)
+            pygame.draw.rect(self.image, self.colors['light'], pygame.Rect(point, (side, side)))
+
+    def _randomPoint(self):
+        """(Stone) -> (int, int)"""
+
+        return (randint(self.rect.width // 20, self.rect.width), randint(self.rect.height // 20, self.rect.height))
+
+
 class Fish(CommonSprite):
     """Fish in ocean."""
 
@@ -426,6 +467,7 @@ class Ocean(CommonSprite):
 
         self.numVictims = config['ocean']['num_victims']
         self.numPredators = config['ocean']['num_predators']
+        self.numStones = config['ocean']['num_stones']
         self.quantumsPerTurn = config['ocean']['quantums_per_turn']
 
         self._createGrid()
@@ -526,7 +568,7 @@ class Ocean(CommonSprite):
 
         self.mapPositionToCreature = {}
         self.creatures = []
-        if self.numVictims + self.numPredators > prod(self.gridSize):
+        if self.numVictims + self.numPredators + self.numStones > prod(self.gridSize):
             raise Exception("Can't create ocean becouse number of creatures is greater than ocean.")
 
         for x in xrange(self.numVictims):
@@ -535,8 +577,11 @@ class Ocean(CommonSprite):
         for x in xrange(self.numPredators):
             self._addPredator(self._getFreePosition())
 
+        for x in xrange(self.numStones):
+            self._addStone(self._getFreePosition())
+
     def _addCreature(self, creature):
-        """(Ocean, Fish) -> NoneType"""
+        """(Ocean, CommonSprite) -> NoneType"""
 
         try:
             self.mapPositionToCreature[creature.position]
@@ -555,6 +600,11 @@ class Ocean(CommonSprite):
         """(Ocean, (int, int)) -> NoneType"""
 
         self._addCreature(Victim(position, self.zoomFactor, self.config))
+
+    def _addStone(self, position):
+        """(Ocean, (int, int)) -> NoneType"""
+
+        self._addCreature(Stone(position, self.zoomFactor, self.config))
 
 
 
