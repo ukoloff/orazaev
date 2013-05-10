@@ -1,4 +1,66 @@
 #!/usr/bin/env python
+"""
+    python-pygame and python-yaml modules is need
+    to be installed:
+
+    $ sudo apt-get install python-pygame
+    $ sudo apt-get install python-yaml
+
+    Copyright 2013 Aman Orazaev
+"""
+
+yamlConfig = \
+"""
+%YAML 1.2
+---
+# Main window
+window:
+    size: [750, 405]
+
+# Ocean configuration
+ocean:
+    size: [750, 405]
+    grid_size: [30, 30]
+    grid_color: [10, 10, 210]
+    color: [0, 7, 160]
+    num_victims: 70
+    num_predators: 20
+    num_stones: 120
+    quantum: 10
+    quantums_per_turn: 30
+    max_iterations: 99999999
+
+# Victim configuration
+victim:
+    colors:
+        head: [43, 62, 241]
+        body: [26, 36, 255]
+        gills: [72, 89, 255]
+        fins: [120, 126, 255]
+        eye: [255, 255, 255]
+    steps_to_spawn: 17
+    max_children: 1
+    lifetime: 41
+    starvation: -1
+
+# Predator configuration
+predator:
+    colors:
+        head: [200, 19, 19]
+        body: [171, 0, 0]
+        gills: [210, 80, 80]
+        fins: [181, 67, 67]
+        eye: [0, 0, 0]
+    steps_to_spawn: 20
+    max_children: 1
+    lifetime: 43
+    starvation: 18
+
+stone:
+    colors:
+        stone: [90, 90, 90, 200]
+        light: [60, 160, 60, 180]
+"""
 
 import pygame
 import itertools
@@ -468,6 +530,8 @@ class Ocean(CommonSprite):
         self.numPredators = config['ocean']['num_predators']
         self.numStones = config['ocean']['num_stones']
         self.quantumsPerTurn = config['ocean']['quantums_per_turn']
+        self.iterationsLeft = config['ocean']['max_iterations']
+        print self.iterationsLeft
 
         self._createGrid()
         self._fillOcean()
@@ -476,6 +540,11 @@ class Ocean(CommonSprite):
         self.nextMap = self.mapPositionToCreature
 
         self._updateImage()
+
+    def isEnd(self):
+        """(Ocean) -> bool"""
+
+        return self.iterationsLeft < 0 or self.numPredators == 0
 
     def _createGrid(self):
         """(Ocean) -> NoneType"""
@@ -518,6 +587,7 @@ class Ocean(CommonSprite):
         if self.currentQuantum == self.quantumsPerTurn:
             self._updateCreaturesDestinations()
             self.currentQuantum = 0
+            self.iterationsLeft -= 1
             self.printInfo()
         else:
             self._moveCreatures()
@@ -621,7 +691,7 @@ def input(events):
 
 def action(window, config):
     ocean = Ocean(config)
-    while True:
+    while not ocean.isEnd():
         ocean.draw(window)
         pygame.display.flip()
         pygame.time.delay(config['ocean']['quantum'])
@@ -635,7 +705,7 @@ def loadConfig(stream):
     return load(stream)
 
 def main():
-    config = loadConfig(open('ocean.yaml', 'rb'))
+    config = loadConfig(yamlConfig)
     window = init_window(config)
     action(window, config)
 
