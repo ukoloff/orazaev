@@ -173,15 +173,15 @@ class Node(object):
 class Tree(object):
     """Tree class."""
 
-    def __init__(self, data=None):
-        """(Tree) -> NoneType
+    def __init__(self, node=None):
+        """(Tree, node=None) -> NoneType
 
-        >>> Tree().root.data
-        >>> Tree('abc').root.data
+        >>> Tree().root
+        >>> Tree(Node('abc')).root.data
         'abc'
         """
 
-        self.root = Node(data)
+        self.root = node
 
     def find(self, data, bfs=True):
         """(Tree, node data, bfs=True) -> Node
@@ -190,7 +190,7 @@ class Tree(object):
         breadth-first search if bfs=True,
         otherwise using depth-first search.
 
-        >>> t = Tree()
+        >>> t = Tree(Node())
         >>> t.root.add('a').add('b').add('c').data
         >>> t.root['a'].add('d').add('e').add('f').data
         'a'
