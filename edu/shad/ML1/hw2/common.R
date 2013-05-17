@@ -1,4 +1,7 @@
 data = read.csv('train.csv')
+#data = read.csv('big.cheat.data.csv')
+
+library('e1071')
 
 
 replace.na.with.mean = function(data) {
@@ -30,7 +33,7 @@ get.class.sizes = function(data) {
   return(class.sizes)
 }
 
-oversampling = function(data) {
+oversampling = function(data, max.clusters=800) {
   balanced.data = data.frame()
 
   class.sizes = get.class.sizes(data)
@@ -46,14 +49,20 @@ oversampling = function(data) {
     cur.class.data = data[data$y == class.sizes$y[i], -ncol(data)]
 
     while (cur.size < max.size) {
-      add.size = round(cur.size * 0.3)
+      add.size = round(cur.size * 0.1)
       if (cur.size + add.size > max.size) {
         add.size = max.size - cur.size
       }
 
-      print(sprintf("Run kmeans on %d elements, with %d clusters.", cur.size, add.size))
-      centroids = as.data.frame(kmeans(cur.class.data, add.size, 4000, 5)$centers)
+      if (add.size > max.clusters) {
+        add.size = max.clusters
+      }
 
+      print(sprintf("Run kmeans on %d elements, with %d clusters.", cur.size, add.size))
+      km.result = kmeans(cur.class.data, add.size, 4000, 5)
+      centroids = as.data.frame(km.result$centers)
+
+      print(sprintf("Non empty centroids = %d", length(unique(sort(km.result$cluster)))))
       cur.class.data = rbind(cur.class.data, centroids)
       cur.size = nrow(cur.class.data)
       print(sprintf("New size = %d.", cur.size))
@@ -125,7 +134,7 @@ undersampling = function(data) {
   return (balanced.data)
 }
 
-calc.balanced.data = function(data, factor=0.5) {
+calc.balanced.data = function(data, factor=0.7) {
   class.sizes = get.class.sizes(data)
   class.sizes = class.sizes[order(class.sizes$size, decreasing=T),]
 
@@ -149,8 +158,6 @@ calc.balanced.data = function(data, factor=0.5) {
 
 
 calc.svm.model = function(data) {
-  library('e1071')
-
   # TUNE = tune(svm, train.x=balanced.data[, -11], train.y=balanced.data[, 11], ranges=list(gamma=c(0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30), cost=c(0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30)), tunecontrol=tune.control(sampling="fix"))
   # TUNE$best.parameters = gamma=1, cost=3
   SVM = svm(data[, -ncol(data)], data[, ncol(data)], type='C', gamma=1, cost=3)
@@ -171,21 +178,34 @@ split.dataset = function(data, coefficient=0.7) {
 }
 
 
-test.svm = function(data, nrepeat=5, gamma=0.97, cost=50, kernel='radial') {
+test.svm = function(data, split.factor=0.7, nrepeat=5, gamma=0.97, cost=50, kernel='radial', degree=3, coef0=0, test.data=data.frame()) {
   set.seed(13)
   accuracy = 0
 
+  model = NA
   for (i in 1:nrepeat) {
-    train.indexes = split.dataset(data)
-    model = svm(data[train.indexes,-11], data[train.indexes,11], type='C', gamma=gamma, cost=cost,kernel=kernel)
-    pred = predict(model, data[-train.indexes,-11])
+    train.indexes = split.dataset(data, coefficient=split.factor)
+    model = svm(data[train.indexes,-11], data[train.indexes,11], type='C',
+                gamma=gamma, cost=cost, kernel=kernel, degree=degree, coef0=coef0)
 
-    accuracy = accuracy + sum(pred == data[-train.indexes,11]) / nrow(data[-train.indexes,])
+    if (nrow(test.data) == 0) {
+        cur.test.data = data[-train.indexes,]
+    } else {
+        cur.test.data = test.data
+    }
 
-    print(sprintf("[%d] accuracy = %f", i, accuracy / i))
+    pred = predict(model, cur.test.data[,-11])
+
+    TPR = pred[cur.test.data[,11] == 2] == cur.test.data[cur.test.data[,11] == 2,11]
+    TPR = sum(TPR) / sum(pred == 2)
+    TNR = pred[cur.test.data[,11] == 1] == cur.test.data[cur.test.data[,11] == 1,11]
+    TNR = sum(TNR) / sum(pred == 1)
+    accuracy = accuracy + sum(pred == cur.test.data[,11]) / nrow(cur.test.data)
+
+    print(sprintf("[%d] accuracy = %f, TPR = %f, TNR = %f", i, accuracy / i, TPR, TNR))
   }
 
-  return(accuracy / nrepeat)
+  return(model)
 }
 
 
