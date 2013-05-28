@@ -37,9 +37,9 @@ public:
         tree = TTreePtr(new TSuffixTree());
         tree->SetText(text);
 
-        TNodePtr node = tree->ConstructNode(2, 0, tree->GetRoot());
+        TSuffixTreeNodePtr node = tree->ConstructNode(2, 0, tree->GetRoot());
         /// root -> ab
-        TEdgePtr edge = tree->ConstructEdge(0, 2, node);
+        TSuffixTreeEdgePtr edge = tree->ConstructEdge(0, 2, node);
         tree->GetRoot()->SetEdge(edge->GetChar(0), edge);
 
         /// root -> ab -> c...
@@ -63,15 +63,15 @@ public:
                 tree->ConstructEdge(0, tree->GetRoot()));
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
-        TEdgePtr edge = tree->GetRoot()->GetEdge(text[0]);
+        TSuffixTreeEdgePtr edge = tree->GetRoot()->GetEdge(text[0]);
         ASSERT_EQUALS(static_cast<size_t>(-1), edge->GetEnd());
-        ASSERT_EQUALS(static_cast<size_t>(-1), edge->GetSize());
+        ASSERT_EQUALS(static_cast<size_t>(-1), edge->GetLength());
         ASSERT_EQUALS(true, edge->IsEndless());
-        ASSERT_EQUALS(tree->GetRoot(), edge->GetAncestor());
+        ASSERT_EQUALS(tree->GetRoot(), edge->GetSourceNode());
     }
 
     void TestApplyString() {
-        TNodePtr node = tree->ApplyString(tree->GetRoot(), 0, 1);
+        TSuffixTreeNodePtr node = tree->ApplyString(tree->GetRoot(), 0, 1);
         ASSERT_EQUALS(tree->GetRoot(), node);
 
         /// Apply ""
@@ -87,7 +87,7 @@ public:
         ASSERT_EQUALS(tree->GetRoot(), node);
 
         /// Apply "abc"
-        TNodePtr expectedNode = tree->GetRoot()->GetEdge(text[0])->GetNode();
+        TSuffixTreeNodePtr expectedNode = tree->GetRoot()->GetEdge(text[0])->GetTargetNode();
         node = tree->ApplyString(tree->GetRoot(), 0, 3);
         ASSERT_EQUALS(expectedNode, node);
 
@@ -97,21 +97,21 @@ public:
     }
 
     void TestTrivialConstruction() {
-        tree->ConstructTreeAndCalcRepeatings("");
+        tree->InitTreeAndCalculateRepeatings("");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
-        TEdgePtr edge = tree->GetRoot()->GetEdge('$');
+        TSuffixTreeEdgePtr edge = tree->GetRoot()->GetEdge('$');
         ASSERT_MESSAGE(edge != 0, "root->GetEdge('$') equals to 0.");
         ASSERT_EQUALS(true, edge->IsEndless());
         ASSERT_EQUALS('$', edge->GetChar(0));
     }
 
     void TestMinimalConstruction() {
-        tree->ConstructTreeAndCalcRepeatings("abcd");
+        tree->InitTreeAndCalculateRepeatings("abcd");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
         for (auto c : std::string("abcd$")) {
-            TEdgePtr edge = tree->GetRoot()->GetEdge(c);
+            TSuffixTreeEdgePtr edge = tree->GetRoot()->GetEdge(c);
             ASSERT_MESSAGE(edge != 0, (std::string("root->GetEdge('") +
                         c + "') equals to 0.").c_str());
             ASSERT_EQUALS(true, edge->IsEndless());
@@ -120,31 +120,31 @@ public:
     }
 
     void TestMinimalSplittedConstruction() {
-        tree->ConstructTreeAndCalcRepeatings("aab");
+        tree->InitTreeAndCalculateRepeatings("aab");
         ASSERT_EQUALS(false, tree->GetRoot()->IsLeaf());
 
         for (auto c : std::string("b$")) {
-            TEdgePtr edge = tree->GetRoot()->GetEdge(c);
+            TSuffixTreeEdgePtr edge = tree->GetRoot()->GetEdge(c);
             ASSERT_MESSAGE(edge != 0, (std::string("root->GetEdge('") + c +
                         "') equals to 0.").c_str());
             ASSERT_EQUALS(true, edge->IsEndless());
             ASSERT_EQUALS(c, edge->GetChar(0));
         }
 
-        TEdgePtr edge = tree->GetRoot()->GetEdge('a');
+        TSuffixTreeEdgePtr edge = tree->GetRoot()->GetEdge('a');
         ASSERT_MESSAGE(edge != 0, "root->GetEdge(SENTINEL) equals to 0.");
         ASSERT_EQUALS(false, edge->IsEndless());
         ASSERT_EQUALS('a', edge->GetChar(0));
 
-        TNodePtr node = edge->GetNode();
+        TSuffixTreeNodePtr node = edge->GetTargetNode();
         ASSERT_MESSAGE(tree->GetRoot() != node, "Split-node is equal to root");
-        ASSERT_EQUALS(size_t(1), edge->GetNode()->GetDepth());
+        ASSERT_EQUALS(size_t(1), edge->GetTargetNode()->GetDepth());
 
         ASSERT_EQUALS(node, tree->ApplyString(tree->GetRoot(), 1, 3));
         ASSERT_EQUALS(node, tree->ApplyString(tree->GetRoot(), 0, 3));
 
         for (auto c : std::string("ab")) {
-            TEdgePtr edge = node->GetEdge(c);
+            TSuffixTreeEdgePtr edge = node->GetEdge(c);
             ASSERT_MESSAGE(edge != 0, (std::string("Split-node->GetEdge('")
                         + c + "') equals to 0.").c_str());
             ASSERT_EQUALS(true, edge->IsEndless());
@@ -184,7 +184,7 @@ public:
             std::string s = GetRandomString(100000);
 
             timer.Start();
-            TSuffixTree().ConstructTreeAndCalcRepeatings(s);
+            TSuffixTree().InitTreeAndCalculateRepeatings(s);
             timer.Stop();
 
             ASSERT_MESSAGE(timer.GetSeconds() < time, "time limit exceeded");
@@ -200,7 +200,7 @@ public:
         TTimer timer;
 
         timer.Start();
-        TSuffixTree().ConstructTreeAndCalcRepeatings(s);
+        TSuffixTree().InitTreeAndCalculateRepeatings(s);
         timer.Stop();
 
         std::cout << timer.GetSeconds() << std::endl;
@@ -219,7 +219,7 @@ public:
         };
         for (size_t i = 0; i < SIZE; ++i) {
             ASSERT_EQUALS(expected[i],
-                    TSuffixTree().ConstructTreeAndCalcRepeatings(input[i]));
+                    TSuffixTree().InitTreeAndCalculateRepeatings(input[i]));
         }
     }
 
@@ -228,7 +228,7 @@ public:
         for (size_t i = 0; i < 2000; ++i) {
             std::string input = GetRandomString(30, 10);
             ASSERT_EQUALS(CalcRepeatings(input),
-                    TSuffixTree().ConstructTreeAndCalcRepeatings(input));
+                    TSuffixTree().InitTreeAndCalculateRepeatings(input));
         }
     }
 
@@ -250,17 +250,17 @@ public:
     }
 
     void ApplyAllSuffixes(const std::string& text) {
-        tree->ConstructTreeAndCalcRepeatings(text);
+        tree->InitTreeAndCalculateRepeatings(text);
 #ifdef VERBOSE_OUTPUT
         std::cout << "TREE for text: " << text << std::endl;
         tree->Print(tree->GetRoot());
 #endif
 
         for (size_t i = 0; i < text.size(); ++i) {
-            TNodePtr node = tree->ApplyString(tree->GetRoot(), i, text.size());
-            TEdgePtr edge = node->GetEdge(text[i + node->GetDepth()]);
+            TSuffixTreeNodePtr node = tree->ApplyString(tree->GetRoot(), i, text.size());
+            TSuffixTreeEdgePtr edge = node->GetEdge(text[i + node->GetDepth()]);
             if (!edge->IsEndless()) {
-                ASSERT_EQUALS(text.size() - i - node->GetDepth(), edge->GetSize());
+                ASSERT_EQUALS(text.size() - i - node->GetDepth(), edge->GetLength());
             }
         }
     }

@@ -12,131 +12,136 @@
 
 
 
-class TNode;
-class TEdge;
-typedef std::shared_ptr<TNode> TNodePtr;
-typedef std::shared_ptr<TEdge> TEdgePtr;
+class TSuffixTreeNode;
+class TSuffixTreeEdge;
+typedef std::shared_ptr<TSuffixTreeNode> TSuffixTreeNodePtr;
+typedef std::shared_ptr<TSuffixTreeEdge> TSuffixTreeEdgePtr;
 
 
 
-class TNode {
+class TSuffixTreeNode {
 public:
-    TNode(size_t depth, const TNodePtr& suffixLink, const TNodePtr& ancestor)
-        : depth(depth)
+    TSuffixTreeNode(size_t depth, const TSuffixTreeNodePtr& suffixLink, const TSuffixTreeNodePtr& ancestor)
+        : depthInChar(depth)
         , suffixLink(suffixLink)
         , ancestor(ancestor)
     { }
 
-    TNode()
-        : depth(0)
+    TSuffixTreeNode()
+        : depthInChar(0)
         , suffixLink(0)
         , ancestor(0)
     { }
 
 public:
-    inline void SetSuffixLink(const TNodePtr& link) { suffixLink = link; }
-    inline void SetAncestor(const TNodePtr& node) { ancestor = node; }
-    inline void SetEdge(char firstChar, const TEdgePtr& edge) {
+    void SetSuffixLink(const TSuffixTreeNodePtr& link) { suffixLink = link; }
+    void SetAncestor(const TSuffixTreeNodePtr& node) { ancestor = node; }
+    void SetEdge(char firstChar, const TSuffixTreeEdgePtr& edge) {
         edges[firstChar] = edge;
     }
 
 public:
-    inline bool IsLeaf() const            { return !edges.size(); }
-    inline TNodePtr GetSuffixLink() const { return suffixLink; }
-    inline TNodePtr GetAncestor() const   { return ancestor; }
-    inline size_t GetDepth() const        { return depth; }
+    bool IsLeaf() const            { return edges.empty(); }
+    TSuffixTreeNodePtr GetSuffixLink() const { return suffixLink; }
+    TSuffixTreeNodePtr GetAncestor() const   { return ancestor; }
+    size_t GetDepth() const        { return depthInChar; }
 
-    TEdgePtr GetEdge(char character) const {
-        return edges.find(character) != edges.end() ?
+    bool HasEdge(char character) const {
+        return edges.find(character) != edges.end();
+    }
+
+    TSuffixTreeEdgePtr GetEdge(char character) const {
+        return HasEdge(character) ?
                 edges.find(character)->second : 0;
     }
 
 private:
-    std::unordered_map<char, TEdgePtr> edges;
-    size_t depth;
-    TNodePtr suffixLink;
-    TNodePtr ancestor;
+    std::unordered_map<char, TSuffixTreeEdgePtr> edges;
+    size_t depthInChar;
+    TSuffixTreeNodePtr suffixLink;
+    TSuffixTreeNodePtr ancestor;
 };
 
 
 
-class TEdge {
+class TSuffixTreeEdge {
 public:
-    TEdge(size_t begin,
-            size_t end,
+    TSuffixTreeEdge(size_t beginIndex,
+            size_t endIndex,
             const std::string& text,
-            const TNodePtr& edgeNode)
-        : edgeNode(edgeNode)
-        , begin(begin)
-        , end(end)
+            const TSuffixTreeNodePtr& targetNode)
+        : targetNode(targetNode)
+        , beginIndex(beginIndex)
+        , endIndex(endIndex)
         , text(text)
     { }
 
-    TEdge(size_t begin, const std::string& text, const TNodePtr& ancestor)
-        : edgeNode(ancestor)
-        , begin(begin)
-        , end(ENDLESS)
+    TSuffixTreeEdge(size_t beginIndex, const std::string& text, const TSuffixTreeNodePtr& ancestor)
+        : targetNode(ancestor)
+        , beginIndex(beginIndex)
+        , endIndex(NO_END)
         , text(text)
     { }
 
 public:
-    inline bool IsEndless() const  { return GetEnd() == ENDLESS; }
-    inline size_t GetEnd() const   { return end; }
-    inline size_t GetBegin() const { return begin; }
+    inline bool IsEndless() const  { return GetEnd() == NO_END; }
+    inline size_t GetEnd() const   { return endIndex; }
+    inline size_t GetBegin() const { return beginIndex; }
 
-    inline size_t GetSize() const  {
-        return IsEndless() ? ENDLESS : GetEnd() - GetBegin();
+    inline size_t GetLength() const  {
+        return IsEndless() ? NO_END : GetEnd() - GetBegin();
     }
 
-    inline TNodePtr GetNode() const {
-        return IsEndless() ? 0 : edgeNode;
+    inline TSuffixTreeNodePtr GetTargetNode() const {
+        return IsEndless() ? 0 : targetNode;
     }
 
-    inline TNodePtr GetAncestor() const {
-        return IsEndless() ? edgeNode : edgeNode->GetAncestor();
+    inline TSuffixTreeNodePtr GetSourceNode() const {
+        return IsEndless() ? targetNode : targetNode->GetAncestor();
     }
 
     inline char GetChar(size_t index) const {
-        return index < GetSize() ? text[GetBegin() + index] : 0;
+        assert(index < GetLength());
+        return text[GetBegin() + index];
     }
 
 public:
-    inline void SetBegin(size_t value) { begin = value; }
+    inline void SetBegin(size_t value) { beginIndex = value; }
 
-    inline void SetAncestor(const TNodePtr& ancestor) {
+    inline void SetAncestor(const TSuffixTreeNodePtr& ancestor) {
         if (IsEndless()) {
-            edgeNode = ancestor;
+            targetNode = ancestor;
         } else {
-            edgeNode->SetAncestor(ancestor);
+            targetNode->SetAncestor(ancestor);
         }
     }
 
 public:
-    static const size_t ENDLESS = static_cast<size_t>(-1);
+    static const size_t NO_END = static_cast<size_t>(-1);
 
 private:
-    TNodePtr edgeNode;
-    size_t begin;
-    size_t end;
+    TSuffixTreeNodePtr targetNode;
+    size_t beginIndex;
+    size_t endIndex;
     const std::string& text;
 };
 
 
 
 struct TReminder {
-    TReminder(const TNodePtr& node, size_t length)
+    TReminder(const TSuffixTreeNodePtr& node, size_t length)
         : node(node)
         , length(length)
     { }
 
-    TNodePtr node;
+    TSuffixTreeNodePtr node;
     size_t length;
 };
 
 
 
 /**
-    @brief Text, useful functions for all nodes and edges
+    @brief Suffix tree class.
 */
 class TSuffixTree {
 public:
@@ -148,16 +153,15 @@ public:
     }
 
 public:
-    inline TNodePtr GetRoot() const          { return root; }
-    void SetText(const std::string& newText) { text = newText; }
+    inline TSuffixTreeNodePtr GetRoot() const          { return root; }
 
-    std::vector<size_t> ConstructTreeAndCalcRepeatings(const std::string& text);
+    std::vector<size_t> InitTreeAndCalculateRepeatings(const std::string& text);
 
     /**
         @brief apply string text[begin:end] to suffix tree node
-        @return TNodePtr to last node on the string way
+        @return TSuffixTreeNodePtr to last node on the string way
     */
-    TNodePtr ApplyString(TNodePtr node, size_t begin, size_t end) {
+    TSuffixTreeNodePtr ApplyString(TSuffixTreeNodePtr node, size_t begin, size_t end) {
         assert(begin <= end);
 
         if (begin >= end) {
@@ -165,53 +169,34 @@ public:
         }
 
         do {
-            TEdgePtr edge = node->GetEdge(text[begin]);
-            begin = begin + edge->GetSize();
+            TSuffixTreeEdgePtr edge = node->GetEdge(text[begin]);
+            begin = begin + edge->GetLength();
             if (edge->IsEndless() || begin >= end) {
                 break;
             }
 
-            node = edge->GetNode();
+            node = edge->GetTargetNode();
         } while (begin < end);
 
         return node;
     }
 
 public:
-    TEdgePtr ConstructEdge(size_t begin, const TNodePtr& ancestor) const {
-        return TEdgePtr(new TEdge(begin, text, ancestor));
-        return std::make_shared<TEdge>(begin, text, ancestor);
-    }
-
-    TEdgePtr ConstructEdge(size_t begin, size_t end, const TNodePtr& node) const {
-        return TEdgePtr(new TEdge(begin, end, text, node));
-        return std::make_shared<TEdge>(begin, end, text, node);
-    }
-
-    static TNodePtr ConstructNode(size_t depth,
-            const TNodePtr& suffixLink,
-            const TNodePtr& ancestor)
-    {
-        return TNodePtr(new TNode(depth, suffixLink, ancestor));
-        return std::make_shared<TNode>(depth, suffixLink, ancestor);
-    }
-
-public:
     static const char SENTINEL = '$';
 
-protected:
+private:
     /**
-        @return TNodePtr for new node on sliced edge.
+        @return TSuffixTreeNodePtr for new node on sliced edge.
     */
-    TNodePtr SplitEdge(const TReminder& reminder, size_t textPosition) {
-        TEdgePtr edge = reminder.node->GetEdge(
+    TSuffixTreeNodePtr SplitEdge(const TReminder& reminder, size_t textPosition) {
+        TSuffixTreeEdgePtr edge = reminder.node->GetEdge(
                 text[textPosition - reminder.length]);
 
         assert(edge->GetChar(reminder.length) != text[textPosition]);
 
-        TNodePtr newNode = ConstructNode(reminder.node->GetDepth() +
+        TSuffixTreeNodePtr newNode = ConstructNode(reminder.node->GetDepth() +
                 reminder.length, 0, reminder.node);
-        TEdgePtr newEdge = ConstructEdge(edge->GetBegin(),
+        TSuffixTreeEdgePtr newEdge = ConstructEdge(edge->GetBegin(),
                 edge->GetBegin() + reminder.length, newNode);
 
         /// Reduce old edge
@@ -230,10 +215,10 @@ protected:
 
     /**
         @brief Do suffix link jump from newNode using ancestor suffix link.
-        @return TNodePtr to suffix jump destenation node.
+        @return TSuffixTreeNodePtr to suffix jump destenation node.
     */
-    TNodePtr DoSuffixLinkJump(TReminder * const reminder,
-            const TNodePtr newNode,
+    TSuffixTreeNodePtr DoSuffixLinkJump(TReminder * const reminder,
+            const TSuffixTreeNodePtr newNode,
             size_t position)
     {
         if (reminder->node == GetRoot()) {
@@ -248,12 +233,12 @@ protected:
         /// Update reminder values
         reminder->length =
                 (newNode->GetDepth() - 1) - reminder->node->GetDepth();
-        TEdgePtr nextEdge =
+        TSuffixTreeEdgePtr nextEdge =
                 reminder->node->GetEdge(text[position - reminder->length]);
 
         /// Boundary case: length is equal to nextEdge size
-        if (nextEdge && reminder->length == nextEdge->GetSize()) {
-            reminder->node = nextEdge->GetNode();
+        if (nextEdge && reminder->length == nextEdge->GetLength()) {
+            reminder->node = nextEdge->GetTargetNode();
             reminder->length = 0;
         }
 
@@ -261,30 +246,56 @@ protected:
     }
 
     void AddNewEdgeToReminderNode(TReminder * const reminder,
-            size_t * const pos,
-            std::vector<size_t> * const result)
+            size_t * const position,
+            std::vector<size_t> * const repeatings)
     {
-        TEdgePtr newEdge = ConstructEdge(*pos, reminder->node);
-        reminder->node->SetEdge(text[*pos], newEdge);
-        result->at(*pos - reminder->node->GetDepth()) =
+        TSuffixTreeEdgePtr newEdge = ConstructEdge(*position, reminder->node);
+        reminder->node->SetEdge(text[*position], newEdge);
+        repeatings->at(*position - reminder->node->GetDepth()) =
             reminder->node->GetDepth();
 
         if (reminder->node != GetRoot()) {
             assert(reminder->node->GetAncestor() != 0);
             reminder->length += reminder->node->GetDepth() - 1;
-            --*pos;
+            --*position;
             reminder->node = reminder->node->GetSuffixLink();
             reminder->length -= reminder->node->GetDepth();
         }
     }
+
+private:
+    TSuffixTreeEdgePtr ConstructEdge(size_t begin, const TSuffixTreeNodePtr& ancestor) const {
+        return TSuffixTreeEdgePtr(new TSuffixTreeEdge(begin, text, ancestor));
+        return std::make_shared<TSuffixTreeEdge>(begin, text, ancestor);
+    }
+
+    TSuffixTreeEdgePtr ConstructEdge(size_t begin, size_t end, const TSuffixTreeNodePtr& node) const {
+        return TSuffixTreeEdgePtr(new TSuffixTreeEdge(begin, end, text, node));
+        return std::make_shared<TSuffixTreeEdge>(begin, end, text, node);
+    }
+
+    static TSuffixTreeNodePtr ConstructNode(size_t depth,
+            const TSuffixTreeNodePtr& suffixLink,
+            const TSuffixTreeNodePtr& ancestor)
+    {
+        return TSuffixTreeNodePtr(new TSuffixTreeNode(depth, suffixLink, ancestor));
+        return std::make_shared<TSuffixTreeNode>(depth, suffixLink, ancestor);
+    }
+
+    void SetText(const std::string& newText) { text = newText; }
+
 private:
     std::string text;
-    TNodePtr root;
+    TSuffixTreeNodePtr root;
+
+#ifdef UNIT_TESTING
+    friend class TTestNode;
+#endif
 };
 
 
 
-std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
+std::vector<size_t> TSuffixTree::InitTreeAndCalculateRepeatings(
         const std::string& input_text)
 {
     SetText(input_text + TSuffixTree::SENTINEL);
@@ -294,11 +305,11 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
     root->SetSuffixLink(root);
 
     TReminder reminder(root, 0);
-    TNodePtr suffixLinkNeed = 0;
+    TSuffixTreeNodePtr suffixLinkNeed = 0;
 
     /// Main cycle
     for (size_t pos = 0; pos < text.size(); ++pos) {
-        TEdgePtr edge = reminder.node->GetEdge(text[pos - reminder.length]);
+        TSuffixTreeEdgePtr edge = reminder.node->GetEdge(text[pos - reminder.length]);
 
         /// Add new edge if hasnt.
         if (edge == 0) {
@@ -308,8 +319,9 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
 
         /// Update reminder if we can pass the edge.
         if (edge->GetChar(reminder.length) == text[pos]) {
-            if (edge->GetSize() <= ++reminder.length) {
-                reminder.node = edge->GetNode();
+            ++reminder.length;
+            if (edge->GetLength() <= reminder.length) {
+                reminder.node = edge->GetTargetNode();
                 reminder.length = 0;
                 assert(reminder.node->GetAncestor() != 0);
             }
@@ -317,7 +329,7 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
         }
 
         /// Split edge and pass through suffix link
-        TNodePtr newNode = SplitEdge(reminder, pos);
+        TSuffixTreeNodePtr newNode = SplitEdge(reminder, pos);
         result[pos - newNode->GetDepth()] = newNode->GetDepth();
 
         /// Set suffixLink for previous split-node
@@ -331,8 +343,8 @@ std::vector<size_t> TSuffixTree::ConstructTreeAndCalcRepeatings(
         DoSuffixLinkJump(&reminder, newNode, pos--);
         if (reminder.length == 0) {
             suffixLinkNeed->SetSuffixLink(reminder.node);
-            assert(suffixLinkNeed->GetDepth() == reminder.node->GetDepth() +
-                   1 || suffixLinkNeed == GetRoot());
+            assert(suffixLinkNeed->GetDepth() == reminder.node->GetDepth()
+                   + 1 || suffixLinkNeed == GetRoot());
             suffixLinkNeed = 0;
         }
     }
@@ -360,7 +372,7 @@ int main() {
     std::cin >> input;
 
     std::vector<size_t> result =
-            TSuffixTree().ConstructTreeAndCalcRepeatings(input);
+            TSuffixTree().InitTreeAndCalculateRepeatings(input);
 
     for (auto e : result) {
         std::cout << e << "\n";
