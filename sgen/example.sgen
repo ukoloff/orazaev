@@ -1,0 +1,21 @@
+%copyright
+
+%comment
+    Example of multiline comment.
+    Second line of comment
+%end
+
+%comment
+    class ExampleClass.
+    brief: demonstration.
+%end
+%class(ExampleClass)
+    %var(int x)
+    %var(f y)
+
+    %func(getX)
+    %end
+%end
+
+%func(main)
+%end
