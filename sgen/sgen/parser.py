@@ -5,7 +5,7 @@
 import re
 import blocks
 
-RE_MACRO = re.compile(r'(?P<name>%[^\s\(]*)(?P<arg>\([^\)]*\))?')
+RE_MACRO = re.compile(r'(?P<name>%[^\s]+)(\s+(?P<arg>.*))?\s*$')
 
 
 class UnknownMacroError(Exception):
@@ -31,7 +31,7 @@ class BlockParser(object):
             raise UnknownMacroError("Unknown macro '{0}' at line {1}"
                                     .format(macroName, lineno))
 
-        macroData = macroArg[1: -1] if macroArg is not None else None
+        macroData = macroArg
         return blocks.fabric[macroName](data=macroData)
 
 

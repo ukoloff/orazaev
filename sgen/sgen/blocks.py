@@ -16,9 +16,14 @@ VARIABLE = '%var'
 RAW = '%raw'
 END = '%end'
 
+# Macro for internal representation
+SOURCE = '%source'
+
 
 class SgenBlock(object):
     """Composition of program blocks."""
+
+    macro = None
 
     def __init__(self, data=None):
         """(SgenBlock, data=None) -> NoneType"""
@@ -48,21 +53,11 @@ class SgenBlock(object):
         for block in self.blocks:
             block.printBlocks(indent=indent+1)
 
-    def startHandle(self, lang=None):
-        """(SgenBlock, lang=None) -> str"""
-
-        raise Exception("Undefined method 'startHandle' for {0} class."
-                        .format(self.__class__.__name__))
-
-    def endHandle(self, lang=None):
-        """(SgenBlock, lang=None) -> str"""
-
-        raise Exception("Undefined method 'endHandle' for {0} class."
-                        .format(self.__class__.__name__))
-
 
 class SourceFileBlock(SgenBlock):
     """Block for source file."""
+
+    macro = SOURCE
 
     def __init__(self, data=None):
         """(SourceFileBlock, data=None) -> NoneType"""
@@ -73,6 +68,8 @@ class SourceFileBlock(SgenBlock):
 class CommentBlock(SgenBlock):
     """Block of comments."""
 
+    macro = COMMENT
+
     def __init__(self, data=None):
         """(CommentBlock, data=None) -> NoneType"""
 
@@ -82,12 +79,16 @@ class CommentBlock(SgenBlock):
 class CopyrightBlock(CommentBlock):
     """Copyright comment."""
 
+    macro = COPYRIGHT
+
     def __init__(self, data=None):
         """(CopyrightBlock, data=None) -> NoneType"""
 
         super(CopyrightBlock, self).__init__()
 
         data=textwrap.dedent("""\
+            TODO: description
+
             Copyright {0} Aman Orazaev
             Mail me: aorazaev[at]gmail.com"""
             .format(datetime.now().year))
@@ -99,6 +100,8 @@ class CopyrightBlock(CommentBlock):
 class FunctionBlock(SgenBlock):
     """Function definition in program."""
 
+    macro = FUNCTION
+
     def __init__(self, data=None):
         """(FunctionBlock, data=None) -> NoneType"""
 
@@ -107,6 +110,8 @@ class FunctionBlock(SgenBlock):
 
 class ClassBlock(SgenBlock):
     """Class definition in program."""
+
+    macro = CLASS
 
     def __init__(self, data=None):
         """(ClassBlock, data=None) -> NoneType"""
@@ -117,6 +122,8 @@ class ClassBlock(SgenBlock):
 class VarBlock(SgenBlock):
     """Variable and class fields defenitions in program."""
 
+    macro = VARIABLE
+
     def __init__(self, data=None):
         """(VarBlock, data=None) -> NoneType"""
 
@@ -126,6 +133,8 @@ class VarBlock(SgenBlock):
 
 class RawTextBlock(SgenBlock):
     """TODO"""
+
+    macro = RAW
 
     def __init__(self, data=None):
         """(RawTextBlock, data=None) -> NoneType"""

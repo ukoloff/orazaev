@@ -1,0 +1,24 @@
+%copyright
+
+%comment
+    Example of multiline comment.
+    Second line of comment
+%end
+
+%class TExampleClass
+    public:
+    %func TExampleClass TExampleClass
+    %end
+
+    %func i getX
+        return x;
+    %end
+
+    private:
+    %var i x
+    %var f y
+%end
+
+%func main
+    %var TExampleClass anExampleClassVariable
+%end

@@ -1,0 +1,36 @@
+
+
+import time
+import sys
+
+
+%class TTimer
+    %var i _startTime
+    %var i _endTime
+
+    %func __init__
+    %end
+
+    %func start
+        _startTime = time.time()
+    %end
+
+    %func end
+        _endTime = time.time()
+    %end
+
+    %func result
+        return _endTime - _startTime
+    %end
+%end
+
+
+%func main
+    %var time.time() startTime
+
+    %var i z
+    for x in xrange(10000): z += 1
+
+    %var time.time() endTime
+    print endTime - startTime
+%end

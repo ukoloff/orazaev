@@ -9,6 +9,7 @@ import sys
 
 import sgen.blocks as blocks
 import sgen.parser as parser
+import sgen.generators as generators
 
 
 def argumentsParsing():
@@ -20,10 +21,10 @@ def argumentsParsing():
         input file macrocommands:
           {0}             copyright message.
           {1}                   end of block.
-          {2}(NAME)            function NAME.
-          {3}(NAME)           class NAME.
+          {2} NAME             function NAME.
+          {3} NAME            class NAME.
           {4}               commented block.
-          {5}(TYPE NAME)        variable defenition."""
+          {5} TYPE NAME         variable defenition."""
           .format(blocks.COPYRIGHT, blocks.END,
                   blocks.FUNCTION, blocks.CLASS,
                   blocks.COMMENT, blocks.VARIABLE))
@@ -50,14 +51,23 @@ def argumentsParsing():
     return args
 
 
-def sgen():
+def main():
     """TODO"""
 
     args = argumentsParsing()
 
     prog = parser.BlockParser().parse(args.input)
-    prog.printBlocks()
+    if args.lang == 'blocks':
+        prog.printBlocks()
+        sys.exit(0)
+
+    if args.lang not in generators.fabric.keys():
+        print >> sys.stderr, "Unknown language '{0}'".format(args.lang)
+        sys.exit(1)
+
+    generator = generators.fabric[args.lang]()
+    print generator.generate(prog)
 
 
 if __name__ == "__main__":
-    sgen()
+    main()
