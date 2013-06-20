@@ -31,22 +31,18 @@ def argumentsParsing():
 
     argparser.formatter_class = argparse.RawDescriptionHelpFormatter
 
-    argparser.add_argument('-l', '--lang', metavar='LANG',
+    argparser.add_argument('-l', '--lang', metavar='LANG', default='blocks',
                            help='Templates programming language.(c++, python, blocks...)')
-    argparser.add_argument('-i', '--input', metavar='FILE',
+    argparser.add_argument('-i', '--input', metavar='FILE', default=sys.stdin,
+                           type=argparse.FileType('rb'),
                            help='Input file with template description.')
+    argparser.add_argument('-t', '--tabstop', metavar='SIZE', default=4,
+                           help='Set indent size. (default: 4)', type=int)
 
     args = argparser.parse_args()
 
-    if args.input is None:
-        args.input = sys.stdin.read()
-    else:
-        args.input = open(args.input, 'rb').read()
-
-    if args.lang is None:
-        args.lang = 'blocks'
-    else:
-        args.lang = args.lang.lower().strip()
+    args.lang = args.lang.lower().strip()
+    args.input = args.input.read()
 
     return args
 
@@ -65,7 +61,7 @@ def main():
         print >> sys.stderr, "Unknown language '{0}'".format(args.lang)
         sys.exit(1)
 
-    generator = generators.fabric[args.lang]()
+    generator = generators.fabric[args.lang](tabstop=args.tabstop)
     print generator.generate(prog)
 
 

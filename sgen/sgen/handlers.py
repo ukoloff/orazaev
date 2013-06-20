@@ -45,6 +45,22 @@ def makeIndent(text, tabstop=4):
 ######################################
 
 
+def cxxSourceHandler(data, inside='', tabstop=4, typeMap={}):
+    """(str, inside='', tabstop=4, typeMap={}) -> str"""
+
+    comment = textwrap.dedent('''\
+        /**
+        {0}TODO: brief
+
+        {0}Copyright 2013 Aman Orazaev
+        {0}Mail me aorazaev[at]gmail.com
+        */
+        
+        '''.format(' ' * tabstop))
+
+    return comment + inside
+
+
 def cxxCommentHandler(data, inside='', tabstop=4, typeMap={}):
     """(str, inside='', tabstop=4, typeMap={}) -> str
 
@@ -124,7 +140,7 @@ def cxxClassHandler(data, inside='', tabstop=4, typeMap={}):
 
 
 cxxHandlerPack = {
-    blocks.SourceFileBlock.macro : dummyHandler,
+    blocks.SourceFileBlock.macro : cxxSourceHandler,
     blocks.CommentBlock.macro : cxxCommentHandler,
     blocks.RawTextBlock.macro : textHandler,
     blocks.FunctionBlock.macro : cxxFunctionHandler,
@@ -146,11 +162,18 @@ def pythonSourceFileHandler(data, inside='', tabstop=4, typeMap={}):
         #!/usr/bin/env python
         # -*- coding: utf-8 -*-
         """
-        {0}TODO
+        {0}TODO: brief
+
+        {0}Copyright 2013 Aman Orazaev
+        {0}Mail me aorazaev[at]gmail.com
         """
+        
         '''.format(' ' * tabstop))
 
-    return comment + inside
+    epilog = "if __name__ == '__main__':\n"
+    epilog += makeIndent('import doctest\ndoctest.testmod()', tabstop=tabstop)
+
+    return comment + inside + '\n\n\n' + epilog.rstrip()
 
 
 def pythonCommentHandler(data, inside='', tabstop=4, typeMap={}):
