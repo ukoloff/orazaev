@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./sgen.py --lang python -i templates/python.sgen

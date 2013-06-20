@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+./sgen.py -l c++ -i templates/cxx.sgen

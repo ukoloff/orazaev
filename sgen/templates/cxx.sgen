@@ -1,0 +1,7 @@
+#include <iostream>
+
+
+%func i main
+
+    return 0;
+%end
