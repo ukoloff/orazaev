@@ -1,0 +1,321 @@
+print "Hello world!"
+exit()
+def f():
+    pass
+def f():
+  pass
+exit()
+import rlcompletion
+exit()
+import rlcompleter
+help(rlcompleter)
+exit()
+import readline
+help(readline)
+exit()
+def myFunctionWithLongName(x):
+	return x + 1
+myFunctionWithLongName(1 + 23)
+exit()
+import vim
+exit()
+[1,2,3,4]
+import sys
+sys.getsizeof([1,2,3,4])
+sys.getsizeof([1])
+sys.getsizeof([])
+sys.getsizeof([1,2,3,4,5])
+sys.getsizeof([1,2,3,4,5,6,7,8,9,10])
+sys.getsizeof(int(1))
+sys.getsizeof(int(0))
+sys.getsizeof({})
+sys.getsizeof({1:1})
+sys.getsizeof({1:1, 2:2})
+sys.getsizeof({1:1, 2:2, 3:3})
+exit()
+import sys
+sys.getsizeof(' ')
+sys.getsizeof('  ')
+sys.getsizeof('  ' )
+sys.getsizeof('   ')
+sys.getsizeof('')
+sys.getsizeof(str())
+sys.getsizeof(' ' * 1024)
+sys.getsizeof(' ' * 2 ** 10)
+sys.getsizeof(' ' * 2 ** 20)
+sys.getsizeof(' ' * 2 ** 20) /
+import sigar
+import wx
+import psutil
+exit()
+import libc
+exit()
+import ctypes
+help(ctypes)
+help(libc)
+libc
+libc = ctypes.CDLL('libc.so')
+libc
+size = c_uint(0)
+from ctypes import *
+del ctypes
+libc
+size = c_uint(0)
+size
+libc.sysctl()
+help(libc)
+libc.sysctlbyname("kern.ostype", None, byref(size), None, 0);
+buf = create_string_buffer(size.value)
+libc.sysctlbyname("kery.ostype", buf, byref(size), None, 0);
+libc.sysctlbyname("kern.ostype", buf, byref(size), None, 0);
+buf.value
+help(libc.sysctlbyname)
+help(libc.sysctl)
+exit()
+'a    , b    , c'.split(',')
+exit()
+import os
+help(os)
+exit()
+import os
+os.path.exist('arcadia')
+os.path.exists('arcadia')
+os.getcwd()
+os.symlinc('
+os.symlinc('/place/home/orazaev/sandbox/runtime_data/arc_src/arcadia_for_10', 'arcadia')
+os.symlink('/place/home/orazaev/sandbox/runtime_data/arc_src/arcadia_for_10', 'arcadia')
+os.getcwd('asdf')
+os.getcwd()
+os.symlink('/place/home/orazaev/sandbox/runtime_data/arc_src/arcadia_for_10', '/place/home/orazaev/sandbox/runtime_data/tasks/6/1/16/arcadia')
+os.getcwd()
+os.setcwd
+exit()
+help(str.partition)
+exit()
+def f:
+def f():
+exit()
+import time
+time.sleep(2)
+exit()
+improt future
+import __future__
+help(__future__)
+from __future__ import print_function
+print("Hello"
+", world")
+exit()
+s = "hello"
+s.partition('@')
+s = "hello@"
+s.partition('@')
+exit()
+import os
+help(os.chdir)
+exit()
+import __future__
+dir(__future__)
+help(__future__)
+help(__future__.unicode_literals)
+from __future__ import print_statement
+dir(__future__)
+from __future__ import print_function
+print "ASD"
+print("Hello")
+help(print)
+print ("Hello" "World")
+print ("Hello", "World")
+i = 23
+print(i)
+exit()
+try:
+   raise Exception("Hello!")
+except e:
+   print e
+try:
+   raise Exception("Hello!")
+except * as e
+exit()
+def f():
+  pass
+f.__name__
+exit()
+def print_func_name(f):
+  print f.__name__
+print_func_name(lambda: pass)
+print_func_name(lambda: 1 + 2)
+exit()
+lambda: 1 + 1
+x = lambda: 1 + 1
+x()
+exit()
+x = lambda: 2
+x.__name__
+exit()
+from run_task import *
+dir()
+task_id = run_task('ROBOT_REGRESSION_TEST_BUILD', {}, 'freebsd', 'orazaev', 'Trying xmlrpc api to create and run task')
+task_id
+wait_task_finished(task_id)
+get_resources(task_id)
+exit()
+from run_tasks import *
+from run_task import *
+task_id = run_task('ROBOT_REGRESSION_TEST_BUILD', {}, 'freebsd', 'orazaev', 'Trying xmlrpc api to create and run task')
+wait_task_finished(task_id)
+get_resources(task_id)
+get_resources(task_id)[0]
+exit()
+import os
+os.getpwnam(os.getpwuid())
+help(os)
+exit()
+import os
+help(os)
+import sys
+sys.getpwnam
+sys.getpwnum
+help(sys)
+imoport pwd
+import pwd
+pwd.getpwnam()
+pwd.getpwnam(os.getuid())
+help(pwd.getpwnam())
+help(pwd.getpwnam)
+help(pwd.getpwuid)
+getpwuid(os.getuid())
+sys.getpwuid(os.getuid())
+pwd.getpwuid(os.getuid())
+pwd.getpwuid(os.getuid())[0]
+exit()
+print 'a\r'
+import sys
+sys.stdout.write('a\r')
+sys.stdout.write('a\rb')
+sys.stdout.write('a\bb')
+sys.stdout.write('abcd'); sys.stdout.write('\b\b')
+exit()
+print 'abc\b\b'
+exit()
+import sys
+sys.stdout.write("Hello, "
+"world!\n")
+exit()
+''.join('master            ;         worker;sovler   ;cmremote'.split())
+exit()
+import module
+dir(module)
+module.print_i()
+module.i = 3
+module.print_i()
+exit()
+from module import i
+from module import print_i
+print_i()
+i = 3
+print_i()
+exit()
+import itertools
+help(itertools)
+i = itertools.cycle('abcd')
+i.next()
+exit()
+s = r'-\|/-\\/'
+s
+exit()
+import itertools
+help(itertools)
+from itertools import imap
+str(imap(lambda s: s * 3, 'abc'))
+x = imap(lambda s: s * 3, 'abc')
+x.next()
+''.join(list(imap(lambda s: s * 3, 'abc'))_
+''.join(list(imap(lambda s: s * 3, 'abc')))
+''.join([s * 3 for s in 'abc'])_
+''.join((s * 3 for s in 'abc'))
+exit()
+import argparse
+help(argparse)
+exit()
+import os
+os.path.exist
+os.path.exists
+exit()
+import os
+help(os.path)
+exit()
+import rsync
+import url
+import ulrlib2
+import urllib2
+help(urllib2)
+import urllib
+help(urllib)
+urllib.splithost('rsync://twalrus.yandex.ru/sandbox-tasks/8/5/58/bin')
+help(urllib)
+ls
+u = 'rsync://twalrus.yandex.ru/sandbox-tasks/8/5/58/bin'
+u
+import re
+RE_URL = re.compile(r'^([^:/]+)://([^/]+)/(.*)$')
+RE_URL.match(u)
+RE_URL.match(u).groups()
+exit()
+import os
+import shutil
+help(shutil)
+help(os.chmod)
+exit()
+import os
+os.chmod('ora_tmp', 0)
+exit()
+import os
+os.chmod('ora_tmp', 0777)
+exit()
+import os
+os.listdir('.')
+exit()
+import os
+help(os.path)
+exit()
+def f():
+   print "f()"
+dir(f)
+print f.__code__
+help(f.__code__)
+ls
+f
+dir(f)
+f.__closure__
+def v(x, y):
+  def z(x)
+def v(x, y):
+  def z(x):
+    return x > y
+  return z(x)
+v(1, 2)
+v(2, 2)
+v(3, 2)
+v(3, 5)
+v(3, 1)
+v.__closure__
+import marshal
+help(marshal)
+exit()
+print """Fault: <Fault 1: u'Traceback (most recent call last):\n  File "/home/sandbox/yasandbox/views/__init__.py", line 842, in xmlrpc\n    response = dispatch_xmlrpc(request, method_name, args)\n  File "/home/sandbox/yasandbox/views/xmlrpc.py", line 45, in dispatch_xmlrpc\n    result = method(*args)\n  File "/home/sandbox/yasandbox/views/xmlrpc.py", line 528, in xmlrpc_getTaskStatus\n    task = task_manager.load(task_id, load_ctx=False)  # \u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\n  File "/home/sandbox/yasandbox/manager.py", line 491, in load\n    fields.remove(\'ctx\')\nAttributeError: \'tuple\' object has no attribute \'remove\'\n'>"""
+s = 'u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442'
+pritn s
+print s
+unicode(s)
+s
+print s
+u'u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442'
+pritn u'u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442'
+print u'u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442'
+exit()
+s = u'Traceback (most recent call last):\n  File "/home/sandbox/yasandbox/views/__init__.py", line 842, in xmlrpc\n    response = dispatch_xmlrpc(request, method_name, args)\n  File "/home/sandbox/yasandbox/views/xmlrpc.py", line 45, in dispatch_xmlrpc\n    result = method(*args)\n  File "/home/sandbox/yasandbox/views/xmlrpc.py", line 528, in xmlrpc_getTaskStatus\n    task = task_manager.load(task_id, load_ctx=False)  # \u0434\u043b\u044f \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u0438\u044f \u0441\u0442\u0430\u0442\u0443\u0441\u0430 \u043d\u0435 \u043d\u0443\u0436\u0435\u043d \u043a\u043e\u043d\u0442\u0435\u043a\u0441\u0442\n  File "/home/sandbox/yasandbox/manager.py", line 491, in load\n    fields.remove(\'ctx\')\nAttributeError: \'tuple\' object has no attribute \'remove\'\n'
+print s
+s.decode('utf-8')
+s.encode('utf-8')
+print s.encode('utf-8')
+exit()
