@@ -19,3 +19,4 @@ else
 fi
 
 export EDITOR=vim
+export PYTHONSTARTUP=~/.pythonstartup
