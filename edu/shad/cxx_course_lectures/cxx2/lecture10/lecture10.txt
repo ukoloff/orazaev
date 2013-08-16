@@ -1,0 +1,164 @@
+!date(15.05.13)
+    *** "Сегодня я буду заменять Лешу..."
+
+    Стандартная библиотека питона.
+
+    unicode
+    """
+        >>> s = 'Hello Привет'
+        >>> print s
+        Hello Привет
+        >>> print s.lower()
+        hello Привет
+        >>> s1 = u'Hello Привет'
+        >>> print s1
+        Hello Привет
+        >>> print s1.lower()
+        hello привет
+        >>> print s.decode('utf-8')
+        Hello Привет
+        >>> print s1.encode('utf-8')
+        Hello Привет
+    """
+    В 3-ем питоне все поменялось и работа со unicode строками стала проще.
+
+    Рассказ про генераторы, xrange.
+    Рассказ про itertools
+    Про чтение и запись d sys.stdin, sys.stdout, sys.stderr.
+
+    Максимальный инт и размер:
+    """
+        >>> import sys
+        >>> sys.maxint
+        2147483647
+        >>> sys.maxsize
+        2147483647
+        >>>
+    """
+
+    А еще есть sys.argv.
+
+    Естесственно напрямую с ним не очень удобно работать,
+    есть такой модуль как optparse (который deprecated)
+
+    """
+        import optparse
+        parser = optparse.OptionParser()
+        parser.usage = 'Usage string'
+        parser.add_option('-i', '--input', dest='input', help='help')
+
+        options, args = parser.parse_args()
+
+    """
+
+    Рассказ про re
+    """
+        >>> import re
+        >>>
+        >>> p = '[0-9]+'
+        >>> re.match(p, '1234')
+        <_sre.SRE_Match object at 0xb732d1a8>
+        >>> re.match(p, 'asdfsdfd')
+        >>> re.match(p, '1233asdfsdfd')
+        <_sre.SRE_Match object at 0xb732d720>
+        >>> m = re.match(p, '1234')
+        >>> p = '([0-9])+'
+        >>> m = re.match(p, '1234')
+        >>> m.group()
+        '1234'
+        >>> m.groups()
+        ('4',)
+        >>> p = '([0-9]+)'
+        >>> m = re.match(p, '1234')
+        >>> m.groups()
+        ('1234',)
+        >>> p = '(?P<num>[0-9]+)\w+'
+        >>> m = re.match(p, '1234qwerty')
+        >>> m.groups()
+        ('1234',)
+        >>> m.group()
+        '1234qwerty'
+        >>> m.groupdict()
+        {'num': '1234'}
+        >>> m.group('num')
+        '1234'
+        >>>
+    """
+
+    Немного про raw strings
+
+    Хочу рассказать про парсинг xml файлов.
+    """
+        >>> import xml.etree.ElementTree
+        >>> tree = xml.etree.ElementTree.parse('file.xml')
+        >>> tree
+        <xml.etree.ElementTree.ElementTree object at 0xb728720c>
+        >>> root = tree.getroot()
+        >>> root.items()
+        []
+        >>> for child in root:
+        ...     print child.tag, child.attrib
+        ...
+        w {}
+        ana {'gr': 'outside'}
+        >>> root = xml.etree.ElementTree.fromstring('<a></a>')
+        >>> root.tag
+        'a'
+        >>> root.attrib
+        {}
+        >>> print "Главный недостаток модуля то, что он хранит все дерево в файле"
+        Главный недостаток модуля то, что он хранит все дерево в файле
+        >>>
+    """
+
+    Этим недостатком не обладает xml.sax (Simple Api for Xml), он
+    воспринимает тэги как события.
+
+    Потоки в питоне:
+    """
+        >>> import threading
+        >>>
+        >>> threading.Thread
+        <class 'threading.Thread'>
+        >>> def f():
+        ...     print 'f()'
+        ...
+        >>> t = threading.Thread(target=f)
+        >>> t.start()
+        >>> f()
+
+        >>> print 'Поток асинхронно вывел f(), и перенес мой ввод на следующую строку'
+        Поток асинхронно вывел f(), и перенес мой ввод на следующую строку
+        >>> t.is_alive()
+        False
+        >>> threading.active_count()
+        1
+        >>> threading.enumerate()
+        [<_MainThread(MainThread, started -1221294400)>]
+        >>> print 'Можно также наследоваться от threading.Thread, и переопределять функции класса (__init__, run и тд)'
+        Можно также наследоваться от threading.Thread, и переопределять функции класса (__init__, run и тд)
+        >>>
+    """
+
+    Последний модуль о котором хочу рассказать:
+    """
+        >>> import subprocess
+        >>> subprocess.call('whoami', shell=True)
+        orazaev
+        0
+        >>> subprocess.check_call('whoami', shell=True)
+        orazaev
+        0
+        >>> subprocess.check_call('whoamis', shell=True)
+        /bin/sh: whoamis: not found
+        Traceback (most recent call last):
+        File "<stdin>", line 1, in <module>
+        File "/usr/lib/python2.7/subprocess.py", line 511, in check_call
+        raise CalledProcessError(retcode, cmd)
+        subprocess.CalledProcessError: Command 'whoamis' returned non-zero exit status 127
+        >>> subprocess.call('whoamis', shell=True)
+        /bin/sh: whoamis: not found
+        127
+        >>>
+    """
+

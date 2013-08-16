@@ -1,0 +1,211 @@
+!date(28.11.12)
+    *** ... рассказ про функторы
+
+
+    Опоздал пишу уже написанный код с функторами.
+    """
+        #include <iostream>
+        #include <iterator>
+        #include <algorithm>
+        #include <functional>
+
+
+
+        struct F: public std::unary_function<int, bool> {
+            result_type operator()(argument_type a) const {
+                return a % 2;
+            }
+        };
+
+
+
+        struct B: public std::binary_function<int, int, bool> {
+            result_type operator()(first_argument_type a,
+                second_argument_type b) const {
+                    return (a - b) % 2 == 0;
+            }
+        };
+
+
+
+        int main() {
+            int a[] = {1, 2, 3, 4, 5};
+
+            std::cout << B()(3, 5) << std::endl;
+
+            std::transform(
+                a,
+                a + 5,
+                std::ostream_iterator<int>(std::cout, " "),
+                F()
+            );
+
+
+            int t = 20;
+            std::bind2nd(std::less<int>(), t);
+            // Создать унарный функтор из бинарного less
+            // еще есть std::bind1st
+            // То есть зафиксировать первый или второй аргумент
+
+            return 0;
+        }
+    """
+
+    Создадим похожую на std::bind** структуру.
+    """
+        template <typename F>
+        struct Binder2nd:
+            public std::unary_functoin<
+                typename F::first_argument_type,
+                typename F::resutl_type
+            > {
+            F functor;
+            typename F::second_argument_type value;
+
+            Binder2nd(F Functor, typename F::second_argument_type Value)
+                : functor(Functor)
+                , value(Value) {
+            }
+
+            typename F::result_type operator() (
+                typename F::first_argument_type x
+            ) const {
+                return functor(x, value);
+            }
+        };
+
+        // Класс не умеет угадывать шаблонный аргумент по параметрам конструктора
+        // Поэтому пишем свою функцию(функции умеют угадывать)
+
+        template <typename F>
+        Binder2nd<F> bind2nd(F, f, typename F::second_argument_type value) {
+            return Binder2nd<F>(f, value);
+        }
+
+        int main() {
+            ::bind2nd(std::less<int>(), 3);
+
+            return 0;
+        }
+    """
+    По следам написанной структуры:
+    Когда мы шаблонным классом наследуемся от шаблонного класа тайпдефы
+    придется писать полностью.
+
+
+    Быстро создать функтор из низкоуровневой функции можно так
+    """
+        bool g(int a, int b) {
+            return a < b;
+        }
+
+        int main() {
+            // ...
+
+            // Вот так можно
+            std::sort(a, a + 5);
+            // Вот так нужно уже оборачивать в std::ptr_fun, ибо нужны typedef и
+            // другие плюхи
+            std::bind2nd(std::ptr_fun(g), 2);
+            return 0;
+        }
+    """
+
+
+    Лирическое отступление:
+    """
+        #include <iostream>
+
+        void f(int x) { std::cout << "f(" << x << ")\n"; }
+        void g(int x) { std::cout << "g(" << x << ")\n"; }
+
+        struct C {
+            int s;
+
+            // Вот у этой функции сложнее получить указатель
+            // Так как тут еще и this передается
+            void h(int x) {
+                std::cout << "h(" << x << ")\n";
+            }
+
+            // Вот у этой как обычно
+            static void static_h(int x) {
+                std::cout << "static_h(" << x << ")\n";
+            }
+        };
+
+        int main() {
+            void (*p)(int);
+            p = f;
+            p(42);  // f(42)\n
+
+            p = g;
+            p(24);  // g(24)\n
+
+            void (C::*q)(int);
+            q = C::h;
+            // Можно еще
+            // q = &C::h
+
+            C x;
+            x.h(123);
+            // Тада привет новый оператор .*
+            (x.*q)(123);    //h(123)\n
+
+
+            // Можно также обращаться и к полю класса
+            int (C::*w);
+            w = &C::s;
+
+            std::cout << (x.*w) << std::endl;
+
+            C * y = new V;
+            y->s = 17;
+            (y->*q)(123);
+
+            delete y;
+
+
+            return 0;
+        }
+    """
+
+
+
+    Ну вот смотрите сами:
+    """
+        #include<iostream>
+        #include<algorithm>
+        #include<functional>
+
+        struct C {
+            void g() const;
+        };
+
+        void f(const C&) {
+
+        }
+
+        int main() {
+            std::vector<C> v;
+
+            std::for_each(v.begin(), v.end(), f);
+            std::for_each(v.begin(), v.end(), std::mem_fun_ref(&C::g));
+
+            return 0;
+        }
+    """
+
+
+    """
+        void g(int, double) {
+        }
+
+        template <typename Arg1, typename Arg2, typename Res>
+        void f<Res(Arg1, Arg2)) {
+
+        }
+
+        // Далее f угадает шаблонные параметры по g
+        f(g);
+    """

@@ -1,0 +1,221 @@
+date(14.11.12)
+    ... обсуждение reserve | resize, и capacity | size
+    В нормальном векторе всегда size <= capacity
+
+    Вообще reserve -- резервирует память, но, не определяет никаких
+    переменных по этомй памяти, поэтому:
+    """
+        std::vector<SomeComplexType> a;
+        a.reserve(10);
+        a[5] = SomeComplexType();
+    """
+    Неверно, так как size вектора все еще 0.
+
+    Выделенная память сырая, там еще нет никаких объектов... это
+    логическая ошибка.
+
+
+    ... Разбираем еще плохого кода:
+    """
+        for (std::vector<int>::iterator i = v.begin();
+             i < v.end(); i++) {
+        //... const-антные действия
+    """
+    Превращается в:
+    """
+        for (std::vector<int>::const_iterator i = v.begin();
+             i != v.end(); ++i) {
+        //...
+    """
+
+    В новой версии стандарта поменяли смысл ключевого слова "auto"
+    """
+        auto i = v.begin();
+    """
+    Значит "Будь добр, компилятор, догадайся сам по присваемому значению
+    какого типа будет i"
+
+    Как работает перегрузка по константности:
+    - Если можно вызвать неконстантную версию, то вызывается неконстантная,
+      а вот если нет возможности использовать неконстантной функции, то
+      вызывается константная функция.
+
+    Также в новой версии стандарта, чтобы избежать постоянного присвоения
+    неконстантного итератора(что плохо) был введен дополнительный функционал:
+    """
+        auto i = v.cbegin(); // cbegin, cend -- константный begin и end
+    """
+
+    В чем отличие "std::endl" от "'\n'". std::endl -- дополнительно отчищает
+    буфер, можно это делать руками с помощью команды std::cout << flush;.
+
+
+    ... Еще плохого кода
+    """
+        std::vector<int> v;
+        v.reserve(2);
+        v[0] = 1;
+        std::cout << v[0]; // 1
+        v.reserve(100);
+        std::cout << v[0]; // 0xDEADBEEF --- или какая-нибудь
+        // фигня лежавшая в памяти
+    """
+    Почему так произошло --- очень просто: size вектора был 0, поэтому при
+    реаллокации ничего не скопировалось.
+
+    Проблемы возникнут также и при ситуации, когда мы позовем resize,
+    который заботливо заполнит память дефолтным значением типа, или
+    значением который мы укажем, при этом затерев уже присвоенное
+    значение.
+
+    ?А покажите нам gdb?
+    -- Да не вопрос
+    (gdb) l                 -- напечатает текущий фрагмент программы
+    (gdb) b 5               -- поставить точку остановки в строке 5
+    (gdb) r                 -- run program
+    (gdb) p a               -- print a (напечатать переменную a)
+    (gdb) n                 -- next line (выполнить следующую строчку)
+    (gdb) q                 -- quit (выйти из gdb)
+
+    *** Но вообще говоря наша тема сегодня это алгоритмы
+        стандартной библиотеки.
+
+    Напишем несколько способов вывода на экран элементов
+    контейнера
+
+    """
+    #include <iostream>
+    #include <deque>
+
+    int main() {
+        std::deque<int> d(10);
+
+        for (size_t i = 0; i != 10; ++i)
+            d[i] = i;
+
+        print(d);
+    }
+    """
+
+    Напишем этот самый print
+    """
+        // variant 1
+        // Работает только для контейнеров с произвольным доступом
+        template <typename C>
+        void print(const C& cont) {
+            for (size_t i = 0; i != cont.size(); ++i)
+                std::cout << cont[i] << " ";
+        }
+
+
+        // variant 2
+        // Хотя бы форвард итераторы, фактически для всех
+        template <typename C>
+        void print(const C& cont) {
+            for (typename C::const_iterator it = cont.begin();
+                 it != cont.end(); ++it)
+                std::cout << cont[i] << " ";
+        }
+
+
+        // variant 3
+        // for_each
+        #include <algorithm>
+        template <typename T>
+        void printElement(const T& elem) {
+            std::cout << elem << " ";
+        }
+        template <typename C>
+        void print(const C& cont) {
+
+            std::for_each(cont.begin(), cont.end(),
+                    printElement<typename C::value_type>);
+            // К несчастью сам фор ич не поймет какой шаблонный
+            // параметр у printElement
+
+            std::cout << std::endl;
+        }
+
+
+        // Как бы мы сами написали for_each
+        template <typename Iter, typename F>
+        void our_for_each(Iter a, Iter b, F f) {
+            while (a != b) {
+                f(*a);
+                ++a;
+            }
+        }
+
+
+        // Я вам обещал написать функтор
+        template <typename T>
+        struct printElemFunctor {
+            void operator () (const T& elem) const {
+                std::cout << elem << " ";
+            }
+        };
+
+
+        template <typename C>
+        void print(const C& cont) {
+
+            std::for_each(cont.begin(), cont.end(),
+                    printElemFunctor());
+            // А вот функтор умеет сам подбирать тип.
+
+            std::cout << std::endl;
+        }
+    """
+
+    На деле for_each возвращает не void, а переданный функтор.
+
+    """
+        // Variant 4
+        // Заключительный..
+        template <typename C>
+        void print(const C& cont) {
+            std::copy(
+                cont.begin(),
+                cont.end(),
+                std::ostream_iterator<typename C::value_type>(std::cout, " ")
+            );
+        }
+
+
+        // Вдохновленные примером 4 пишем
+        #include <iterator>
+        int main() {
+            std::deque<int> d;
+
+            std::copy(
+                std::istream_iterator<int>(std::cin),
+                std::istream_iterator<int>(),
+                std::back_inserter(d)       // когда присаивают -- делает push_back()
+            );
+
+            // можно ведь так std::deque<int> d2(d.begin(), d.end());
+
+            // попробуем вот так
+            // Пример с using namespace std;
+            // std::deque<int> d2(
+            //     std::istream_iterator<int>(cin),
+            //     std::istream_iterator<int>()
+            // );
+            // Но не работает! Почему?
+            // ... тишина
+            // Компилятор считает, что d это не deque, а функция.
+            // Он интерпретирует это как:
+            // std::deque<int> d2(
+            //     std::istream_iterator<int> cin,
+            //     std::istream_iterator<int> kakaya_to_bezimyannaya_func()
+            // );
+
+            std::copy(
+                d.begin(),
+                d.end(),
+                std::ostream_iterator<int>(std::cout, " ")
+            );
+
+            return 0;
+        }
+    """

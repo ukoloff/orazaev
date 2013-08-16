@@ -1,0 +1,144 @@
+!date(04.12.12)
+    *** Вспоминаем тест с первого занятия и понимаем, что знаем ответы.
+
+    Считается, что безопасны относительно исключений:
+        * Операции освобождения ресурсов.
+        * swap
+
+
+    ... Рассказ про подзадачку 3-ей задачи семинара(прошлого)
+
+    """
+        template <typename T>
+        struct Function {
+            public:
+            typedef result_type typename T::result_type;
+            typedef first_argument_type typename T::first_argument_type;
+            typedef second_argument_type typename T::second_argument_type;
+        };
+
+        template <typename R, typename A1, typename A2>
+        struct Function<R(A1, A2)> {
+            public:
+            typedef result_type R;
+            typedef first_argument_type A1;
+            typedef second_argument_type A2;
+        };
+
+        int main() {
+            Function<void(int, double)> f;
+            return 0;
+        }
+    """
+
+
+
+    """
+        // Хотим так
+        template <typename T>
+        class MyClass: private IsClonable<T> {
+
+        };
+    """
+
+    Реализуем хотелку:
+    Обязательно, чтобы была функция член класса T вида:
+    T Clone() const;
+    """
+        template <typename T>
+        class IsClonable<T> {
+            public:
+            IsClonable() {
+                // Вот она вся хитрость!
+                T (T::*f)() const = &T::Clone;
+            }
+        };
+    """
+
+
+    Теперь так хотим:
+    """
+        template <typename D, typename B>
+        class MyClass: private IsDerivedFrom<D, B> {
+        };
+    """
+
+    """
+        templaet <typename D, typename B>
+        class IsDerivedFrom {
+            public:
+            IsDerivedFrom() {
+                B* ptr = (D*)0;
+            }
+        };
+    """
+
+    реализация через static_assert:
+    """
+        templaet <bool True>
+        struct static_assert {};
+
+        template <>
+        struct static_assert<false> {
+            private:
+            static_assert();
+        };
+
+
+        templaet <typename D, typename B>
+        class IsDerivedFrom {
+            char foo(B*) { return 0; }
+            public:
+            IsDerivedFrom() {
+                static_assert<sizeof(foo((D*)0))>();
+            }
+        };
+    """
+
+
+    Юникодные символы можно хранить в wchar_t и std::wstring.
+
+    Что же такое std::sting --
+    Это просто typedef:
+    typedef basic_string<char> string;
+
+    Очевидно что:
+    typedef basic_string<wchar_t> wstring;
+
+    У basic_string есть еще дополнительные параметры шаблона это
+    std::char_traits, который по умолчанию std::char_traits<char>;
+
+
+    Мы будем решать следующюю задачу -- написать строки которые
+    нечуствительны к регистру относительно сравнения, то есть
+    "AbC" == "abc".
+
+    Короче нужно написать подобный char_traits класс.
+    """
+        #include <string.h>
+
+        class MyCharTraits: public std::char_traits<char> {
+            public:
+            static bool eq(char a, char b) {
+                return tolower(a) == tolower(b);
+            }
+
+            static bool lt(char a, char b) {
+                return tolower(a) < tolower(b);
+            }
+
+            static int compare(const char* s1, const char* s2, size_t n) {
+                while(n-->0) {
+                    if(!eq(*s1, *s2)) {
+                        return lt(*s1, *s2) ? -1 : 1;
+                    }
+                    ++s1;
+                    ++s2;
+                }
+                return 0;
+            }
+        };
+
+    """
+
+    Note: для широких символов следуют использовать wcout.

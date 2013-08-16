@@ -1,0 +1,157 @@
+!data(13.03.13)
+    ...
+
+    """
+        #include <iostream>
+        #include <vector>
+        #include <list>
+
+        template <typename T>
+        clas Allocator: public std::allocator<T> {
+        public:
+            Allocator() throw() {
+                std::cout << "Allocator()" << std::endl;
+            }
+            ~Allocator() thorw() {
+                std::cout << "~Allocator()" << std::endl;
+            }
+        };
+
+        int main() {
+            std::vector<int, Allocator<int> > v;
+            v.push_back(123);
+
+            return 0;
+        }
+    """
+
+    Если написать весь код аллокатора то будет печататься "Allocator()",
+    если же не делать этого, то ничего выводится не будет.
+
+    Для того чтобы все заработало нужно написать волшебное:
+            rebind
+    """
+        #include <iostream>
+        #include <vector>
+        #include <list>
+        #include <typeinfo>
+
+        template <typename T>
+        class Allocator: public std::allocator<T> {
+        public:
+            Allocator() throw() {
+                std::cout << "Allocator() for "
+                          << typeid(T).name() << std::endl;
+            }
+            ~Allocator() throw() {
+                std::cout << "~Allocator() for "
+                          << typeid(T).name() << std::endl;
+            }
+            template <typename U>
+            struct rebind {
+                typedef Allocator<U> other;
+            };
+        };
+
+        int main() {
+            std::vector<int, Allocator<int> > v;
+            v.push_back(123);
+
+            return 0;
+        }
+    """
+    Теперь будет печататься (в gcc).
+
+    ЗЫ Пацаны говорят, что в MSVC все работает без rebind.
+
+    Дело в том что реализация gcc аллокатора не особо доверяет нам
+    поэтому зовет rebind.
+
+
+    ? Где надо писать throw() ?
+    -- Аллокатор это плохой пример - с ним никто не работает полиморфно.
+       В новом стандарте не рекомендуется использовать throw().
+
+    Для list потребуется написать шаблонный конструктор копирования
+    """
+        #include <iostream>
+        #include <vector>
+        #include <list>
+        #include <typeinfo>
+
+        template <typename T>
+        class Allocator: public std::allocator<T> {
+        public:
+            Allocator() throw() {
+                std::cout << "Allocator() for "
+                          << typeid(T).name() << std::endl;
+            }
+            template <typename U>
+            Allocator(const Allocator<U>& other) throw() {
+                std::cout << "Allocator(const Allocator<" << typeid(U).name()
+                          << ">&) for  " << typeid(T).name() << std::endl;
+            }
+            ~Allocator() throw() {
+                std::cout << "~Allocator() for "
+                          << typeid(T).name() << std::endl;
+            }
+            template <typename U>
+            struct rebind {
+                typedef Allocator<U> other;
+            };
+        };
+
+        int main() {
+            std::vector<int, Allocator<int> > v;
+            v.push_back(123);
+
+            return 0;
+        }
+    """
+
+
+    Поговорим о Singleton-ах:
+    """
+        class Singleton {
+        private:
+            Singleton() { printf("Singleton()\n"); }
+            Singleton(const Singleton&);
+            Singleton& operator=(const Singleton&);
+            static Singleton * instance = NULL;
+        public:
+            static Singleton* GetInstance() {
+                if (instance == NULL) {
+                    instance = new Singleton;
+                }
+                return instance;
+            }
+        };
+
+        int main() {
+            Singleton * s = Singleton::GetInstance();
+            // Возможна следующая беда с указателями:
+            // delete * s;
+            // Так что лучше с сылкой.
+        }
+    """
+
+    Синглтон Майерса:
+    """
+        class Singleton {
+        private:
+            Singleton() { printf("Singleton()\n"); }
+            Singleton(const Singleton&);
+            Singleton& operator=(const Singleton&);
+        public:
+            static Singleton& GetInstance() {
+                static Singleton instance;
+                return instance;
+            }
+            ~Singleton() throw() { }
+        }
+
+        int main() {
+            const Singleton& s = Singleton::GetInstance();
+            return 0;
+        }
+    """

@@ -1,0 +1,281 @@
+date(24.10.12)
+*** Мы с вами долго говорили про исключения, пора
+    бы научиться их писать...
+
+
+    Что такое исключение?
+    """
+        #include <iostream>
+        void f() {
+            throw "Hello, world!";
+        }
+
+        int main() {
+
+            return 0;
+        }
+    """
+
+    Когда функция встречает throw -- функция
+    аварийно завершает работу. Для этой функции
+    после встречи throw -- работа закончена.
+
+    Обработчик исключений гарантирует, что для
+    всех локальных переменных, для которых мы выделили
+    память сработает деструктор. То есть, локальная
+    память будет освобождена.
+
+    Проблемы возникнут в таком случае:
+
+    """
+        void f() {
+            int * a = new int [100];
+            throw 1;
+        }
+    """
+    Беда в том, что память освободится для указателя,
+    а динамическая память не освободится.
+
+    Аксиома: все деструкторы не выпускают исключения
+    наружу. Мы свято верим в то, что операции возвращающие
+    ресурсы -- безсбойные.
+
+
+    Перехват исключений:
+    """
+        try {
+            f();
+        } catch(int a) {
+
+        } catch(const std::exception &) {
+
+        } catch(const char * s) {
+
+        }
+    """
+
+    Мыслите об этом как о наборе функций с одинаковым числом
+    аргументов, но разным типом аргументов. Мыслите об этом
+    как о перегрузке.
+
+    ? Важно в каком порядке будут стоять catch ?
+    - Да, они просматриваются сверху вниз.
+
+
+    Стоит наследоваться от стандартных эксепшнов.
+    """
+        class MyZeroDivideException {
+            Complex numerator;
+            public:
+            MyZeroDivideException(const Complex & c)
+                : numerator(c) { }
+
+            const Complex & getNumerator() const {
+                return numerator;
+            }
+
+            const char * what() const {
+                return "Division by zero";
+            }
+        }
+
+        class Complex() {
+            /* ... */
+            public:
+            /* ... */
+            Complex operator / (const Complex & z) const {
+                if (z == 0) {
+                    throw MyZeroDivideException(*this);
+                }
+            /* ... */
+            }
+            /* ... */
+        };
+
+        int main() {
+            Complex a, b;
+            try {
+                a / b;
+            } catch (const MyZeroDivideException & ex) {
+                std::cerr << ex.what() << std::endl
+                    << "Numerator: " << ex.getNumerator()
+                    << std::endl;
+            }
+        }
+    """
+
+    Есть еще один вариант блока catch:
+    """
+        try {
+        /* ... */
+        } catch(...) {
+            // Отловит все возможные исключения
+        }
+
+    """
+
+
+
+
+
+*** Оператор приведения типа
+    "Еще одна штука про которую я не успел рассказать" (c)
+
+    """
+        complex z;
+        // Хочется уметь вот так
+        double a = (double) z;
+
+
+        class Complex() {
+            /* ... */
+            public:
+            /* ... */
+
+            // Пишется очень просто
+            operator double () const {
+                // Например хочу модуль числа вернуть
+                return sqrt(x*x + y*y);
+            }
+
+            /* ... */
+            }
+            /* ... */
+        };
+    """
+
+
+
+    То, что поможет нам сделать дз
+    """
+        class A {
+            private:
+            // Теперь B имеет доступ к private полям класса A
+            friend class B;
+            int a;
+            public:
+            void f() {
+                a;
+            }
+        }
+
+        class B {
+            public:
+            void g(const A& v) {
+                v.a;
+            }
+        }
+    """
+
+    """
+        typedef T value_type;
+        typedef T * iterator;
+        typedef const T & const_iterator;
+        typedef T * pointer;
+        typedef T & reference;
+        typedef T const * const_pointer;
+        typedef const T & const_reference;
+    """
+
+    """
+        #include <iterator>
+
+        template <typename T>
+        class MyIterator
+                : public std::iterator<T, std::random_access_iterator_tag> {
+            // typedef std::random_access_iterator_tag iterator_category;
+            // typedef T value_type;
+            // typedef ptrdiff_t difference_type;
+        };
+
+
+        // Расстояние между итераторами
+        template <typename Iter>
+        size_t distance(Iter a, Iter b) {
+            size_t counter = 0;
+            while (a != b) {
+                ++counter;
+                ++a;
+            }
+            return counter;
+
+            return b - a;
+        }
+
+        int main() {
+            std::vector<int> v;
+            std::list<int> l;
+
+            distance(v.begin(), v.end());
+
+            // Эта строка со вторым ретерном не скомпилируется.
+            distance(l.begin(), l.end());
+        }
+    """
+
+    Решение этой проблемы:
+    """
+        template <typename Iter, typename Category>
+        size_t distance_impl(Iter a, Iter b, Category) {
+            size_t counter = 0;
+            while (a != b) {
+                ++counter;
+                ++a;
+            }
+            return counter;
+        }
+
+        template <typename Iter>
+        size_t distance_impl(Iter a
+                , Iter b
+                , std::random_access_iterator_tag) {
+            return b - a;
+        }
+
+        template <typename Iter>
+        size_t distance(Iter a, Iter b) {
+            return distance_impl
+                    (a, b, typename Iter::terator_category());
+        }
+    """
+
+    Еще одна проблема -- это не будет работать с указателями!
+
+    "Что же делать? Как же писать?" (c)
+
+    Решение:
+    """
+        template <typename Iter>
+        size_t distance(Iter a, Iter b) {
+            return distance_impl(Iter a, Iter b
+                , typename std::iterator_traits<Iter>::iterator_category());
+        }
+    """
+
+    Все очень просто iterator_trains определена для указателей по одному,
+    а для всего остального по другому.
+
+    """
+        template <typename Iter>
+        struct iterator_traits {
+            typedef typename Iter::iterator_category iterator_category;
+        };
+
+        // Более специализированная версия для указателей
+        template <typename T>
+        struct iterator_traits<T*> {
+            typedef std::random_access_iterator_tag iterator_category;
+        };
+
+        // Надо бы еще константную реализацию...
+        template <typename T>
+        struct iterator_traits<T * const> {
+            typedef std::random_access_iterator_tag iterator_category;
+        };
+
+        // Может понадобиться volatile
+    """
+
+    Что же такое volatile -- мы можем написать везде, где можно конст,
+    вместо конст или рядом с конст. Это означает, что переменная не будет
+    храниться в регистре процессора -- у нее будет честный адрес в памяти.

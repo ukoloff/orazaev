@@ -1,0 +1,164 @@
+date(31.10.12)
+
+*** Разбор домашней работы
+
+    Разговор про mutable -- позваляет менять поле
+    даже у константного объекта.
+    Опасная конструкция.
+
+    Есть еще одна опасная конструкция const_cast --
+    снимает константность.
+
+
+    Такими вещами не стоит злоупотреблять...
+    Если это используется массово, то надо задуматься
+    о правильности архитектуры...
+
+
+
+
+    Рассказ про то, что может быть в классе
+    статические переменные:
+    """
+        template <typename T = double>
+        class A {
+            static int counter;
+        };
+
+        // Нужно определить переменную вне класса
+        template <typename T>
+        int A::counter = 0;
+
+
+        int main() {
+            A<int>::counter += 10;
+
+            A::counter += 11;
+
+            std::cout << A<double>::counter << std::endl;
+            // 11
+
+            std::cout << A<int>::counter << std::endl;
+            // 10
+        }
+
+    """
+
+    ? Можно ли статическую переменную объявить в классе ?
+    - Если она простого типа то можно.
+
+
+
+    Разговор о пользе typename
+
+    Специализация шаблона
+    """
+        template <typename T>
+        struct C {
+            typedef int X;
+        };
+
+        template <>
+        struct C<double> {
+            static double X;
+        }
+
+        template <typename T1, typename T2>
+        struct D {
+            typedef int X;
+        };
+
+        template <typename T1>
+        struct D<T1, double> {
+            static double X;
+        }
+    """
+
+
+    Пример: размер как параметр шаблона.
+    """
+        template <typename C, int N>
+        class Matrix {
+
+        };
+
+        Matrix<int, 10> m;
+    """
+
+
+
+    Шаблонный параметр шаблона
+    """
+        Stack<typename T, typename Container> {
+        };
+    """
+    Container -- здесь есть шаблонный параметр шаблона --
+    то есть можно передать например std::vector
+    """
+        Stack<int, std::vector> s;
+    """
+
+
+
+
+*** Метапрограммирование
+
+    Вычисляем степень
+    """
+        #include <iostream>
+
+        template <int A, int N>
+        struct Power {
+            static const int Result = A * Power<A, N - 1>::Result;
+        };
+
+        template <int A>
+        struct Power<A, 0> {
+            static const int Result = 1;
+        };
+
+
+        int main() {
+            std::cout << Power<2, 10>::Result << std::endl;
+        }
+    """
+
+    Теперь... доказательство, что все это происходит на этапе
+    компиляции.
+
+    """
+        // Определение шаблонов Power
+
+        template <int T>
+        class Dummy;
+
+        int main() {
+            Dummy<Power<2, 10>::Result> d;
+        }
+    """
+
+    Теперь линкер ругнется, что он не может найти определение
+    для Dummy<1024>.
+
+    """
+        template <int A, int N>
+        struct Power {
+            // Не работает
+            static const int Result =
+                N > 0
+                ? A * Power<A, N - 1>
+                : 1;
+        };
+    """
+
+    Причина не работы данной конструкции в том, что для оператора "? :"
+    компилятор считает и правое и левое выражение, поэтому он достигнет
+    максимальной глубины стека уйдя в отрицательные N и ругнется.
+
+    ? Какова практическая польза ?
+    - Утверждается, что для мат. библиотеки мы, к примеру, пишем
+    скалярное произведение. Если нам заранее известно длины векторов,
+    то было бы заманчиво развернуть цикл самим с помощью шаблона.
+    ... Вот такая вот микрооптимизация.
+
+

@@ -1,0 +1,165 @@
+!date(03.04.13)
+    *** Разговор о фабриках...
+
+    Наивная фабрика:
+    """
+        class Shape { ... };
+        class Triangle : public Shape { ... };
+        class Line : public Shape { ... };
+        class Circle : public Shape { ... };
+
+        const int
+            iLine = 1,
+            iTriangle = 2,
+            iCircle = 3;
+
+
+        Shape * CreateObject(int id) {
+            switch (id) {
+                case iLine:
+                    return new Line;
+                case iTriangle:
+                    return new Triangle;
+                case iCircle:
+                    return new Circle;
+            }
+        }
+    """
+
+    У этого подхода есть минус: при масштабировании
+    придется писать новый case, новый iНечто и новый класс!
+
+    Это слишком много -- такой код подвержен ошибкам.
+
+    Идея сделать такой контейнер, который идентификатору на
+    класс (id) возвращает нечто. Например указатель на функцию,
+    которая создает нужный объект.
+
+    """
+        typedef Shape * (*TCreator)()
+
+        std::unordered_map<int, TCreator> registry;
+
+        Shape * CreateObject(int id) {
+            // Грубое решение, так как нет проверки на то, что
+            // такой id есть в реестре.
+            return registry[id]();
+        }
+    """
+
+    Сделаем проверку:
+    """
+        Shape * CreateObject(int id) {
+            auto iter = registry.find(id);
+            if (iter != registry.end()) {
+                return (iter->second)();
+            } else {
+                throw std::logic_error("Unknown id!");
+            }
+        }
+    """
+
+    Классы же будут выглядеть так:
+    """
+        class Line: public Shape {
+            static Shape * Create() {
+                return new Line;
+            }
+        };
+    """
+
+    А еще лучше в Shape написать:
+    """
+        class Shape {
+            template <typename T>
+            static Shape * Create() {
+                return new T;
+            }
+        };
+    """
+
+    Теперь хотелось бы сделать автоматическую добавку в реестр.
+
+    Тут мы приезжаем к проблеме инициализации статических переменных.
+    Неопределено в каком порядке инициализируются статические переменные
+    из разных едениц трансляции.
+
+    Но мы можем быть уверены, что внутри одной еденицы трансляции:
+    1) Сначала инициализируются подобъекты
+    2) Инициализация идет в порядке объявления.
+
+    Тогда будем пользоваться статическими переменными функции, так как
+    они инициализируются в момент вызова функции.
+
+    """
+        typedef std::map<int, TCreate> TRegistry;
+
+        // Отложенная инициализация
+        TRegistry& GetRegestry() {
+            static TRegistry registry;
+            return registry;
+        }
+    """
+
+    Теперь классы будут выглядеть вот так!
+    """
+        class Line: public Shape {
+        public:
+            void Draw() const { }
+            static bool isRegistered;
+        }
+
+        bool Line::isRegistered =
+            GetRegestry().insert(std::make_pair(iLine, Shape::Create<Line>))->second;
+    """
+
+
+
+
+    Теперь поговорим о препроцессинге, линковке и компиляции.
+    Разговор про #define и include guards.
+
+    Сейчас вместо инклюд guards используют
+    """
+        #pragma once
+    """
+
+    Объявить переменную не инициализировав ее можно так:
+    """
+        extern int z; // declaration
+
+        int y; // definition
+    """
+    С функциями и классами:
+    """
+        void f(); // declaration
+        void f() { ... } // definition
+
+
+        class C; // declaration
+        class C {
+            void g(); // declaration
+
+            ...
+        }; // declaration
+
+        void C::g() { ... } // definition
+    """
+
+    Определениями будут лишь тела тех функций этого класса,
+    которые мы пишем отдельно от этого класса
+
+    Есть только одна проблема с inline функциями -- линкер не будет
+    ругаться на 2 инлайн функции с одинаковыми сигнатурами ибо он не поймет
+    что это одно и то же, так как у этих функций нет адреса.
+    При этом не гарантируется какая из них будет вызвана.
+    P.S. Просто не надо так делать.
+
+
+
+
+    Счетчик Шварца.
+    Желательно чтобы некоторый статический объект был проинициализирован
+    ранее чем все остальное (например std::cout)
+
+    !link(http://en.wikibooks.org/wiki/More_C%2B%2B_Idioms/Nifty_Counter#Solution_and_Sample_Code)

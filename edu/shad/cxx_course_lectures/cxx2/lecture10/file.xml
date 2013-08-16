@@ -1,0 +1,7 @@
+<body>
+    <w>
+        <ana gr="inside1" />
+        <ana gr="inside2" />
+    </w>
+    <ana gr="outside" />
+</body>

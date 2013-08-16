@@ -1,0 +1,386 @@
+!date(21.11.12)
+    *** ... обсуждаем будущее дз.
+    *** Сегодня поговорим о классах и иже с ними.
+
+
+    """
+        class C {
+
+        };
+    """
+
+    Можем написать три области(раздела) доступа:
+    """
+        class C {
+            private:    // Видно только классу
+
+            protected:  // Видно наследникам
+
+            public:     // Видно всем (интерфейс)
+        };
+    """
+
+    Хорошим тоном является описывать в public интерфейс,
+    а данные скрывать в private.
+
+
+    Что может быть в классе?
+    """
+        class C {
+            private:
+            int a;
+            std::vector<int> v;
+
+            protected:
+            typedef int TInt;
+            void f() connst {
+
+            }
+
+            friend void g();    // Дружественная функция
+                                // Получает доступ к внутренним
+                                // полям класса.
+
+            public:
+            class D {
+
+            };
+        };
+    """
+
+    Что же такое наследование класса?
+
+    Например мы хотим написать класс D, который похож на
+    класс C, но мы хотим дополнить этот класс D.
+    """
+        class D: public C {
+
+        };
+    """
+
+    Бывают три модификатора наследования:
+    * public
+    * private (default)
+    * protected
+
+    Этот модификатор на область доступа в классе наследнике.
+
+    public:
+    'считается, что в наследнике D храниться "подобъект" класса C.'
+    (c) учителъ.
+    'private не видно, protected сохраняет статус protected, public
+    сохраняет статус public'
+
+    """
+        class C {
+            private:
+                int a;
+                std::vector<int> v;
+            public:
+                double d;
+        };
+
+        class D: public C {
+            public:
+            void h() {
+                // Нам видны все переменные и функции класса С, как свои.
+            }
+        };
+    """
+
+    Вектор есть три указателя(обычно):
+    начало выделенного куска памяти
+    конец выделенного куска памяти
+    конец заполненной области.
+
+    private:
+    'private поля вообще не видны, а public поля становятся private
+    в наследнике' (c)
+
+    protected:
+    'private поля вообще не видны, protected видны и сохраняют статус
+    protected, public получают статус protected в наследнике.'
+
+
+
+    Простой пример:
+    """
+        class C {
+            protected:
+                void f() {
+
+                }
+        };
+
+        class D: public C {
+        };
+
+        class E: public C {
+            public:
+                using C::f;
+        };
+
+        int main() {
+            D d;
+            d.f();  // Не получится f сохранит статус protected
+
+            E e;
+            e.f();  // А это уже сработает!
+        }
+
+    """
+
+    Таким образом класс наследник может изменить область доступа
+    наследованных полей. (Выдать поля своих родителей)
+
+    // public Morozoff (use google)
+
+
+
+    Более легкий пример. Иерархия геометрических фигур.
+    """
+        // Например есть цвет
+        class Figure {
+            protected:
+            int Colour;
+
+            public:
+            void Draw() const;
+        };
+
+        class Ellipse: public Figure {
+            protected:
+            double X1, Y1, X2, Y2, e;
+        };
+
+        class Circle: public Figure {
+            protected:
+            double X, Y;
+            double Radius;
+        };
+
+        class Triangle: public Figure k
+            protected:
+            double X1, Y1, X2, Y2, X3, Y3;
+        };
+
+        // Правильный треугольник... будем пробовать?
+        class RightTriangle: public Triangle {
+            // Может быть мы неправильно выбрали иерархию наследования.
+        };
+
+
+        int main() {
+            RightTriangle tr;
+            tr.Draw();
+        }
+    """
+
+    "Открытое наследование -- это отношение 'является'" (c)
+    "Часто говорят -- предпочитайте композицию наследованию"
+
+    Каким правилом компилятор находит имена в иерархиях --
+    1) Ищет имя в самом возможном узком классе
+    2) Ищет по параметром подходящее имя в найденном классе
+    3) Смотрим на модификатор доступа (можно ли воспользоваться)
+
+    """
+        class A {
+            public:
+                f(int);
+        };
+        class B: public A {
+            private:
+                f(int);
+        };
+
+        class C: public B {
+
+        };
+
+        int main() {
+            C c;
+            C.f(5); // ошибка компиляции
+        }
+    """
+    или
+    """
+        class A {
+            public:
+                f(int);
+        };
+        class B: public A {
+            public:
+                f(const std::vector<int> & v);
+                f(const std::list<int> & l);
+        };
+
+        class C: public B {
+        };
+
+        int main() {
+            C c;
+            C.f(int(5)); // ошибка компиляции
+        }
+    """
+
+    Идем к виртуальности:
+
+    """
+        #include <iostream>
+
+        class Figure {
+            protected:
+            int Colour;
+
+            public:
+            // Определим после ошибок в main ниже
+            virtual void Draw() const {
+                std::cout << "BASE DRAW" << std::endl;
+            }
+        };
+
+        class Ellipse: public Figure {
+            protected:
+            double X1, Y1, X2, Y2, e;
+        };
+
+        class Circle: public Figure {
+            protected:
+            double X, Y;
+            double Radius;
+
+            public:
+            void Draw() {
+                std::cout << "O" << std::endl;
+            }
+        };
+
+        class Triangle: public Figure k
+            protected:
+            double X1, Y1, X2, Y2, X3, Y3;
+
+            public:
+            void Draw() const {
+                std::cout << "Triangle!" << std::endl;
+            }
+        };
+
+        class RightTriangle: public Triangle {
+            public:
+            void Draw() const {
+                std::cout << "Right Triangle!" << std::endl;
+            }
+        };
+
+
+        int main() {
+            RightTriangle tr;
+            tr.Draw();  // 'Right Triangle!'
+
+            Figure& f = tr;
+            f.Draw(); // Ошибка линковки.
+            // После того как мы определим Figure::Draw() const
+            // f.Draw() вызовет из базового класса.
+            // А после того как мы определим virtual Figure::Draw() const;
+            // Вызовется Rigth triangle.
+        }
+    """
+
+    Заметим, что мы применили virtual только в базовом классе.
+
+    Если в классе есть virtual функция, то в него добавится указатель на
+    таблицу виртуальных функций (а именно на нужную реализацию виртуальной
+    функции). С помощью sizeof можно увидеть, что размер у одного и того же
+    класса с виртуальными и не виртуальными функциями разный.
+
+    О вызове конструкторов:
+    * Вызывается самый верхний в иерархии класс
+    * и далее все ниже и ниже по лестнице иерархии до нашего класса.
+
+    Каждый конструктор на деле изменяет наш "виртуальный" указатель, таким
+    образом заставляя правильно указывать на функцию фактически созданного
+    класса.
+
+    Пример с вызовами конструкторов:
+    """
+        class A {
+            A() {
+                std::cout << "A!";
+            }
+        };
+
+        class B : public A {
+            B() {
+                std::cout << "B!";
+            }
+        };
+
+        class C : public B {
+            C() {
+                std::cout << "C!";
+            }
+        };
+
+        int main() {
+            C c; // на экране: A!B!C!
+            A a = c; // на экране пусто, так как
+            // вызвался конструктор копирования.
+        }
+    """
+
+
+    Пример с вектором указателем на фигуры:
+    """
+    // ... Предыдущее описание фируг
+
+    int main() {
+        std::vector<Figure*> figures;
+        figures.push_back(new Circle);
+        figures.push_back(new RightTriangle);
+        figures.push_back(new Triangle);
+
+        for (size_t = 0; i != figures.size(); ++i) {
+            figures[i]->Draw();
+            delete figures[i];  // ахтунг! не виртуальный деструктор!
+        }
+    }
+
+    """
+    Результат работы:
+    O
+    Right Triangle!
+    Triangle!
+
+
+    Но есть огромная проблема! вызывается не виртуальный деструктор,
+    мы вызываем деструктор для базового класса.
+
+    Также лучше чтобы у базового класса была функция Draw, но чтоб она
+    не существовала:
+    """
+        class Figure {
+            // Для этого объявим чисто виртуальную функцию.
+            // pure virtual function
+            virtual void Draw() const = 0;
+            virtual ~Figure() {
+            }
+        };
+    """
+
+    О чем тут еще стоит сказать:
+    Есть ведь еще и шаблоны: полиморфизм времени компиляции
+    Когда виртуальные функции: полиморфизм времени исполнения.
+
+    Вот так можно полиморфировать во время компиляции.
+    """
+    template <typename F>
+    void DrawIt(const F& object) {
+        object.Draw();
+    }
+    """
+
+    Но вектор создать не получится... только если не void *, а это
+    не очень хорошо, придется сырую память потом правильно приводить.
+
+    Бывает и множественное наследование.

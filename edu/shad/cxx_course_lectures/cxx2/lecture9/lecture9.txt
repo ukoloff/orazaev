@@ -1,0 +1,299 @@
+!date(24.04.13)
+    ... Про классы ...
+    """
+        a = 0
+        def f():
+            global a
+            a = 21
+    """
+
+    Класс это прежде всего пространство имен.
+
+    Классы старого типа:
+    """
+    >>> class C:
+    ...     print "Hello"
+    ...     a = 2
+    ...     y = ""
+    ...     for x in range(10):
+    ...         print x, y
+    >>> C
+    <class __main__.C at 0xb73e231c>
+    >>> C.b = 123
+    >>> C.b
+    123
+    >>> del C.b
+    >>>
+    >>> C.b
+    AttributeError: class C has no attribute 'b'
+    >>>
+    >>> c = C()
+    >>> c.a
+    2
+    >>> C.a
+    2
+    >>> c.a = 50
+    >>> c.a
+    50
+    >>> C.a
+    2
+    """
+
+    Поиск атрибутов происходит так:
+    *) Сначала ищем в self
+    *) Потом во всем классе
+
+    """
+    >>> class Record:
+    ...     pass
+    >>> r1 = Record
+    >>> r1.a = 1
+    >>> r1.b = 2
+    >>>
+    >>> rw = Record()
+    >>>
+    >>> r2.a = 8
+    >>> r2.b = 9
+    >>> r2.c = 10
+    """
+
+    О подстановке аргументов
+    """
+    >>> class C:
+    ...     def f(x, y):
+    ...         print x, y
+    ...
+    >>> c = C()
+    >>> print c
+    <__main__.C instance at 0xb72f2e4c>
+    >>> c.f(1)
+    <__main__.C instance at 0xb72f2e4c> 1
+    >>> C.f(c, 1)
+    <__main__.C instance at 0xb72f2e4c> 1
+    """
+
+    Соглашение:
+    "Если ваша функция имеет семантику private-функции, то назовите ее
+     начиная с одного подчеркивания: _myFuncName_"
+    "С двух подчеркиваний начинаются системные функции"
+
+    """
+    >>> class D(object):
+    ...     def f(self, x):
+    ...     self.value = x
+    ...
+    >>> d = D()
+    >>> d.f(42)
+    >>> d.value
+    >>> 42
+    >>> foo = D()
+    >>> foo.value
+    AttributeError: 'D' object has no attribute 'value'
+    """
+
+    Это еще один популярный язык, который
+    поддерживает множестенные наследования.
+
+    Только есть несколько моментов:
+    * Все функции по умолчанию у вас как будто бы виртуальные
+    """
+    >>> class E(D):
+    ...     def f(self, y):
+    ...         print y
+    ...
+    >>> e = E()
+    >>> e.f(20)
+    20
+    >>> e.__class__
+    <class '__main__.E'>
+    >>> a = e.__class__()
+    >>> F = E
+    >>> E.__class__
+    <type 'type'>
+    >>> E.__class__.__class__
+    <type 'type'>
+    """
+
+    Старые классы от новых вот чем отличаются:
+    """
+    >>> class OldClass:
+    ...     pass
+    >>> class NewClass:
+    ...     pass
+    >>> type(OldClass())
+    <type 'instance'>
+    >>> type(NewClass()):
+    <class '__main__.NewClass'>
+    >>>
+    """
+
+    Щас мы с вами напишем конструктор:
+    """
+    >>> from math import sqrt
+    >>> class Point(object):
+    ...     """A simple point class."""
+    ...     def __init__(self, cordinates):
+    ...         """(Point, list of floats) -> NullType"""
+    ...         self.cords = cordinates
+    ...     def distance(self):
+    ...         """(Point) -> float
+    ...
+    ...         >>> Point([1, 2, 3]).distance()
+    ...         4
+    ...         """
+    ...         result = 0;
+    ...         for c in coords:
+    ...             result += c ** 2
+    ...         return math.sqrt(result)
+    ...
+    """
+
+    Важное замечание, в питоне нельзя перегружать функции по
+    типу и количеству аргументов. Фактически перегружать функции
+    можно только __никак__.
+
+    К примеру мы забили добавить функцию distance в класс
+    """
+    >>> class Point2(object):
+    ...     def __init__(self, x, y):
+    ...         """(Point2, float, float) -> NullType"""
+    ...         self.x = x
+    ...         self.y = y
+    ...
+    >>> print "Забыли distance"
+    Забыли distance
+    >>>
+    >>> def newDistance(self):
+    ...     """(Point2) -> float"""
+    ...     return sqrt(self.x ** 2 + self.y ** 2)
+    ...
+    >>> Point2.distance = newDistance
+    >>> del newDistance
+    >>> Point2(3, 4).distance()
+    25
+    >>>
+    """
+
+    Фактически в newDistance мы можем отправить любой объект у
+    которого есть x и y. Это называется "динамическим полиморфизмом",
+    хотя нет, это называется "УТИНОЙ ТИПИЗАЦИЕЙ".
+
+
+    Кстати про декораторы...
+    Вопрос такой: как написать функцию которая возвращает функцию?
+    """
+    >>> def linear(a, b):
+    ...     def f(x):
+    ...         return a + b *x
+    ...     return f
+    ...
+    >>> linear(1, 2)(10)
+    21
+    >>>
+    """
+
+    Проcтой пример, декоратор для вывода курсивом в html:
+    """
+    >>> def italic(g):
+    ...     return lambda: "<i>" + g() + "</i>"
+    ...
+    >>> f = lambda: "Hello"
+    >>>
+    >>> italic(f)
+    '<i>Hello</i>'
+    >>> @italic
+    ... def h():
+    ...     return "World"
+    ...
+    """
+
+    Различные декораторы:
+    """
+    >>> class C(object):
+    ...     @staticmethod
+    ...     def f():
+    ...         print "hello"
+    ...
+    >>> C.f()
+    'hello'
+    >>> c = C()
+    >>> c.f()
+    'hello'
+    """
+
+
+    Несколько полезных функций:
+    isinstance и issubclass
+    """
+    >>> isinstance(c, C)
+    True
+    >>> class E:
+    ...     pass
+    ...
+    >>> class D(E):
+    ...     pass
+    ...
+    >>> issubclass(D, E)
+    True
+    >>> issubclass(E, D)
+    False
+    """
+
+    Здесь если угодно, всякое наследование является виртуальным,
+    но это не совсем правильно. Все дело в поиске имен.
+
+    Например:
+        class A(object)
+        class B(object)
+        class X(A, B)
+        class Y(B, A)
+        class C(X, Y)
+
+    Или в коде:
+    """
+    >>> class A(object):
+    ...     pass
+    ...
+    >>> class B(object):
+    ...     pass
+    ...
+    >>> class X(A, B):
+    ...     pass
+    ...
+    >>> class Y(B, A):
+    ...     pass
+    ...
+    >>> class C(X, Y):
+    ...     pass
+    ...
+    Traceback (most recent call last):
+    File "<stdin>", line 1, in <module>
+    TypeError: Error when calling the metaclass bases
+        Cannot create a consistent method resolution
+        order (MRO) for bases B, A
+    >>>
+    """
+
+    Классы старого типа обходили рекурсивно по очереди своих наследование.
+    Теперь же Python пытается правильно линеаризовать классы, если это
+    невозможно сделать однозначно, то пишет TypeError.
+
+    Под линеаризацией понимается список в порядке которого интерпретатор
+    обходит классы в поиске имен.
+
+    """
+    >>> Z = type("SomeClassName", (object,), {'x':1, 'y':2})
+    >>> Z
+    <class '__main__.SomeClassName'>
+    >>> SomeClassName
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    NameError: name 'SomeClassName' is not defined
+    >>> Z
+    <class '__main__.SomeClassName'>
+    >>> Z.x
+    1
+    >>> Z.y
+    2
+    >>>
+    """

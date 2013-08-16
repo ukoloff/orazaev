@@ -1,0 +1,398 @@
+!date(06.03.2013)
+    *** Сегодня я хотел рассказать вам про работу с памятью
+        и про перегрузку операторов new и delete.
+
+    Какая память вообще бывает:
+        * стек: автоматические переменные в блоке кода.
+          обычна стек небольшой.
+        * динамическая память: память выделяемая из
+          кучи. В C непрерывный кусок памяти выделялся
+          с помощью malloc, и освобождался с помощью free.
+
+    В С++ появились операторы new и delete. Так как C-функции
+    типа malloc возвращют сырую память. В С++ появились классы
+    и когда зовется new -- сначала выделяется сырой блок
+    памяти, потом в этом блоке конструируется объект класса.
+
+    Перегружая new мы можем изменить только ту часть, которая
+    ответственна за выделение памяти. Например мы можем заранее
+    выделить большой пулл (непрерывный кусок памяти), а далее
+    выделять память из этого пулла.
+
+    Перегружая new, мы можем выиграть в скорости (используя
+    пулл и не рыская в поисках свободной памяти).
+
+    Наивный способ сделать пулл -- это выделить память,
+    разбить на фрагменты по размеру структур, которые мы
+    хотели бы хранить, а далее линейным поиском искать свободное
+    место в пулле.
+
+    Так как же все таки перегружать?
+    """
+        #include <iostream>
+        #include <stdlib.h>
+
+        // Возвращаем сырую память.
+        void * operator new (size_t sz) {
+            return malloc(sz);
+        }
+
+        int main() {
+
+        }
+    """
+
+    На слово new надо смотреть двояко:
+        1) Выделение сырой памяти (только эту часть мы можем
+           перегрузить)
+           void * operator new(size_t sz)
+
+        2) Вызов конструктора.
+
+    Попробуем более безопасно:
+    """
+        #include <iostream>
+        #include <stdlib.h>
+
+        void * operator new (size_t sz) {
+            std::cout << "My global operator new(" << sz << ")\n";
+            void * p = malloc(sz);
+            if (p == 0) {
+                throw std::bad_alloc();
+            }
+            return p;
+        }
+
+        void operator delete(void * ptr) {
+            std::cout << "My global operator delete\n";
+            free(ptr);
+        }
+
+        int main() {
+            int * a = new int(5);
+            delete a;
+        }
+    """
+
+    И теперь с []:
+    """
+        void * operator new[] (size_t sz) {
+            std::cout << "My global operator new[](" << sz << ")\n";
+            void * p = malloc(sz);
+            if (p == 0) {
+                throw std::bad_alloc();
+            }
+            return p;
+        }
+
+        void operator delete[](void * ptr) {
+            std::cout << "My global operator delete[]\n";
+            free(ptr);
+        }
+    """
+
+    ? А где хранится размер массива ?
+    -- По разному, в зависимости у компилятора:
+        - Может быть рядом с куском памяти, например слева.
+        - Может быть компилятор хранит таблицу сопостовляя размеры и массивы.
+        - Все может быть...
+
+
+    Перегружать глобально, вообще говоря, плохо, давайте в классе.
+
+    """
+        class C {
+        public:
+        // static можно опустить, перегруженные операторы new и delete, всегда
+        // будут статическими. Но лучше писать, так понятней.
+            static void * operator new (size_t sz) {
+                std::cout << "My operator new(" << sz << ")\n";
+                void * p = malloc(sz);
+                if (p == 0) {
+                    throw std::bad_alloc();
+                }
+                return p;
+            }
+
+            void operator delete (void * ptr, size_t sz) {
+                std::cout << "My operator delete(" << sz << ")\n";
+                free(ptr);
+            }
+        };
+    """
+
+    """
+        class SomeClass {
+        private:
+            char x;
+            int a;
+        };
+    """
+
+    Размер класса будет не 6 байт, а 8 байт -- т.к. с памятью железо
+    работает не с байтами, а с пачками байтов. Это есть выравнивание до 8 байт.
+
+    """
+        class ClassSizeFirst {
+            char x;
+            int a;
+            char y;
+        };
+
+        class ClassSizeSecond {
+            char x;
+            char y;
+            int a;
+        };
+    """
+    Фокус в том, что размер ClassSizeFirst будет равен 12 байт, а ClassSizeSecond
+    будет размера 8 байт.
+
+    -- Я вижу, что тема выравнивания много кого заинтересовала, но разговор
+       сегодня не про это.
+
+    """
+        class C {
+            int b;
+            char x;
+        public:
+            static void * operator new (size_t sz) {
+                std::cout << "My operator new(" << sz << ")\n";
+                void * p = malloc(sz);
+                if (p == 0) {
+                    throw std::bad_alloc();
+                }
+                return p;
+            }
+
+            void operator delete (void * ptr, size_t sz) {
+                std::cout << "My operator delete(" << sz << ")\n";
+                free(ptr);
+            }
+        };
+
+        class D: public C {
+            char y;
+            int z;
+        };
+
+        int main() {
+            C * c = new D;
+            delete c;
+
+            return 0;
+        }
+    """
+
+    Тут будет выделяться 12 байт, а удаляться 8!!! Так как деструктор не виртуальный!
+
+    """
+        class C {
+            int b;
+            char x;
+        public:
+            static void * operator new (size_t sz) {
+                std::cout << "My operator new(" << sz << ")\n";
+                void * p = malloc(sz);
+                if (p == 0) {
+                    throw std::bad_alloc();
+                }
+                return p;
+            }
+
+            void operator delete (void * ptr, size_t sz) {
+                std::cout << "My operator delete(" << sz << ")\n";
+                free(ptr);
+            }
+
+            virtual ~C() {
+            }
+        };
+
+        class D: public C {
+            char y;
+            int z;
+        };
+
+        int main() {
+            C * c = new D;
+            delete c;
+
+            return 0;
+        }
+    """
+
+    А вот теперь будет будет выделяться 16 байт и удаляться 16 байт, так как
+    в классе появился указатель на таблицу виртуальных функций! Все в точности
+    до 32 битной машины.
+
+
+    -- А теперь давайте посмотрим на нечто необычное.
+
+    """
+        class C {
+            int b;
+            char x;
+        public:
+            // Добавим параметров!
+            static void * operator new (size_t sz, double d) {
+                std::cout << "My operator new(" << sz ", " << d << ")\n";
+                void * p = malloc(sz);
+                if (p == 0) {
+                    throw std::bad_alloc();
+                }
+                return p;
+            }
+
+            void operator delete (void * ptr, double d) {
+                std::cout << "My operator delete(" << sz << ", " << d << ")\n";
+                free(ptr);
+            }
+
+            void operator delete (void * ptr, size_t sz) {
+                std::cout << "My operator delete(" << sz << ", " << ")\n";
+                free(ptr);
+            }
+
+            virtual ~C() {
+            }
+        };
+
+        class D: public C {
+            char y;
+            int z;
+        };
+
+        int main() {
+            C * c = new (3.1415) D;
+            // По синтаксису нельзя писать в delete дополнительный аргумент
+            delete c;
+
+            return 0;
+        }
+    """
+
+    Вообще говоря можно перегрузить operator delete с дополнительными аргументами.
+
+    Но: 1) можно вызвать явно 2) можно кинуть исключение.
+    """
+        class C {
+            int b;
+            char x;
+        public:
+            C() {
+                throw 42;
+            }
+
+            static void * operator new (size_t sz, double d) {
+                std::cout << "My operator new(" << sz ", " << d << ")\n";
+                void * p = malloc(sz);
+                if (p == 0) {
+                    throw std::bad_alloc();
+                }
+                return p;
+            }
+
+            static void operator delete (void * ptr, double d) {
+                std::cout << "My operator delete(" << d << ")\n";
+                free(ptr);
+            }
+
+            static void operator delete (void * ptr, size_t sz) {
+                std::cout << "My operator delete(" << sz << ", " << ")\n";
+                free(ptr);
+            }
+
+            virtual ~C() {
+            }
+        };
+
+        class D: public C {
+            char y;
+            int z;
+        };
+
+        int main() try {
+            C * c = new (3.1415) D;
+            delete c;
+        } catch(...) {
+            std::cout << "!!!\n";
+            return 0;
+        }
+    """
+
+
+    Вообще зачем придумали парамтр new с дополнительными параметрами.
+    Потому что иногда бывает полезно передать указатель на пулл!
+    Речь идет о размещающем операторе new.
+
+    """
+        int main() {
+            char buf[1000];
+            C * a = new (buf) C;
+            a->~C();
+            // delete a;
+        }
+    """
+
+    Нам нельзя удалять руками через delete, так как память будет освобождена
+    2 раза -- delete-ом, а далее в конце блока. Привет Undefined Behaviour.
+    Поэтому деструктор приходится вызывать явно.
+
+
+    Пример: Наш маленький valgrind.
+    """
+        template <typename T>
+        class MyValgrind {
+            static size_t memory;
+        public:
+            static void * operator new(size_t sz) {
+                memory += sz;
+                return ::operator new(sz);
+            }
+
+            static void operator delete(void * ptr, size_t sz) {
+                ::operator delete(ptr);
+                memory -= sz;
+            }
+
+            static size_t getMemory() const {
+                return memory;
+            }
+
+            virtual ~MyValgrind() {
+            }
+        };
+
+        template <typename T>
+        size_t MyValgrind<T>::memory = 0;
+
+        class Foo : public MyValgrind<Foo> {
+            char x;
+            int z;
+        };
+
+        int main() {
+            Foo * f = new f();
+
+            std::cout << f->getMemory();
+            delete f();
+
+            std::cout << f->getMemory();
+
+            return 0;
+        }
+    """
+
+
+    Некоторая тонкость -- создание статического массива.
+    """
+        template <typename T>
+        class C {
+            static const int N = 128;
+            static bool A[N];
+        };
+
+        template <typename T>
+        bool C<T>::A[C<T>::N] = {false};
+    """
