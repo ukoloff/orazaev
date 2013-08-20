@@ -17,7 +17,7 @@ date:26.09.12
                 while(*s++) ++len;
                 return len;
             }
-    
+
             char * strcpy(char * dest, const char * source) {
                 char * oldDest = dest;
                 while (*dest++ = *source++);
@@ -37,10 +37,10 @@ date:26.09.12
         int main() {
             const char * s = "Hello!";
             // char * s = "Hello!"; // Не компилируется.
-            
+
             char * d = new char[100];
             MyNamespace::strcpy(d, s);
-            
+
             std::cout << MyNamespace::strlen(s) << std::endl;
             std::cout << d << std::endl;
 
@@ -50,7 +50,7 @@ date:26.09.12
 
 *** ? про const
     """
-        // копия a 
+        // копия a
         void f_just_copy(T a) {
             // Тут можно менять a, сама переменная переданная в функцию не изменится
             // Не стоит передавать большие объекты
@@ -129,7 +129,7 @@ date:26.09.12
         }
     """
 
-*** 
+***
     С функциями можно работать практически также как и с переменными.
     """
     // На примере уже имеющихся strcat, strlen, strcpy
@@ -154,7 +154,7 @@ date:26.09.12
         f = MyNamespace::strcpy;
         f(d, s);
         // d = "Hello!";
-        
+
         f = MyNamespace::strcat;
         f(d, s);
         // d = "Hello!Hello!";
@@ -195,7 +195,6 @@ date:26.09.12
 
         // Так можно писать много и долго.
         // Но лучше применить шаблон
-    
         template <typename T>
         T max(T a, T b) {
             return a < b ? b : a;
