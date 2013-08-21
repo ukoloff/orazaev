@@ -37,9 +37,6 @@ struct PrintPrime<1> {
 };
 
 int main() {
-    std::cout << IsPrime<11>::ans << std::endl;
-
     PrintPrime<10>::print;
-
     return 0;
 }

@@ -1899,3 +1899,952 @@ private.
 адрес в памяти.
 
 
+
+***********************
+Лекция 9
+***********************
+
+Забытые темы
+======================
+
+Опасные конструкции
+-------------------
+``mutable``
+    ключевое слово которое позволяет менять
+    поле даже у константного объекта. Опасная
+    конструкция.
+
+``const_cast``
+    еще одна опасная конструкция -- снимает константность.
+
+.. note:: Такими вещами не стоит злоупотреблять. Если они
+    используются массово, то надо задуматься о правильности
+    архитектуры.
+
+Статические переменные
+----------------------
+Что еще можно объявить в классе? Статические переменные.
+
+.. code:: c++
+
+    template <typename T = doube>
+    class A {
+        static int counter;
+    };
+
+    // Нужно определить переменную вне класса
+    template <typename T>
+    int A::counter = 0;
+
+
+    int main() {
+        A<int>::counter += 10;
+
+        A::counter += 11;
+
+        std::cout << A<double>::counter << std::endl;
+        // 11
+
+        std::cout << A<int>::counter << std::endl;
+        // 10
+    }
+
+Вопрос: можно ли статическую переменную объявить в классе?
+Ответ: если она простого типа, то можно.
+
+Специализация шаблона
+---------------------
+.. code:: c++
+
+    template <typename T>
+    struct C {
+        typedef int X;
+    };
+
+    template <>
+    struct C<double> {
+        static double X;
+    }
+
+    template <typename T1, typename T2>
+    struct D {
+        typedef int X;
+    };
+
+    template <typename T1>
+    struct D<T1, double> {
+        static double X;
+    }
+
+Пример: размер, как параметр шаблона:
+
+.. code:: c++
+
+    template <typename C, int N>
+    class Matrix {
+        // ...
+    };
+
+    Matrix<int, 10> m;
+
+Шаблонный параметр шаблона
+
+.. code:: c++
+
+    Stack<typename T, typename Container> {
+        // ...
+    };
+
+    // Container -- здесь есть шаблонный параметр шаблона.
+    // то есть можно передать например std::vector
+
+    Stack<int, std::vector> s;
+
+
+Метапрограммирование
+====================
+
+Вычисляем степерь на этапе компиляции:
+
+.. code:: c++
+
+    #include <iostream>
+
+    template <int A, int N>
+    struct Power {
+        static const int Result = A * Power<A, N - 1>::Result;
+    };
+
+    template <int A>
+    struct Power<A, 0> {
+        static const int Result = 1;
+    };
+
+
+    int main() {
+        std::cout << Power<2, 10>::Result << std::endl;
+    }
+
+Теперь доказажем, что все это действительно происходит
+на этапе компиляции.
+
+.. code:: c++
+
+    // Определение шаблонов Power
+
+    template <int T>
+    class Dummy;
+
+    int main() {
+        Dummy<Power<2, 10>::Result> d;
+    }
+
+Теперь линкер ругнется, что он не может найти определение
+для ``Dummy<1024>``.
+
+Следующий код не сработает.
+
+.. code:: c++
+
+    template <int A, int N>
+    struct Power {
+        // Не работает
+        static const int Result =
+            N > 0
+            ? A * Power<A, N - 1>
+            : 1;
+    };
+
+Причина не работы данной конструкции в том, что для оператора ``? :``
+компилятор считает и правое и левое выражение, поэтому он достигнет
+максимальной глубины стека уйдя в отрицательные ``N`` и ругнется.
+
+Какова практическая польза?
+Утверждается, что для математических библиотеки мы, к примеру,
+пишем скалярное произведение. Если нам заранее известны длины
+векторов, то было бы заманчиво развернуть цикл самим с помощью
+шаблона. Вот такая вот микрооптимизация.
+
+
+Задачи с семинара
+-----------------
+
+.. code:: c++
+
+    // Задача:
+    // Напишите функцию static_assert (не макрос).
+    // Которая на этапе компиляции будет проверять
+    // истинность выражения. В случае если выражение
+    // равняется false, программа не должна
+    // компилироваться.
+
+    template <bool True>
+    struct static_assert {
+    };
+
+    template <>
+    struct static_assert<false>;
+
+    template <int M>
+    class C: static_assert<M <= 100> {
+    };
+
+    int main() {
+        static_assert<2 * 2 == 5>();
+        C<20> c;
+        C<1000> d;
+
+        return 0;
+    }
+
+.. code:: c++
+
+    // Задача:
+    // Напишите класс-адаптер TVector, который будет по дефолту
+    // основываться на std::vector, но с перегруженным оператором
+    // []. Так, что если мы выходим за границы контейнера, то
+    // на возвращается дефолтное значение.
+
+    #include <vector>
+    #include <iostream>
+    #include <assert.h>
+
+    template <typename T, typename Container = std::vector<T> >
+    class TVector : public Container {
+        public:
+        TVector() {}
+
+        const T& operator [] (size_t index) const {
+            if (index >= this->size()) {
+                return T();
+            }
+            return this->Container::operator[](index);
+        }
+
+        T& operator [] (size_t index) {
+            if (index >= this->size()) {
+                this->resize(index + 1);
+            }
+            return this->Container::operator[](index);
+        }
+    };
+
+    int main() {
+        TVector<int> v;
+        v.push_back(10);
+        assert(v[0] == 10 && v.size() == 1 && v[10] == 0);
+
+        v[10] = 42;
+        assert(v[9] == 0 && v[10] == 42 && v.size() == 11);
+
+        return 0;
+    }
+
+.. code:: c++
+
+    // Задача:
+    // С помощью метапрограммирования напишите конструкцию,
+    // которая на этапе компиляции будет печатать все простые
+    // числа от 1 до заданного числа.
+
+    #include<stdio.h>
+    #include<iostream>
+
+    template <int N, int Div>
+    struct Is {
+        static const bool Prime = N % Div && Is<N, Div - 1>::Prime;
+    };
+
+    template <int N>
+    struct Is<N, 1> {
+        static const bool Prime = true;
+    };
+
+    template <int N>
+    struct IsPrime {
+        static const bool ans = Is<N, N - 1>::Prime;
+    };
+
+    template <int N, bool T>
+    struct PrintIfPrime;
+
+    template <int N>
+    struct PrintIfPrime<N, false> {
+        static const bool print = false;
+    };
+
+    template <int N>
+    struct PrintPrime {
+        static const bool print = PrintIfPrime<N, IsPrime<N>::ans>::print
+                && PrintPrime<N - 1>::print;
+    };
+
+    template <>
+    struct PrintPrime<1> {
+        static const bool print = false;
+    };
+
+    int main() {
+        PrintPrime<10>::print;
+        return 0;
+    }
+
+
+******************************
+Лекция 11
+******************************
+П.С. Лекции 10 просто не было, вместо нее был большой семинар.
+
+В ``std::vector`` есть функции ``reserve``, ``resize``, ``capacity``
+и ``size``. Так вот ``capacity`` -- это аллоцированная память,
+поэтому ``size`` всегда меньше либо равен ``capacity``. ``reserve``
+нужен для изменения ``capacity``, соответственно ``resize`` для
+``size``. Так как reserve только резервирует память, но, не
+определяет никаких переменных по этомй памяти, то:
+
+.. code:: c++
+
+    std::vector<SomeComplexType> a;
+    a.reserve(10);
+    a[5] = SomeComplexType(); // Неверно, так как a.size() все
+                              // еще равен 0.
+
+Выделенная память сырая, там еще нет никаких объектов -- это
+логическая ошибка.
+
+Разберем плохой код:
+
+.. code:: c++
+
+    for (std::vector<int>::iterator i = v.begin();
+         i < v.end();
+         i++
+    ) {
+        //... const-антные действия
+    }
+
+Поправим этот код:
+
+.. code:: c++
+
+    for (std::vector<int>::const_iterator i = v.begin();
+         i != v.end();
+         ++i
+    ) {
+        //...
+    }
+
+В новой версии стандарта поменяли смысл ключевого слова ``auto``:
+
+.. code:: c++
+
+    auto i = v.begin();
+
+Значит "Будь добр, компилятор, догадайся сам по присваемому значению
+какого типа будет ``i``"
+
+Как работает перегрузка по константности?
+Если можно вызвать неконстантную версию, то вызывается неконстантная,
+а вот если нет возможности использовать неконстантной функции, то
+вызывается константная функция.
+
+Также в новой версии стандарта, чтобы избежать постоянного присвоения
+неконстантного итератора(что плохо) был введен дополнительный функционал:
+
+.. code:: c++
+
+    auto i = v.cbegin(); // cbegin, cend -- константный begin и end
+
+
+Вопрос: В чем отличие ``std::endl`` от ``'\n'``?
+Ответ: ``std::endl`` дополнительно отчищает буфер,
+можно это делать руками с помощью команды ``std::cout << flush;``.
+
+Еще пример плохого кода:
+
+.. code:: c++
+
+    std::vector<int> v;
+    v.reserve(2);
+    v[0] = 1;
+    std::cout << v[0]; // 1
+    v.reserve(100);
+    std::cout << v[0]; // 0xDEADBEEF --- или какой-нибудь
+                       // другой мусор лежавший в памяти
+
+Почему так произошло? Все очень просто: ``size`` вектора был 0,
+поэтому при реаллокации ничего не скопировалось.
+
+Проблемы возникнут также и при ситуации, когда мы позовем
+``resize``, который заботливо заполнит память дефолтным значением
+типа, или значением который мы укажем, при этом затерев уже
+присвоенное значение.
+
+Вопрос: а покажите нам gdb!
+Ответ: Да не вопрос::
+
+    (gdb) l                 -- напечатает текущий фрагмент программы
+    (gdb) b 5               -- поставить точку остановки в строке 5
+    (gdb) r                 -- run program
+    (gdb) p a               -- print a (напечатать переменную a)
+    (gdb) n                 -- next line (выполнить следующую строчку)
+    (gdb) q                 -- quit (выйти из gdb)
+
+"Но вообще говоря наша тема сегодня это алгоритмы стандартной
+библиотеки." А. Зобнин.
+
+Алгоритмы стандартной библиотеки
+================================
+
+Напишем несколько способов вывода на экран элементов
+контейнера
+
+.. code:: c++
+
+    #include <iostream>
+    #include <deque>
+
+    int main() {
+        std::deque<int> d(10);
+        for (size_t i = 0; i != 10; ++i)
+            d[i] = i;
+
+        print(d);
+    }
+
+Напишем этот самый ``print``:
+
+.. code:: c++
+
+    // variant 1
+    // Работает только для контейнеров с произвольным доступом
+    template <typename C>
+    void print(const C& cont) {
+        for (size_t i = 0; i != cont.size(); ++i)
+            std::cout << cont[i] << " ";
+    }
+
+.. code:: c++
+
+    // variant 2
+    // Хотя бы форвард итераторы, фактически для всех
+    template <typename C>
+    void print(const C& cont) {
+        for (typename C::const_iterator it = cont.begin();
+             it != cont.end(); ++it)
+            std::cout << cont[i] << " ";
+    }
+
+.. code:: c++
+
+    // variant 3
+    // for_each
+    #include <algorithm>
+    template <typename T>
+    void printElement(const T& elem) {
+        std::cout << elem << " ";
+    }
+
+    template <typename C>
+    void print(const C& cont) {
+
+        std::for_each(cont.begin(), cont.end(),
+                printElement<typename C::value_type>);
+        // К несчастью сам фор ич не поймет какой шаблонный
+        // параметр у printElement
+
+        std::cout << std::endl;
+    }
+
+.. code:: c++
+
+    // Как бы мы сами написали for_each
+    template <typename Iter, typename F>
+    void our_for_each(Iter a, Iter b, F f) {
+        while (a != b) {
+            f(* a);
+            ++a;
+        }
+    }
+
+    // "Я вам обещал написать функтор" А. Зобнин.
+    template <typename T>
+    struct printElemFunctor {
+        void operator () (const T& elem) const {
+            std::cout << elem << " ";
+        }
+    };
+
+
+    template <typename C>
+    void print(const C& cont) {
+
+        std::for_each(cont.begin(), cont.end(),
+                printElemFunctor());
+        // А вот функтор умеет сам подбирать тип.
+
+        std::cout << std::endl;
+    }
+
+На деле ``for_each`` возвращает не ``void``, а переданный ему функтор.
+
+.. code:: c++
+
+    // Variant 4
+    // Заключительный..
+    template <typename C>
+    void print(const C& cont) {
+        std::copy(
+            cont.begin(),
+            cont.end(),
+            std::ostream_iterator<typename C::value_type>(std::cout, " ")
+        );
+    }
+
+
+    // Вдохновленные примером 4 пишем
+    #include <iterator>
+    int main() {
+        std::deque<int> d;
+
+        std::copy(
+            std::istream_iterator<int>(std::cin),
+            std::istream_iterator<int>(),
+            std::back_inserter(d)  // когда присаивают, делает push_back()
+        );
+
+        // можно ведь так std::deque<int> d2(d.begin(), d.end());
+        // а значит можно попробовать и вот так
+        // std::deque<int> d2(
+        //     std::istream_iterator<int>(cin),
+        //     std::istream_iterator<int>()
+        // );
+        // Но не работает! Почему?
+        // ... тишина
+        // Компилятор считает, что d2 это не deque, а функция.
+        // Он интерпретирует это как:
+        // std::deque<int> d2(
+        //     std::istream_iterator<int> cin,
+        //     std::istream_iterator<int> kakaya_to_bezimyannaya_func()
+        // );
+
+        std::copy(
+            d.begin(),
+            d.end(),
+            std::ostream_iterator<int>(std::cout, " ")
+        );
+
+        return 0;
+    }
+
+
+*************************
+Лекция 12
+*************************
+
+И снова о классах
+=================
+
+В классе мы можем писать три области доступа:
+
+.. code:: c++
+
+    class C {
+    private:    // Видно только классу
+        // ...
+    protected:  // Видно наследникам
+        // ...
+    public:     // Видно всем (интерфейс)
+        // ...
+    };
+
+Хорошим тоном является описывать в ``public`` интерфейс,
+а данные скрывать в ``private``
+
+Что может быть в классе?
+
+.. code:: c++
+
+    class C {
+    private:
+        int a;
+        std::vector<int> v;
+
+    protected:
+        typedef int TInt;
+        void f() connst {
+
+        }
+
+        friend void g();    // Дружественная функция
+                            // Получает доступ к внутренним
+                            // полям класса.
+
+    public:
+        class D { };
+    };
+
+Наследование
+------------
+
+Например мы хотим написать класс D, который похож на
+класс C, но мы хотим дополнить этот класс D.
+
+.. code:: c++
+
+    class D: public C {
+        //...
+    };
+
+
+Бывают три модификатора наследования:
+    * public
+    * private (default)
+    * protected
+
+Этот модификатор на область доступа в классе наследнике.
+
+``public``
+    "считается, что в наследнике D храниться "подобъект" класса C."
+    (c) А. Зобнин.
+
+    ``private`` поля не видны в наследнике,
+    ``protected`` поля сохраняют статус ``protected``,
+    ``public`` сохраняют статус ``public``.
+
+.. code:: c++
+
+    class C {
+    private:
+        int a;
+        std::vector<int> v;
+    public:
+        double d;
+    };
+
+    class D: public C {
+    public:
+        void h() {
+            // Нам видны все переменные и функции класса С, как свои.
+            // Кроме private полей.
+        }
+    };
+
+.. note::
+
+    Как в виде данных представляется вектор?
+    Вектор есть три указателя(обычно):
+
+        * начало выделенного куска памяти
+        * конец выделенного куска памяти
+        * конец заполненной области.
+
+
+``private``
+    "``private`` поля вообще не видны, а ``public`` и ``protected`` поля
+    становятся private в наследнике." А. Зобнин.
+
+
+``protected``
+    "``private`` поля вообще не видны, ``protected`` видны и сохраняют
+    статус ``protected``, ``public`` получают статус ``protected``
+    в наследнике.'
+
+
+Простой пример:
+
+.. code:: c++
+
+    class C {
+    protected:
+        void f() { }
+    };
+
+    class D: public C { };
+
+    class E: public C {
+    public:
+        using C::f;
+    };
+
+    int main() {
+        D d;
+        d.f();  // Не получится f сохранит статус protected
+
+        E e;
+        e.f();  // А это уже сработает!
+    }
+
+
+Таким образом класс наследник может изменить область доступа
+наследованных полей. (Выдать поля своих родителей)
+
+Приведенный выше антипаттерн называют "public Morozoff". Не стоит
+писать такой код.
+
+Более легкий пример. Иерархия геометрических фигур:
+
+.. code:: c++
+
+    // Например есть цвет
+    class Figure {
+    protected:
+        int Colour;
+
+    public:
+        void Draw() const;
+    };
+
+    class Ellipse: public Figure {
+    protected:
+        double X1, Y1, X2, Y2, e;
+    };
+
+    class Circle: public Figure {
+    protected:
+        double X, Y;
+        double Radius;
+    };
+
+    class Triangle: public Figure k
+    protected:
+        double X1, Y1, X2, Y2, X3, Y3;
+    };
+
+    // Правильный треугольник... будем пробовать?
+    class RightTriangle: public Triangle {
+        // Может быть мы неправильно выбрали иерархию наследования.
+    };
+
+
+    int main() {
+        RightTriangle tr;
+        tr.Draw();
+    }
+
+"Открытое наследование -- это отношение 'является'" А. Зобнин.
+
+.. tip:: "предпочитайте композицию наследованию"
+
+
+Каким правилом компилятор находит имена в иерархиях --
+    1. Ищет имя в самом возможном узком классе
+    2. Ищет по параметром подходящее **имя** в найденном классе
+    3. Смотрим на модификатор доступа (можно ли воспользоваться)
+
+Пример для понимания:
+
+.. code:: c++
+
+    class A {
+    public:
+        f(int);
+    };
+
+    class B: public A {
+    private:
+        f(int);
+    };
+
+    class C: public B { };
+
+    int main() {
+        C c;
+        C.f(5); // ошибка компиляции
+    }
+
+или
+
+.. code:: c++
+
+    class A {
+    public:
+        f(int);
+    };
+    class B: public A {
+    public:
+        f(const std::vector<int> & v);
+        f(const std::list<int> & l);
+    };
+
+    class C: public B { };
+
+    int main() {
+        C c;
+        C.f(int(5)); // ошибка компиляции
+    }
+
+Примеры показывают, что сначала компилятор ищет именно **имя** в иерархии
+наследовании. Нашел класс с этим именем, а уже после этого в найденном
+классе пробует найти функцию с подходящей сигнатурой.
+
+``virtual``
+-----------
+Идем к виртуальности:
+
+.. code:: c++
+
+    #include <iostream>
+
+    class Figure {
+    protected:
+        int Colour;
+
+    public:
+        // Определим после ошибок в main ниже
+        virtual void Draw() const {
+            std::cout << "BASE DRAW" << std::endl;
+        }
+    };
+
+    class Ellipse: public Figure {
+    protected:
+        double X1, Y1, X2, Y2, e;
+    };
+
+    class Circle: public Figure {
+    protected:
+        double X, Y;
+        double Radius;
+
+    public:
+        void Draw() {
+            std::cout << "O" << std::endl;
+        }
+    };
+
+    class Triangle: public Figure {
+    protected:
+        double X1, Y1, X2, Y2, X3, Y3;
+
+    public:
+        void Draw() const {
+            std::cout << "Triangle!" << std::endl;
+        }
+    };
+
+    class RightTriangle: public Triangle {
+    public:
+        void Draw() const {
+            std::cout << "Right Triangle!" << std::endl;
+        }
+    };
+
+    int main() {
+        RightTriangle tr;
+        tr.Draw();  // "Right Triangle!"
+
+        Figure& f = tr;
+        f.Draw(); // Ошибка линковки.
+        // После того как мы определим Figure::Draw() const
+        // f.Draw() вызовет из базового класса.
+        // А после того как мы определим virtual Figure::Draw() const;
+        // Вызовется Rigth triangle.
+    }
+
+Заметим, что мы применили ``virtual`` только в базовом классе.
+
+Если в классе есть ``virtual`` функция, то в него добавится указатель на
+таблицу виртуальных функций (а именно на нужную реализацию виртуальной
+функции). С помощью ``sizeof`` можно увидеть, что размер у одного и того
+же класса с виртуальными и не виртуальными функциями разный.
+
+О вызове конструкторов:
+    1. Вызывается самый верхний в иерархии класс
+    2. и далее все ниже и ниже по лестнице иерархии до нашего класса.
+
+Каждый конструктор на деле изменяет наш "виртуальный" указатель, таким
+образом заставляя правильно указывать на функцию фактически созданного
+класса.
+
+Пример с вызовами конструкторов:
+
+.. code:: c++
+
+    class A {
+    public:
+        A() {
+            std::cout << "A!";
+        }
+    };
+
+    class B : public A {
+    public:
+        B() {
+            std::cout << "B!";
+        }
+    };
+
+    class C : public B {
+    public:
+        C() {
+            std::cout << "C!";
+        }
+    };
+
+    int main() {
+        C c; // на экране: A!B!C!
+        A a = c; // на экране пусто, так как
+        // вызвался конструктор копирования.
+    }
+
+Пример с вектором указателем на фигуры:
+
+.. code:: c++
+
+    // ... Предыдущее описание фируг
+
+    int main() {
+        std::vector<Figure*> figures;
+        figures.push_back(new Circle);
+        figures.push_back(new RightTriangle);
+        figures.push_back(new Triangle);
+
+        for (size_t = 0; i != figures.size(); ++i) {
+            figures[i]->Draw();
+            delete figures[i];  // Oops! не виртуальный деструктор!
+        }
+    }
+
+    // Результат работы:
+    // O
+    // Right Triangle!
+    // Triangle!
+
+
+Но есть огромная проблема! Вызывается не виртуальный деструктор,
+мы вызываем деструктор для базового класса.
+
+Поправим код. Также лучше чтобы у базового класса была функция
+``Draw``, но чтоб она не существовала:
+
+.. code:: c++
+
+    class Figure {
+    public:
+        // Для этого объявим чисто виртуальную функцию.
+        // pure virtual function
+        virtual void Draw() const = 0;
+        virtual ~Figure() {
+        }
+    };
+
+О чем тут еще стоит сказать:
+Есть ведь еще и шаблоны: полиморфизм времени компиляции
+Когда виртуальные функции: полиморфизм времени исполнения.
+
+Вот так можно "полиморфировать" во время компиляции.
+
+.. code:: c++
+
+    template <typename F>
+    void DrawIt(const F& object) {
+        object.Draw();
+    }
+
+Но вектор создать не получится... только если не ``void*``, а это
+не очень хорошо, придется сырую память потом правильно приводить.
+
+Бывает и множественное наследование, но об этом несколько позже.
+
+
