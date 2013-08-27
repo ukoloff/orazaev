@@ -10,6 +10,7 @@
 import sys
 import imaplib
 import email
+import mailutils
 
 
 class MailServer(object):
@@ -30,6 +31,13 @@ class MailServer(object):
     def login(self, login, passwd):
         """(MailServer, str, str) -> NoneType"""
         pass
+
+    def authorize(self):
+        """Read username and password from stdin
+           and authorize.
+        """
+        self._conn = mailutils.authorize()
+
 
 if __name__ == '__main__':
     import doctest

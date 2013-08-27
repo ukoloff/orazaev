@@ -127,6 +127,22 @@ class Connection(object):
         retry_to_call(lambda: self.smtp.sendmail(sendfrom, sendto, email_msg),
                       repair=lambda: self._reconnect())
 
+    def noop(self):
+        """Send noop to imap server and to smtp server.
+
+           If one of connection is dead then trying to reconnect.
+        """
+        def noop_imap():
+            retcode, data = self.imap.noop()
+            if ret != 'OK': raise BadReturnCode(retcode)
+
+        def noop_smtp():
+            retcode, data = self.smtp:noop()
+            if ret != 250: raise BadReturnCode(retcode)
+
+        retry_to_call(noop_imap, sleep=1, repair=lambda: self._reconnect())
+        retry_to_call(noop_smtp, sleep=1, repair=lambda: self._reconnect())
+
     def __enter__(self):
         pass
 
