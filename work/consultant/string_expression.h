@@ -113,3 +113,5 @@ private:
 
 
 StringExpression build_expression(const std::string& str);
+
+std::string sort_string(const std::string& str);

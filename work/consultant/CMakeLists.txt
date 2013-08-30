@@ -11,3 +11,4 @@ set (SOURCES
 
 add_executable (ut string_expression_ut.cpp ${HEADERS} ${SOURCES})
 add_executable (app1 app1.cpp ${HEADERS} ${SOURCES})
+add_executable (app2 app2.cpp ${HEADERS} ${SOURCES})

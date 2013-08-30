@@ -41,7 +41,7 @@ void test_build_expression() {
     }
 }
 
-void test_sorting() {
+void test_StringExpression() {
     StringExpression expr = build_expression("B+A");
     expr.sort();
     assert(expr.str() == "A+B");
@@ -51,10 +51,17 @@ void test_sorting() {
     assert(expr.str() == "((A+M+V)+C+(C+(C+C)+L+M)+X)");
 }
 
+void test_sort_string() {
+    assert(sort_string("") == "");
+    assert(sort_string("B+A") == "A+B");
+    assert(sort_string("(X+(V+M+A)+C+(M+L+(C+C)+C))") == "((A+M+V)+C+(C+(C+C)+L+M)+X)");
+}
+
 int main() {
     test_Character();
     test_InnerExpression();
     test_build_expression();
-    test_sorting();
+    test_StringExpression();
+    test_sort_string();
     return 0;
 }

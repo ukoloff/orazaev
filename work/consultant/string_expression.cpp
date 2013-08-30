@@ -105,3 +105,10 @@ StringExpression build_expression(const std::string& str) {
 
     return main;
 }
+
+
+std::string sort_string(const std::string& str) {
+    StringExpression an_expression = build_expression(str);
+    an_expression.sort();
+    return an_expression.str();
+}
