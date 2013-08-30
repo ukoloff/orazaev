@@ -36,7 +36,7 @@ std::string InnerExpression::str() const {
 }
 
 
-std::string InnerExpression::subtokens_str() const {
+std::string StringExpression::subtokens_str() const {
     std::string result;
 
     for (std::vector<TokenHolder>::const_iterator cit = subtokens.begin();
@@ -53,7 +53,7 @@ std::string InnerExpression::subtokens_str() const {
 }
 
 
-void InnerExpression::sort() {
+void StringExpression::sort() {
     std::for_each(subtokens.begin(), subtokens.end(), sort_token);
     std::sort(subtokens.begin(), subtokens.end(), token_comparison);
 }

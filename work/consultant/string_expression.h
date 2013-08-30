@@ -24,16 +24,16 @@ public:
 };
 
 
-/* @brief Expression in parentheses.
+/* @brief Main expression without parentheses.
  *
- * Example: (A+(B+C)+D)
+ * Example: A+(B+(C+D)+E)
  */
-class InnerExpression : public Token {
+class StringExpression : public Token {
 public:
-    InnerExpression()
+    StringExpression()
     { }
 
-    InnerExpression(const std::vector<TokenHolder>& subtokens)
+    StringExpression(const std::vector<TokenHolder>& subtokens)
         : Token()
         , subtokens(subtokens)
     { }
@@ -53,17 +53,17 @@ private:
 };
 
 
-/* @brief Main expression without parentheses.
+/* @brief Expression in parentheses.
  *
- * Example: A+(B+(C+D)+E)
+ * Example: (A+(B+C)+D)
  */
-class StringExpression : public InnerExpression {
+class InnerExpression : public StringExpression {
 public:
-    StringExpression()
+    InnerExpression()
     { }
 
-    StringExpression(const std::vector<TokenHolder>& subtokens)
-        : InnerExpression(subtokens)
+    InnerExpression(const std::vector<TokenHolder>& subtokens)
+        : StringExpression(subtokens)
     { }
 
     std::string str() const;
