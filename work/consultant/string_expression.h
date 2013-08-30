@@ -1,3 +1,18 @@
+/* @brief Data declarations for string expressions problem.
+ *
+ * Grammar
+ * -------
+ * StringExpression is one of:
+ *      empty
+ *      Expression + StringExpression
+ *      Character + StringExpression
+ *
+ * InnerExpression is one of:
+ *      (StringExpression)
+ *
+ * Character is one stand alone character.
+ *
+ */
 #pragma once
 
 #include <tr1/memory>
