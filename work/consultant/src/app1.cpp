@@ -1,10 +1,15 @@
 /* @brief Write N random string expressions to given file.
  *
- * Note: random seed selected using std::srand in main function.
+ * Realization of test problem 1.
  */
-#include "string_expression.h"
 #include <fstream>
 #include <cstdlib>
+#include <ctime>
+
+#include "string_expression.h"
+
+
+using namespace NStringExpression;
 
 
 std::string usage() {
@@ -56,19 +61,12 @@ std::vector<std::string> generate(int n) {
 }
 
 
-int main(int argc, char* argv[]) {
-    if (argc < 3) {
-        std::cerr << usage() << std::endl;
-        exit(1);
-    }
+void app1(int n, const char * const file_name) {
+    std::vector<std::string> exprs = generate(n);
 
-    std::srand(42);
-    std::vector<std::string> exprs = generate(atoi(argv[1]));
-
-    std::fstream output_file(argv[2], std::fstream::out);
-
+    std::fstream output_file(file_name, std::fstream::out);
     if (!output_file.is_open()) {
-        std::cerr << "Can't open file '" << argv[2] << "'\n";
+        std::cerr << "Can't open file '" << file_name << "' with read mode.\n";
     }
 
     for (std::vector<std::string>::const_iterator cit = exprs.begin();
@@ -79,5 +77,17 @@ int main(int argc, char* argv[]) {
     }
 
     output_file.close();
+}
+
+
+int main(int argc, char* argv[]) {
+    if (argc < 3) {
+        std::cerr << usage() << std::endl;
+        exit(1);
+    }
+
+    std::srand(time(0));
+
+    app1(atoi(argv[1]), argv[2]);
     return 0;
 }

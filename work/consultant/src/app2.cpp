@@ -1,10 +1,16 @@
 /* @brief read string expressions from given file and write sorted expressions
  *        to another given file.
+ *
+ * Realization of test problem 2.
  */
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
 #include "string_expression.h"
+
+
+using namespace NStringExpression;
+
 
 std::string usage() {
     return "app2 <input_file>";

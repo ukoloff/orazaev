@@ -4,9 +4,18 @@
 #include <sstream>
 #include <iostream>
 
+using namespace NStringExpression;
+
 void test_Character() {
     Character ch('A');
     assert(ch.str() == "A");
+
+    try {
+        ch.append(TokenHolder(new Character('B')));
+        assert(false);
+    } catch (const std::logic_error& le) {
+        // OK
+    }
 }
 
 void test_InnerExpression() {
