@@ -1,8 +1,9 @@
-#include "string_expression.h"
-
 #include <assert.h>
 #include <sstream>
 #include <iostream>
+
+#include "string_expression.h"
+
 
 using namespace NStringExpression;
 

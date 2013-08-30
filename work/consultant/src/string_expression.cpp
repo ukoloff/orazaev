@@ -1,6 +1,8 @@
-#include "string_expression.h"
 #include <stack>
 #include <algorithm>
+
+#include "string_expression.h"
+
 
 namespace NStringExpression {
     namespace {

@@ -21,6 +21,7 @@
 #include <iostream>
 #include <stdexcept>
 
+
 namespace NStringExpression {
     class Token;
     typedef std::tr1::shared_ptr<Token> TokenHolder;
@@ -119,7 +120,7 @@ namespace NStringExpression {
 
     /* @brief Sorts given string as string expression.
      *
-     * It is the A function, what is defined in problem description.
+     * It is the A function, what is defined in task description.
      */
     std::string sort_string(const std::string& str);
 }
