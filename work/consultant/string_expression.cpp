@@ -8,9 +8,11 @@ namespace {
         return ch == '+';
     }
 
+
     bool is_operator(char ch) {
         return ch == '(' || ch == ')' || ch == '+';
     }
+
 
     std::string strip_token(const TokenHolder& tok) {
         std::string result = tok->str();
@@ -21,9 +23,11 @@ namespace {
         return result;
     }
 
+
     bool token_comparison(const TokenHolder& lhs, const TokenHolder& rhs) {
         return strip_token(lhs) < strip_token(rhs);
     }
+
 
     void sort_token(TokenHolder& tok) {
         tok->sort();

@@ -1,10 +1,14 @@
+/* @brief Write N random string expressions to given file.
+ *
+ * Note: random seed selected using std::srand in main function.
+ */
 #include "string_expression.h"
 #include <fstream>
 #include <cstdlib>
 
 
-void usage() {
-    std::cerr << "app1 <N> <output_file_name>" << std::endl;
+std::string usage() {
+    return "Usage: app1 <N> <output_file_name>";
 }
 
 
@@ -54,7 +58,7 @@ std::vector<std::string> generate(int n) {
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
-        usage();
+        std::cerr << usage() << std::endl;
         exit(1);
     }
 
