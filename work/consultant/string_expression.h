@@ -30,6 +30,14 @@ public:
  */
 class Expression : public Token {
 public:
+    Expression()
+    { }
+
+    Expression(const std::vector<TokenHolder>& subtokens)
+        : Token()
+        , subtokens(subtokens)
+    { }
+
     void append(const TokenHolder& token) {
         subtokens.push_back(token);
     }
@@ -51,6 +59,13 @@ private:
  */
 class MainExpression : public Expression {
 public:
+    MainExpression()
+    { }
+
+    MainExpression(const std::vector<TokenHolder>& subtokens)
+        : Expression(subtokens)
+    { }
+
     std::string str() const;
 };
 
