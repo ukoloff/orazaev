@@ -28,7 +28,7 @@ std::vector<TokenHolder> generate_tokens(int max_tokens=50,
         }
 
         int number_of_tokens_in_subexpr = number_of_tokens - rand() % number_of_tokens;
-        TokenHolder subexpr(new Expression(generate_tokens(number_of_tokens_in_subexpr + 1,
+        TokenHolder subexpr(new InnerExpression(generate_tokens(number_of_tokens_in_subexpr + 1,
                                                            number_of_tokens_in_subexpr,
                                                            expression_probability)));
         tokens.push_back(subexpr);
@@ -44,7 +44,7 @@ std::vector<TokenHolder> generate_tokens(int max_tokens=50,
 std::vector<std::string> generate(int n) {
     std::vector<std::string> result;
     for (int i = 0; i < n; ++i) {
-        MainExpression expr(generate_tokens());
+        StringExpression expr(generate_tokens());
         result.push_back(expr.str());
     }
 

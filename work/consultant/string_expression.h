@@ -28,12 +28,12 @@ public:
  *
  * Example: (A+(B+C)+D)
  */
-class Expression : public Token {
+class InnerExpression : public Token {
 public:
-    Expression()
+    InnerExpression()
     { }
 
-    Expression(const std::vector<TokenHolder>& subtokens)
+    InnerExpression(const std::vector<TokenHolder>& subtokens)
         : Token()
         , subtokens(subtokens)
     { }
@@ -57,13 +57,13 @@ private:
  *
  * Example: A+(B+(C+D)+E)
  */
-class MainExpression : public Expression {
+class StringExpression : public InnerExpression {
 public:
-    MainExpression()
+    StringExpression()
     { }
 
-    MainExpression(const std::vector<TokenHolder>& subtokens)
-        : Expression(subtokens)
+    StringExpression(const std::vector<TokenHolder>& subtokens)
+        : InnerExpression(subtokens)
     { }
 
     std::string str() const;
@@ -97,4 +97,4 @@ private:
 };
 
 
-MainExpression build_expression(const std::string& str);
+StringExpression build_expression(const std::string& str);

@@ -31,12 +31,12 @@ namespace {
 }
 
 
-std::string Expression::str() const {
+std::string InnerExpression::str() const {
     return "(" + subtokens_str() + ")";
 }
 
 
-std::string Expression::subtokens_str() const {
+std::string InnerExpression::subtokens_str() const {
     std::string result;
 
     for (std::vector<TokenHolder>::const_iterator cit = subtokens.begin();
@@ -53,19 +53,19 @@ std::string Expression::subtokens_str() const {
 }
 
 
-void Expression::sort() {
+void InnerExpression::sort() {
     std::for_each(subtokens.begin(), subtokens.end(), sort_token);
     std::sort(subtokens.begin(), subtokens.end(), token_comparison);
 }
 
 
-std::string MainExpression::str() const {
+std::string StringExpression::str() const {
     return subtokens_str();
 }
 
 
-MainExpression build_expression(const std::string& str) {
-    MainExpression main;
+StringExpression build_expression(const std::string& str) {
+    StringExpression main;
     std::stack<Token*> parentheses_level_stack;
     parentheses_level_stack.push(&main);
 
@@ -86,7 +86,7 @@ MainExpression build_expression(const std::string& str) {
         }
 
         if (*cit == '(') {
-            TokenHolder expr(new Expression());
+            TokenHolder expr(new InnerExpression());
             parentheses_level_stack.top()->append(expr);
             parentheses_level_stack.push(expr.get());
             continue;

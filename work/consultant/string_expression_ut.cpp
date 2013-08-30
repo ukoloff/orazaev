@@ -9,13 +9,13 @@ void test_Character() {
     assert(ch.str() == "A");
 }
 
-void test_StringExpression() {
-    TokenHolder expr(new Expression());
+void test_InnerExpression() {
+    TokenHolder expr(new InnerExpression());
     expr->append(TokenHolder(new Character('A')));
     expr->append(TokenHolder(new Character('B')));
     expr->append(TokenHolder(new Character('C')));
 
-    MainExpression main_expr;
+    StringExpression main_expr;
     main_expr.append(expr);
     assert(main_expr.str() == "(A+B+C)");
 }
@@ -42,7 +42,7 @@ void test_build_expression() {
 }
 
 void test_sorting() {
-    MainExpression expr = build_expression("B+A");
+    StringExpression expr = build_expression("B+A");
     expr.sort();
     assert(expr.str() == "A+B");
 
@@ -53,7 +53,7 @@ void test_sorting() {
 
 int main() {
     test_Character();
-    test_StringExpression();
+    test_InnerExpression();
     test_build_expression();
     test_sorting();
     return 0;
