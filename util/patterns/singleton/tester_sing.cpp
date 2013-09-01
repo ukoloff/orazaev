@@ -22,6 +22,6 @@ int main() {
         ip((a = b - 20), -15),
         ip(b, -15)
     };
-    
+
     Tester::pntest(8, t);
 }
