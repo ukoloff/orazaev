@@ -14,14 +14,14 @@
  *  ==3487== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
  *  ==3487== Using Valgrind-3.6.1 and LibVEX; rerun with -h for copyright info
  *  ==3487== Command: ./smart_ptr.out
- *  ==3487== 
- *  ==3487== 
+ *  ==3487==
+ *  ==3487==
  *  ==3487== HEAP SUMMARY:
  *  ==3487==     in use at exit: 0 bytes in 0 blocks
  *  ==3487==   total heap usage: 19 allocs, 19 frees, 10,524 bytes allocated
- *  ==3487== 
+ *  ==3487==
  *  ==3487== All heap blocks were freed -- no leaks are possible
- *  ==3487== 
+ *  ==3487==
  *  ==3487== For counts of detected and suppressed errors, rerun with: -v
  *  ==3487== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 17 from 6)
  *
@@ -116,7 +116,7 @@ private:
 /**
  * TDefaultStoragePolicy.
  * @brief Storage policy for TSmartPointer.
- * 
+ *
  * Has default delete operator (without bracets []).
  */
 template <typename T>
@@ -247,7 +247,7 @@ private:
 /**
  *  TDestructiveCopyOwnershipPolicy.
  *  @brief Ownership policy for TSmartPointer.
- *  
+ *
  *  Set pointer to 0, when it is copyied in another place.
  */
 template <typename T>
