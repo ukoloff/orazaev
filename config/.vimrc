@@ -10,7 +10,7 @@ set tabstop=4 shiftwidth=4 expandtab
 
 " UI options
 syntax on
-colors hickop
+colors ora
 set guifont=monaco
 
 " Recover position and folding in file
