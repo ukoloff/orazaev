@@ -21,19 +21,23 @@ if has("autocmd")
     au BufWinEnter ?* silent loadview
 endif
 
+
 function HighlightTrailingSpaces()
     let b:mtrailingws=matchadd('ErrorMsg', '\s\+$', -1)
 endfunction
+
 
 function HighlightLongString()
     let w:m1=matchadd('Search', '\%<101v.\%>90v', -1)
     let w:m2=matchadd('ErrorMsg', '\%>100v.\+', -1)
 endfunction
 
+
 function HighlightMixedTabsAndSpaces()
     let b:mtabbeforesp=matchadd('ErrorMsg', '\v(\t+)\ze( +)', -1)
     let b:mtabaftersp=matchadd('ErrorMsg', '\v( +)\zs(\t+)', -1)
 endfunction
+
 
 function MakeMatches()
     call HighlightLongString()
@@ -42,6 +46,7 @@ function MakeMatches()
 endfunction    
 
 au BufNewFile,BufRead *.cpp,*.h,*.java,*.sh,*.py call MakeMatches()
+
 
 " Don't screw up folds when inserting text that might affect them, until
 " leaving insert mode. Foldmethod is local to the window. Protect against
@@ -61,7 +66,8 @@ set nocompatible
 filetype off
 
 set rtp+=~/.vim/bundle/vundle/
- call vundle#rc()
+call vundle#rc()
+
 
 " let Vundle manage Vundle
 " required! 
@@ -76,9 +82,17 @@ Bundle 'terryma/vim-multiple-cursors'
 Bundle 'vim-scripts/taglist.vim'
 Bundle 'scrooloose/nerdtree'
 Bundle 'tpope/vim-abolish'
-Bundle 'khorser/vim-repl'
+
+" REPLs:
+" Bundle 'khorser/vim-repl' -- it sucks
+" Bundle 'jpalardy/vim-slime.git' -- it sucks
 Bundle 'pthrasher/conqueterm-vim'
 " need if_lua
 " Bundle 'Shougo/neocomplete.vim'
+
+" Colors:
+Bundle 'junegunn/seoul256.vim'
+Bundle 'altercation/vim-colors-solarized'
+let g:solarized_termcolors=256
 
 filetype plugin indent on
