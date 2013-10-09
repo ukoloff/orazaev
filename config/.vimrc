@@ -43,7 +43,7 @@ function MakeMatches()
     call HighlightLongString()
     call HighlightTrailingSpaces()
     call HighlightMixedTabsAndSpaces()
-endfunction    
+endfunction
 
 au BufNewFile,BufRead *.cpp,*.h,*.java,*.sh,*.py call MakeMatches()
 
@@ -70,7 +70,7 @@ call vundle#rc()
 
 
 " let Vundle manage Vundle
-" required! 
+" required!
 "
 Bundle 'gmarik/vundle'
 
@@ -83,10 +83,18 @@ Bundle 'vim-scripts/taglist.vim'
 Bundle 'scrooloose/nerdtree'
 Bundle 'tpope/vim-abolish'
 
+Bundle 'bling/vim-airline'
+set laststatus=2
+let g:airline_left_sep = ''
+let g:airline_right_sep = ''
+let g:airline_powerline_fonts = 0
+let g:airline_theme = 'understated'
+
 " REPLs:
 " Bundle 'khorser/vim-repl' -- it sucks
 " Bundle 'jpalardy/vim-slime.git' -- it sucks
 Bundle 'pthrasher/conqueterm-vim'
+
 " need if_lua
 " Bundle 'Shougo/neocomplete.vim'
 
