@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 
-# vim configure
+
+##############################################
+#               vim configure
+##############################################
 ln -s $PWD/.vimrc ~/.vimrc
 ln -s $PWD/.vim ~/.vim
 
+# get vundle to automatic install other plugins
 git clone https://github.com/gmarik/vundle.git ~/.vim/bundle/vundle
 
-# python configure
+echo "export TERM=xterm-256color" >> ~/.bashrc
+echo "export EDITOR=vim" >> ~/.bashrc
+
+##############################################
+#              python confiture
+##############################################
 ln -s $PWD/.pythonstartup ~/.pythonstartup
 
-
-echo "export EDITOR=vim" >> ${HOME}/.bashrc
-echo "export PYTHONSTARTUP=~/.pythonstartup" >> ${HOME}/.bashrc
-echo "export TERM=xterm-256color" >> ${HOME}/.bashrc
+echo "export PYTHONSTARTUP=~/.pythonstartup" >> ~/.bashrc
