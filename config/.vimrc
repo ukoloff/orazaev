@@ -45,7 +45,7 @@ function MakeMatches()
     call HighlightMixedTabsAndSpaces()
 endfunction
 
-au BufNewFile,BufRead *.cpp,*.h,*.java,*.sh,*.py call MakeMatches()
+au BufNewFile,BufRead *.cpp,*.h,*.java,*.sh,*.py,*.sml call MakeMatches()
 
 
 " Don't screw up folds when inserting text that might affect them, until
