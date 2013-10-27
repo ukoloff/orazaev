@@ -144,7 +144,6 @@ let
                                         c::tail => play(tail, c::hl, mtail)
                                       | [] => score(hl, goal)))
        | [] => score(hl, goal)
-
 in
   play(cs, [], ms)
 end
