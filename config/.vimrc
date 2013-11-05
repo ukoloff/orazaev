@@ -28,7 +28,7 @@ endfunction
 
 
 function HighlightLongString()
-    let w:m1=matchadd('Search', '\%<101v.\%>90v', -1)
+    let w:m1=matchadd('Search', '\%<101v.\%>79v', -1)
     let w:m2=matchadd('ErrorMsg', '\%>100v.\+', -1)
 endfunction
 
