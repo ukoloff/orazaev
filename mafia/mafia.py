@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import urllib2
+import sys
 
 from BeautifulSoup import BeautifulSoup
 
@@ -137,6 +138,7 @@ class MafiaGameRecord(object):
 
         page = FetchStrategy.getGame(gid)
         ParseStrategy.parse(self, page)
+        print >> sys.stderr, self.__dict__
 
     def exportToCsv(self):
         """(MafiaGameRecord) -> str
