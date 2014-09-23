@@ -1,0 +1,10 @@
+58c58,59
+<             print "This space intentionally left blank."
+---
+>             connection = pymongo.MongoClient('localhost', 27017)
+>             user = connection.blog.users.find_one({'_id': username})
+89c90,91
+<             print "This space intentionally left blank."
+---
+>             connection = pymongo.MongoClient('localhost', 27017)
+>             connection.blog.users.insert(user)
