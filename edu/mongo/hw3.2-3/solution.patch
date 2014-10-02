@@ -1,0 +1,12 @@
+57a58
+>             self.posts.insert(post)
+70a72
+>         cursor = self.posts.find()
+94a97
+>         post = self.posts.find_one({"permalink": permalink})
+113c116,118
+< 
+---
+>             self.posts.update(
+>                 {"permalink": permalink},
+>                 {"$push": {"comments": comment}})
