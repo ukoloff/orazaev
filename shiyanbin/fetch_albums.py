@@ -14,6 +14,7 @@ SHIYANBIN_EVENTS_PAGE = SHIYANBIN_PAGE + '/events'
 SHIYANBIN_ALBUM_LINK_CSS_CLASS = '.gallery-collection-item-link'
 SHIYANBIN_IMG_LINK_CSS_CLASS = '.gallery-collection-item-link'
 
+REQUEST_TIMEOUT=120
 
 
 def parse_args():
@@ -36,14 +37,24 @@ def retry_get(href, times=3, not_fail_404=False):
     tries = 0
     while tries < times:
         tries += 1
-        response = requests.get(href)
+        try:
+            response = requests.get(href, timeout=REQUEST_TIMEOUT)
+        except requests.exceptions.Timeout:
+            sys.stdout.write('ERROR: timeout\n')
+            sys.stdout.flush();
+            continue
+        except requests.exceptions.ChunkedEncodingError:
+            sys.stdout.write('ERROR: chunked encoding error\n')
+            sys.stdout.flush();
+            continue
         if response.ok or not_fail_404 and response.status_code == 404:
             return response
     raise CantFetchLinkError(href)
 
 
 def save_images_to_directory(directory, image_links):
-    sys.stdout.write('INFO: Fetching directory {0}\n'.format(directory.encode('utf-8')))
+    directory = directory.replace('"', "'").replace(':', '-')
+    sys.stdout.write('INFO: Fetching directory {0}\n'.format(directory))
     if not os.path.exists(directory):
         os.makedirs(directory)
     already_fetched = len(os.listdir(directory))
@@ -57,6 +68,7 @@ def save_images_to_directory(directory, image_links):
             sys.stdout.write("ERROR: can't fetch {0}\n".format(link))
             continue
         with open(os.path.join(directory, '{0}.jpg'.format(img_id)), 'wb') as img_file:
+            sys.stdout.write("DEBUG: saving to {0}\n".format(img_file.name))
             img_file.write(response.content)
 
 
@@ -70,7 +82,7 @@ def fetch_albums_from_shiyanbin(outdir):
         response = retry_get(SHIYANBIN_PAGE + album.attrib['href'])
         q = pyquery.PyQuery(response.content)
         save_images_to_directory(
-            os.path.join(outdir, q('title').text()),
+            os.path.join(outdir, q('title').text().encode('utf-8')),
             (e.attrib['href'] for e in q(SHIYANBIN_IMG_LINK_CSS_CLASS)))
 
 
