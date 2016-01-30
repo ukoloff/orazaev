@@ -22,6 +22,8 @@ def parse_args():
         description='tool for fetching albums from shiyanbin')
 
     parser.add_argument('outdir')
+    parser.add_argument('-e', '--events-page', default=SHIYANBIN_EVENTS_PAGE,
+                        help='web page with albums')
     return parser.parse_args()
 
 
@@ -72,10 +74,10 @@ def save_images_to_directory(directory, image_links):
             img_file.write(response.content)
 
 
-def fetch_albums_from_shiyanbin(outdir):
+def fetch_albums_from_shiyanbin(outdir, events_page):
     if not os.path.exists(outdir):
         os.makedirs(outdir)
-    response = retry_get(SHIYANBIN_EVENTS_PAGE)
+    response = retry_get(events_page)
 
     pq = pyquery.PyQuery(response.content)
     for album in pq(SHIYANBIN_ALBUM_LINK_CSS_CLASS):
@@ -89,4 +91,5 @@ def fetch_albums_from_shiyanbin(outdir):
 
 
 if __name__ == '__main__':
-    fetch_albums_from_shiyanbin(parse_args().outdir)
+    args = parse_args()
+    fetch_albums_from_shiyanbin(args.outdir, args.events_page)
