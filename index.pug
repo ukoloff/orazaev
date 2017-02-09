@@ -1,0 +1,80 @@
+// Mixins declaration
+
+mixin oraNavBar
+  .ora-nav-bar
+    h3 Find him
+    | ----------------------------
+    .ora-nav-link-container(onclick="location.href='https://www.linkedin.com/in/orazaev';")
+      .ora-nav-link linkedin
+    .ora-nav-link-container(onclick="location.href='https://github.com/aorazaev';")
+      .ora-nav-link github
+    .ora-nav-link-container(onclick="location.href='https://www.facebook.com/orzev';")
+      .ora-nav-link facebook
+    .ora-nav-link-container(onclick="location.href='http://instagram.com/orzev';")
+      .ora-nav-link instagram
+    .ora-nav-link-container(onclick="location.href='http://www.vkontakte.ru/orzev';")
+      .ora-nav-link vk
+    | ----------------------------
+    .ora-nav-link-container(onclick="location.href='https://www.linkedin.com/in/orazaev';")
+      .ora-nav-link full CV
+    | ----------------------------
+
+mixin oraHeader
+  .page-header
+    h1
+      .glyphicon.glyphicon-sunglasses
+        |  Orazaev
+      small &nbsp;&nbsp;yet another code writer
+
+mixin oraFaceAndNav
+  .row
+    .col-md-8
+      img.responsive(src="img/mongol_fox_small.jpg")
+    .col-md-4
+      +oraNavBar
+
+mixin oraInfo
+  .container.ora-info
+    .row
+      .col-sm-3
+        h4 Specialization
+        | Backend development <br/>
+        | Analytics <br/>
+        | Testing <br/>
+      .col-sm-3
+        h4 Primary weapon
+        | C++ <br/>
+        | Python <br/>
+      .col-sm-3
+        h4 Characteristics
+        | Passionate about coding <br/>
+        | Versatile <br/>
+        | Smartass <br/>
+      .col-sm-3
+        | &nbsp;
+
+mixin oraFooter
+  .footer
+    .container
+      p.text-muted.text-center
+        | Copyright
+        script document.write(new Date().getFullYear());
+        |  ~~~ &copy; Orazaev.ru  ~~~ All rights reserved
+
+mixin oraBody
+  body
+    .container
+      +oraHeader
+      +oraFaceAndNav
+      +oraInfo
+    +oraFooter
+
+
+// Page content
+
+doctype html
+html
+  head
+    include includes/bootstrap_min_css.pug
+    link(rel="stylesheet", href="css/orazaev_ru.css")
+  +oraBody
